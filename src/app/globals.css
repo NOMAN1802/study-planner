@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---- Design tokens: neutral palette + one accent (green) ---- */
+:root {
+  --bg: #f6f6f3;
+  --surface: #ffffff;
+  --surface-2: #efefeb;
+  --surface-3: #e6e6e1;
+  --border: #e2e2dd;
+  --border-strong: #c9c9c2;
+  --fg: #1b1b19;
+  --fg-muted: #66665f;
+  --fg-subtle: #6b6b64;
+  --accent: #1e7a58;
+  --accent-strong: #165f45;
+  --accent-fg: #ffffff;
+  --accent-soft: #dff2e9;
+  --danger: #b42318;
+  --danger-fg: #ffffff;
+  --danger-soft: #fbe9e7;
+  --warning: #9a4a07;
+  --ring: #1e7a58;
+}
+
+.dark {
+  --bg: #121311;
+  --surface: #1a1b19;
+  --surface-2: #222321;
+  --surface-3: #2b2c29;
+  --border: #2c2d2a;
+  --border-strong: #3f403c;
+  --fg: #ecece7;
+  --fg-muted: #a3a39c;
+  --fg-subtle: #939389;
+  --accent: #3fbf8a;
+  --accent-strong: #5fd4a3;
+  --accent-fg: #0d1f17;
+  --accent-soft: #163528;
+  --danger: #f08a7d;
+  --danger-fg: #2a0d09;
+  --danger-soft: #3a1c19;
+  --warning: #f2a84b;
+  --ring: #3fbf8a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-fg: var(--danger-fg);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-geist), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible focus for keyboard users only */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Section entrance: one short fade/rise when content first appears.
+   `--enter-index` staggers siblings. Disabled by the reduced-motion rule below. */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.enter {
+  animation: enter 220ms ease-out both;
+  animation-delay: calc(var(--enter-index, 0) * 40ms);
+}
+
+/* Progress fill: animates when a value changes (topic done, cycle completed). */
+.bar-fill {
+  transition: width 300ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

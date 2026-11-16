@@ -1,0 +1,308 @@
+// Prisma 7: the datasource URL lives in prisma.config.ts (DIRECT_URL for the CLI),
+// the runtime connection is supplied by the pg driver adapter in src/lib/prisma.ts
+// (DATABASE_URL, pooled).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Enums ----------
+
+enum Frequency {
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum SessionType {
+  FOCUS
+  SHORT_BREAK
+  LONG_BREAK
+}
+
+enum TaskCategory {
+  GENERAL
+  OFFICE
+  STUDY
+}
+
+enum RoutineKind {
+  STUDY
+  OFFICE
+  PERSONAL
+}
+
+enum ExamKind {
+  WEEKLY
+  SUBJECT_FINAL
+  MOCK
+}
+
+// ---------- Models ----------
+
+/// One row per Supabase auth user. `id` equals `auth.users.id`.
+model Profile {
+  id           String   @id @db.Uuid
+  email        String
+  displayName  String?
+  timezone     String   @default("UTC")
+  weekStartsOn Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  habits           Habit[]
+  habitLogs        HabitLog[]
+  tasks            Task[]
+  pomodoroConfigs  PomodoroConfig[]
+  pomodoroSessions PomodoroSession[]
+  timeBlocks       TimeBlock[]
+  studyPlan        StudyPlan?
+  routineSlots     RoutineSlot[]
+}
+
+model Habit {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  name          String
+  note          String?
+  color         String    @default("#0f766e")
+  icon          String    @default("circle")
+  frequency     Frequency @default(DAILY)
+  targetCount   Int?
+  targetMinutes Int?
+  /// HOURLY only: hours of day (0-23) the habit is active. Empty = all hours.
+  activeHours   Int[]     @default([])
+  sortOrder     Int       @default(0)
+  archivedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user       Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs       HabitLog[]
+  tasks      Task[]
+  timeBlocks TimeBlock[]
+
+  @@index([userId, archivedAt, sortOrder])
+}
+
+/// One row per habit per period, keyed by the period's UTC start instant.
+model HabitLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  habitId     String   @db.Uuid
+  periodStart DateTime
+  count       Int      @default(0)
+  minutes     Int      @default(0)
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habit Habit   @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, periodStart])
+  @@index([userId, periodStart])
+}
+
+model Task {
+  id            String       @id @default(uuid()) @db.Uuid
+  userId        String       @db.Uuid
+  title         String
+  note          String?
+  status        TaskStatus   @default(TODO)
+  priority      Priority     @default(MEDIUM)
+  dueAt         DateTime?
+  targetMinutes Int?
+  actualMinutes Int          @default(0)
+  habitId       String?      @db.Uuid
+  category      TaskCategory @default(GENERAL)
+  sortOrder     Int          @default(0)
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user             Profile           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habit            Habit?            @relation(fields: [habitId], references: [id], onDelete: SetNull)
+  pomodoroConfig   PomodoroConfig?
+  pomodoroSessions PomodoroSession[]
+  timeBlocks       TimeBlock[]
+  subject          Subject?
+
+  @@index([userId, status, dueAt])
+  @@index([userId, habitId])
+}
+
+model PomodoroConfig {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @db.Uuid
+  taskId                String   @unique @db.Uuid
+  focusMinutes          Int      @default(25)
+  shortBreakMinutes     Int      @default(5)
+  longBreakMinutes      Int      @default(15)
+  cyclesBeforeLongBreak Int      @default(4)
+  autoStartNext         Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+/// A single focus/break interval. Remaining time derives from timestamps, never tick counts.
+model PomodoroSession {
+  id             String      @id @default(uuid()) @db.Uuid
+  userId         String      @db.Uuid
+  taskId         String      @db.Uuid
+  type           SessionType
+  plannedMinutes Int
+  startedAt      DateTime
+  pausedAt       DateTime?
+  pausedMs       Int         @default(0)
+  endedAt        DateTime?
+  completed      Boolean     @default(false)
+  /// Work-Station: the lecture this focus cycle was spent on.
+  topicId        String?     @db.Uuid
+  createdAt      DateTime    @default(now())
+
+  user  Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task  Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  topic Topic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  @@index([userId, startedAt])
+  @@index([taskId, startedAt])
+}
+
+/// A planned block on the calendar. Links to at most one task or habit (or neither).
+model TimeBlock {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  title     String?
+  startAt   DateTime
+  endAt     DateTime
+  taskId    String?  @db.Uuid
+  habitId   String?  @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task  Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  habit Habit?  @relation(fields: [habitId], references: [id], onDelete: SetNull)
+
+  @@index([userId, startAt, endAt])
+}
+
+// ---------- Work-Station ----------
+
+/// One exam-preparation plan per user. The day-by-day schedule is computed, never stored.
+model StudyPlan {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @unique @db.Uuid
+  name         String
+  /// First study day, `YYYY-MM-DD` in the user's timezone.
+  startDay     String
+  learningDays Int      @default(70)
+  revisionDays Int      @default(20)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user     Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjects Subject[]
+  exams    StudyExam[]
+}
+
+/// A subject studied in order. Backed by a STUDY task so the pomodoro timer runs on it.
+model Subject {
+  id           String   @id @default(uuid()) @db.Uuid
+  planId       String   @db.Uuid
+  taskId       String   @unique @db.Uuid
+  name         String
+  color        String   @default("#0f766e")
+  sortOrder    Int      @default(0)
+  /// Studied every day alongside the current subject (vocabulary).
+  isDaily      Boolean  @default(false)
+  /// Lecture list this subject's topics came from (Doc/study-resource).
+  resourceFile String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  plan   StudyPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  task   Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  topics Topic[]
+  exams  StudyExam[]
+
+  @@index([planId, sortOrder])
+}
+
+/// One lecture.
+model Topic {
+  id        String    @id @default(uuid()) @db.Uuid
+  subjectId String    @db.Uuid
+  sortOrder Int       @default(0)
+  title     String
+  url       String?
+  estCycles Int       @default(2)
+  doneAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  subject  Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  sessions PomodoroSession[]
+
+  @@index([subjectId, sortOrder])
+}
+
+/// Weekly routine template. Minutes are local wall-clock minutes from midnight.
+model RoutineSlot {
+  id        String      @id @default(uuid()) @db.Uuid
+  userId    String      @db.Uuid
+  /// 0 = Sunday … 6 = Saturday
+  weekday   Int
+  startMin  Int
+  endMin    Int
+  kind      RoutineKind
+  label     String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, weekday, startMin])
+}
+
+model StudyExam {
+  id        String   @id @default(uuid()) @db.Uuid
+  planId    String   @db.Uuid
+  kind      ExamKind
+  subjectId String?  @db.Uuid
+  /// `YYYY-MM-DD` in the user's timezone.
+  day       String
+  score     Float?
+  total     Float?
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  plan    StudyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  subject Subject?  @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  @@index([planId, day])
+}
