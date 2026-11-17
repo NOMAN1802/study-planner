@@ -10,7 +10,7 @@ import {
   secondaryLink,
 } from "@/components/workstation/format";
 import { TopicDone } from "@/components/workstation/topic-done";
-import { Bar, Stat } from "@/components/workstation/ws-header";
+import { Bar, Stat, StatStrip } from "@/components/workstation/ws-header";
 import { cn } from "@/lib/utils";
 import {
   KIND_LABEL,
@@ -64,7 +64,7 @@ export function TodayTab({ data }: { data: WorkstationData }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <StatStrip>
         <Stat
           label="Today"
           value={`${data.doneToday}/${todayTarget}`}
@@ -99,7 +99,7 @@ export function TodayTab({ data }: { data: WorkstationData }) {
           tone={schedule.bufferCycles < 0 ? "warning" : "accent"}
           testId="ws-buffer"
         />
-      </div>
+      </StatStrip>
 
       {data.activeTimer ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-accent/40 bg-accent-soft px-4 py-2.5 text-sm">
@@ -122,8 +122,8 @@ export function TodayTab({ data }: { data: WorkstationData }) {
           aria-labelledby="up-next-title"
           className="enter min-w-0 rounded-lg border border-border bg-surface"
         >
-          <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-1.5">
-            <h2 id="up-next-title" className="text-sm font-medium">
+          <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-1.5 sm:px-5">
+            <h2 id="up-next-title" className="font-display text-base font-semibold tracking-tight">
               {started ? "Up next today" : `First day · ${formatDay(plan.startDay)}`}
             </h2>
             {currentSubject ? (
@@ -209,8 +209,8 @@ export function TodayTab({ data }: { data: WorkstationData }) {
           className="enter min-w-0 rounded-lg border border-border bg-surface"
           style={{ "--enter-index": 1 } as CSSProperties}
         >
-          <header className="flex min-h-11 items-center justify-between border-b border-border px-4 py-1.5">
-            <h2 id="timeline-title" className="text-sm font-medium">
+          <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
+            <h2 id="timeline-title" className="font-display text-base font-semibold tracking-tight">
               Routine ·{" "}
               {formatDay(now.dayKey, { weekday: "long", day: undefined, month: undefined })}
             </h2>
@@ -234,7 +234,7 @@ export function TodayTab({ data }: { data: WorkstationData }) {
                     key={slot.id}
                     className={cn(
                       "rounded-md border px-3 py-2",
-                      isNow ? "border-accent bg-accent-soft" : "border-transparent",
+                      isNow ? "border-mark bg-mark-soft" : "border-transparent",
                     )}
                     aria-current={isNow ? "time" : undefined}
                   >

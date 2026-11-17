@@ -15,7 +15,7 @@ export default async function PlannerPage({ searchParams }: PageProps<"/planner"
   const today = dayKeyOf(now, user.timezone);
 
   return (
-    <div className="enter mx-auto flex w-full max-w-7xl flex-col gap-4">
+    <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
       <PlannerToolbar view={view} date={date} today={today} weekStartsOn={user.weekStartsOn} />
       <PlannerBoard
         // Remount on navigation so selection/armed state doesn't leak between ranges.

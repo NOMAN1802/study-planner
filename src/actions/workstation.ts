@@ -20,10 +20,13 @@ import {
   examSchema,
   firstErrors,
   formValues,
+  planLengthSchema,
   setupSchema,
   slotSchema,
   type ExamField,
   type ExamState,
+  type PlanLengthField,
+  type PlanLengthState,
   type SetupField,
   type SetupState,
   type SlotField,
@@ -115,6 +118,23 @@ export async function setupPlan(_prev: SetupState, formData: FormData): Promise<
   revalidate();
   revalidatePath("/settings");
   redirect("/work-station");
+}
+
+/** Changes the learning/revision split of the plan; progress is kept. */
+export async function updatePlanLength(
+  _prev: PlanLengthState,
+  formData: FormData,
+): Promise<PlanLengthState> {
+  const user = await requireUser();
+  const parsed = planLengthSchema.safeParse(formValues(formData, ["learningDays", "revisionDays"]));
+  if (!parsed.success) return { fieldErrors: firstErrors<PlanLengthField>(parsed.error) };
+  const { count } = await prisma.studyPlan.updateMany({
+    where: { userId: user.id },
+    data: parsed.data,
+  });
+  if (count === 0) return { error: "Set up your study plan first." };
+  revalidate();
+  return { ok: true };
 }
 
 /** Deletes the plan, its subjects and their study tasks (sessions go with them). */

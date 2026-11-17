@@ -36,9 +36,9 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex h-9 items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors duration-150",
+              "relative flex h-9 items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors duration-150",
               active
-                ? "bg-surface-2 font-medium text-fg"
+                ? "bg-surface-2 font-medium text-fg before:absolute before:inset-y-2 before:-left-3 before:w-[3px] before:rounded-r before:bg-accent"
                 : "text-fg-muted hover:bg-surface-2 hover:text-fg",
             )}
           >

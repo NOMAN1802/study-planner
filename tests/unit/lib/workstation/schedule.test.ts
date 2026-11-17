@@ -32,13 +32,14 @@ function subject(id: string, topics: number, extra: Partial<PlanSubject> = {}): 
 function input(over: Partial<ScheduleInput> = {}): ScheduleInput {
   return {
     startDay: "2026-11-21",
-    learningDays: 70,
-    revisionDays: 20,
+    learningDays: 75,
+    revisionDays: 25,
     capacityByWeekday: CAPACITY,
     subjects: [subject("vocab", 3, { isDaily: true }), subject("eng", 4), subject("ban", 2)],
     today: "2026-11-21",
     doneToday: 0,
     dailyDoneToday: false,
+    vocabDaysDone: 0,
     weeklyExamDays: [],
     mockDays: [],
     ...over,
@@ -167,7 +168,28 @@ describe("buildSchedule", () => {
     expect(s.subjects.map((p) => p.status)).toEqual(["done", "current"]);
   });
 
-  it("fits the real BCS syllabus in 70 days with the default routine", () => {
+  it("learns 10 new words Saturday–Thursday and revises the week's words on Friday", () => {
+    const s = buildSchedule(
+      input({ subjects: [subject("vocab", 3, { isDaily: true }), subject("eng", 60)] }),
+    );
+    const daily = (day: string) =>
+      s.days.find((d) => d.day === day)?.items.find((i) => i.kind === "daily");
+    // Sat 21 … Thu 26 = six word days, Fri 27 = revision, Sat 28 continues the count.
+    expect(daily("2026-11-21")).toMatchObject({ cycles: 1, topicId: "vocab-1" });
+    expect(daily("2026-11-21")?.label).toContain("Words 1–10");
+    expect(daily("2026-11-26")?.label).toContain("Words 51–60");
+    expect(daily("2026-11-27")?.cycles).toBe(1);
+    expect(daily("2026-11-27")?.topicId).toBeUndefined();
+    expect(daily("2026-11-27")?.label).toBe("Vocabulary revision: this week's 60 words");
+    expect(daily("2026-11-28")?.label).toContain("Words 61–70");
+  });
+
+  it("continues the word count from vocabulary days already done", () => {
+    const s = buildSchedule(input({ vocabDaysDone: 4 }));
+    expect(s.days[0].items[0].label).toContain("Words 41–50");
+  });
+
+  it("fits the real BCS syllabus in 75 days with the default routine", () => {
     const subjects: PlanSubject[] = BCS_SYLLABUS.map((sub, i) => ({
       id: `s${i}`,
       name: sub.name,
@@ -187,7 +209,7 @@ describe("buildSchedule", () => {
     const s = buildSchedule(input({ subjects }));
     expect(s.bufferCycles).toBeGreaterThan(0);
     expect(s.projectedLearningEnd! <= s.learningEnd).toBe(true);
-    expect(s.days.filter((d) => d.phase !== "overflow")).toHaveLength(90);
+    expect(s.days.filter((d) => d.phase !== "overflow")).toHaveLength(100);
   });
 });
 

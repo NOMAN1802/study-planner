@@ -19,7 +19,7 @@ export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
   const [tasks, total] = await Promise.all([getTaskRows(user, filters), countTasks(user.id)]);
 
   return (
-    <div className="enter mx-auto flex w-full max-w-5xl flex-col gap-4">
+    <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <TaskFilters filters={filters} />
         <Link href="/tasks/new" className={primaryLink}>

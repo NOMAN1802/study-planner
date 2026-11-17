@@ -1,6 +1,7 @@
 import { formatDay, isExam, plural } from "@/components/workstation/format";
+import { PlanLengthForm } from "@/components/workstation/plan-length-form";
 import { ResetPlan } from "@/components/workstation/reset-plan";
-import { Bar, Stat } from "@/components/workstation/ws-header";
+import { Bar, Stat, StatStrip } from "@/components/workstation/ws-header";
 import type { WeekStart } from "@/lib/dates";
 import { addDays, startOfWeekKey, weekdayOf } from "@/lib/planner";
 import { cn } from "@/lib/utils";
@@ -55,7 +56,7 @@ export function PlanTab({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <StatStrip>
         <Stat
           label="Lectures done"
           value={`${doneTopics}/${totalTopics}`}
@@ -83,7 +84,7 @@ export function PlanTab({
           detail={`cycles · ${schedule.learningCapacityLeft} available`}
           tone={schedule.bufferCycles < 0 ? "warning" : undefined}
         />
-      </div>
+      </StatStrip>
 
       {late ? (
         <p
@@ -100,8 +101,11 @@ export function PlanTab({
         aria-labelledby="subjects-plan-title"
         className="enter rounded-lg border border-border bg-surface"
       >
-        <header className="flex min-h-11 items-center justify-between border-b border-border px-4 py-1.5">
-          <h2 id="subjects-plan-title" className="text-sm font-medium">
+        <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
+          <h2
+            id="subjects-plan-title"
+            className="font-display text-base font-semibold tracking-tight"
+          >
             Subjects in order
           </h2>
           <span className="text-xs text-fg-muted">Projected from today</span>
@@ -125,7 +129,7 @@ export function PlanTab({
                   />
                   <span className="truncate">{s.name}</span>
                   {p.status === "current" ? (
-                    <span className="rounded bg-accent-soft px-1.5 text-[11px] leading-5 text-fg">
+                    <span className="rounded bg-mark-soft px-1.5 text-[11px] leading-5 font-medium text-mark">
                       Current
                     </span>
                   ) : p.status === "done" ? (
@@ -157,7 +161,8 @@ export function PlanTab({
                 style={{ backgroundColor: daily.color }}
                 aria-hidden
               />
-              {daily.name}: one cycle every day, alongside the current subject.
+              {daily.name}: 10 new words a day Saturday–Thursday, and revision of the week&apos;s 60
+              words on Friday.
             </li>
           ) : null}
         </ol>
@@ -167,8 +172,8 @@ export function PlanTab({
         aria-labelledby="calendar-title"
         className="enter rounded-lg border border-border bg-surface"
       >
-        <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-1.5">
-          <h2 id="calendar-title" className="text-sm font-medium">
+        <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-1.5 sm:px-5">
+          <h2 id="calendar-title" className="font-display text-base font-semibold tracking-tight">
             {plan.learningDays + plan.revisionDays}-day roadmap
           </h2>
           <span className="flex flex-wrap items-center gap-3 text-xs text-fg-muted">
@@ -231,7 +236,7 @@ export function PlanTab({
                             "flex h-9 flex-col justify-between rounded px-1 py-0.5",
                             exam && "outline-2 -outline-offset-2 outline-fg",
                             d === now.dayKey &&
-                              "ring-2 ring-accent ring-offset-1 ring-offset-surface",
+                              "ring-2 ring-mark ring-offset-1 ring-offset-surface",
                             past ? "bg-surface-2" : !subject && "bg-surface-3",
                             d > schedule.planEnd && "opacity-60",
                           )}
@@ -262,7 +267,8 @@ export function PlanTab({
         </div>
       </section>
 
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <PlanLengthForm learningDays={plan.learningDays} revisionDays={plan.revisionDays} />
         <ResetPlan />
       </div>
     </div>

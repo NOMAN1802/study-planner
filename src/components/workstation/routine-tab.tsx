@@ -87,8 +87,11 @@ export function RoutineTab({ slots }: { slots: WsSlot[] }) {
               className="rounded-lg border border-border bg-surface"
               data-testid="ws-routine-day"
             >
-              <header className="flex min-h-11 items-center justify-between border-b border-border px-4">
-                <h2 id={`day-${weekday}`} className="text-sm font-medium">
+              <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
+                <h2
+                  id={`day-${weekday}`}
+                  className="font-display text-base font-semibold tracking-tight"
+                >
                   {WEEKDAY_NAME[weekday]}
                 </h2>
                 <span className="font-mono text-xs text-fg-muted tabular-nums">

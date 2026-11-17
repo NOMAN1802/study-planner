@@ -24,6 +24,14 @@ export const setupSchema = z.object({
   revisionDays: int("Revision days", 0, 120),
 });
 export type SetupField = keyof z.input<typeof setupSchema>;
+
+export const planLengthSchema = setupSchema.pick({ learningDays: true, revisionDays: true });
+export type PlanLengthField = keyof z.input<typeof planLengthSchema>;
+export type PlanLengthState = {
+  ok?: boolean;
+  error?: string;
+  fieldErrors?: Partial<Record<PlanLengthField, string>>;
+};
 export type SetupState = { error?: string; fieldErrors?: Partial<Record<SetupField, string>> };
 
 const time = (label: string) =>

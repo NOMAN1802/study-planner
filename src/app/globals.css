@@ -2,21 +2,24 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ---- Design tokens: neutral palette + one accent (green) ---- */
+/* ---- Design tokens: "study ledger" — warm paper, ink, one green accent,
+   and an amber mark reserved for "now / current" ---- */
 :root {
-  --bg: #f6f6f3;
-  --surface: #ffffff;
-  --surface-2: #efefeb;
-  --surface-3: #e6e6e1;
-  --border: #e2e2dd;
-  --border-strong: #c9c9c2;
-  --fg: #1b1b19;
-  --fg-muted: #66665f;
-  --fg-subtle: #6b6b64;
-  --accent: #1e7a58;
-  --accent-strong: #165f45;
+  --bg: #f3f1ea;
+  --surface: #fffdf8;
+  --surface-2: #ece9e0;
+  --surface-3: #e3dfd3;
+  --border: #e1ddd1;
+  --border-strong: #c9c3b4;
+  --fg: #1d1b16;
+  --fg-muted: #5f5b51;
+  --fg-subtle: #67635a;
+  --accent: #1d6f50;
+  --accent-strong: #155a40;
   --accent-fg: #ffffff;
-  --accent-soft: #dff2e9;
+  --accent-soft: #dcefe4;
+  --mark: #8f4709;
+  --mark-soft: #f8e9d4;
   --danger: #b42318;
   --danger-fg: #ffffff;
   --danger-soft: #fbe9e7;
@@ -25,15 +28,17 @@
 }
 
 .dark {
-  --bg: #121311;
-  --surface: #1a1b19;
-  --surface-2: #222321;
-  --surface-3: #2b2c29;
-  --border: #2c2d2a;
-  --border-strong: #3f403c;
-  --fg: #ecece7;
-  --fg-muted: #a3a39c;
-  --fg-subtle: #939389;
+  --bg: #14130f;
+  --surface: #1c1b16;
+  --surface-2: #25231d;
+  --surface-3: #2e2c25;
+  --border: #302e27;
+  --border-strong: #46433a;
+  --fg: #ede9de;
+  --fg-muted: #a8a397;
+  --fg-subtle: #99948a;
+  --mark: #eda04f;
+  --mark-soft: #3a2a17;
   --accent: #3fbf8a;
   --accent-strong: #5fd4a3;
   --accent-fg: #0d1f17;
@@ -64,10 +69,15 @@
   --color-danger-soft: var(--danger-soft);
   --color-warning: var(--warning);
   --color-ring: var(--ring);
+  --color-mark: var(--mark);
+  --color-mark-soft: var(--mark-soft);
 
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display), var(--font-geist), ui-sans-serif, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  /* Main content width inside the app shell. */
+  --container-page: 96rem;
+
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -85,7 +95,6 @@ body {
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-sans);
-  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
 }
 

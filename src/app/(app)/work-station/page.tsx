@@ -32,13 +32,17 @@ export default async function WorkstationPage({ searchParams }: PageProps<"/work
       : [];
 
   return (
-    <div className="enter mx-auto flex w-full max-w-5xl flex-col gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-display text-xl font-semibold tracking-tight">{data.plan.name}</h2>
-          <p className="text-sm text-fg-muted">
-            {formatDay(data.plan.startDay)} → {formatDay(data.schedule.planEnd)} · 50-minute focus,
-            10-minute break
+    <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <div className="min-w-0">
+          <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-[28px]">
+            {data.plan.name}
+          </h2>
+          <p className="mt-0.5 text-sm text-fg-muted">
+            <span className="font-mono tabular-nums">
+              {formatDay(data.plan.startDay)} → {formatDay(data.schedule.planEnd)}
+            </span>
+            <span className="hidden sm:inline"> · 50-minute focus, 10-minute break</span>
           </p>
         </div>
         <WorkstationTabs tab={tab} />
@@ -81,8 +85,8 @@ async function Setup({ timezone }: { timezone: string }) {
         aria-labelledby="setup-subjects"
         className="rounded-lg border border-border bg-surface"
       >
-        <header className="flex min-h-11 items-center justify-between border-b border-border px-4">
-          <h3 id="setup-subjects" className="text-sm font-medium">
+        <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
+          <h3 id="setup-subjects" className="font-display text-base font-semibold tracking-tight">
             Subjects, hardest first
           </h3>
           <span className="text-xs text-fg-muted">{lectures} lectures</span>

@@ -53,7 +53,7 @@ export function FocusChart({ series }: { series: Record<FocusRange, FocusSeries>
       </div>
 
       {current.total === 0 ? (
-        <p className="flex h-48 items-center justify-center rounded-md border border-dashed border-border text-sm text-fg-muted">
+        <p className="flex h-28 items-center justify-center rounded-md border border-dashed border-border text-sm text-fg-muted sm:h-48">
           No focus sessions {RANGE_NOUN[range]} yet.
         </p>
       ) : (

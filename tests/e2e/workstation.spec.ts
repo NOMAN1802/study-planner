@@ -33,7 +33,10 @@ test.describe("work-station", () => {
     // Today: vocabulary first, then the first English lectures.
     await expect(page.getByRole("heading", { name: "Up next today" })).toBeVisible();
     const items = page.getByTestId("ws-item");
-    await expect(items.first()).toContainText("Vocabulary 1.1 (Part-1)");
+    // Vocabulary: 10 new words Saturday–Thursday, the week's revision on Friday.
+    if (new Date().getDay() === 5)
+      await expect(items.first()).toContainText("Vocabulary revision: this week's 60 words");
+    else await expect(items.first()).toContainText("Words 1–10 · Vocabulary 1.1 (Part-1)");
     await expect(items.nth(1)).toContainText("Lit 01: Literary Terms");
     await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^0\/(7|14)$/);
     await expect(page.getByTestId("ws-week-cycles")).toHaveText("0/56");
@@ -64,6 +67,16 @@ test.describe("work-station", () => {
       "English Literature + Grammar",
     );
     await expect(page.getByTestId("ws-plan-subject").nth(2)).toContainText("Math + Mental Ability");
+    await expect(page.getByText("75 learning + 25 revision days")).toBeVisible();
+    // Plan length can change without losing progress.
+    const plan = page.getByRole("form", { name: "Plan length" });
+    await plan.getByLabel("Learning days").fill("80");
+    await plan.getByLabel("Revision days").fill("20");
+    const saved = serverActionDone(page);
+    await plan.getByRole("button", { name: "Save plan length" }).click();
+    await saved;
+    await expect(page.getByText("80 learning + 20 revision days")).toBeVisible();
+    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/164");
 
     // Office: a task created here comes back here, and shows in Tasks with an Office tag.
     await page.getByRole("link", { name: "Office", exact: true }).click();

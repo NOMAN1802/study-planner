@@ -41,7 +41,7 @@ export function SetupForm({ defaultStart }: { defaultStart: string }) {
             type="number"
             inputMode="numeric"
             min={7}
-            defaultValue={70}
+            defaultValue={75}
             invalid={Boolean(errors.learningDays)}
             aria-describedby={errors.learningDays ? "learningDays-error" : "learningDays-hint"}
           />
@@ -58,7 +58,7 @@ export function SetupForm({ defaultStart }: { defaultStart: string }) {
             type="number"
             inputMode="numeric"
             min={0}
-            defaultValue={20}
+            defaultValue={25}
             invalid={Boolean(errors.revisionDays)}
             aria-describedby={errors.revisionDays ? "revisionDays-error" : "revisionDays-hint"}
           />

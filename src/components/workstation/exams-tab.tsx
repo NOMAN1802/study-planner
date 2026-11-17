@@ -53,8 +53,8 @@ export function ExamsTab({ data }: { data: WorkstationData }) {
           aria-labelledby="upcoming-title"
           className="enter rounded-lg border border-border bg-surface"
         >
-          <header className="flex min-h-11 items-center border-b border-border px-4">
-            <h2 id="upcoming-title" className="text-sm font-medium">
+          <header className="flex min-h-11 items-center px-4 pt-3 pb-1.5 sm:px-5">
+            <h2 id="upcoming-title" className="font-display text-base font-semibold tracking-tight">
               Next 3 weeks
             </h2>
           </header>
@@ -81,8 +81,8 @@ export function ExamsTab({ data }: { data: WorkstationData }) {
           aria-labelledby="history-title"
           className="enter rounded-lg border border-border bg-surface"
         >
-          <header className="flex min-h-11 items-center justify-between border-b border-border px-4">
-            <h2 id="history-title" className="text-sm font-medium">
+          <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
+            <h2 id="history-title" className="font-display text-base font-semibold tracking-tight">
               Results
             </h2>
             {exams.length > 0 ? (

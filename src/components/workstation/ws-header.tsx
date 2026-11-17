@@ -1,11 +1,12 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { TAB_LABEL, WORKSTATION_TABS, type WorkstationTab } from "@/schemas/workstation";
 
 export function WorkstationTabs({ tab }: { tab: WorkstationTab }) {
   return (
-    <nav aria-label="Work-Station sections" className="-mx-1 overflow-x-auto">
-      <ul className="flex min-w-max gap-1 px-1">
+    <nav aria-label="Work-Station sections" className="w-full sm:w-auto">
+      <ul className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-surface p-1 sm:flex sm:rounded-md">
         {WORKSTATION_TABS.map((t) => {
           const active = t === tab;
           return (
@@ -14,9 +15,9 @@ export function WorkstationTabs({ tab }: { tab: WorkstationTab }) {
                 href={t === "today" ? "/work-station" : `/work-station?tab=${t}`}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-8 items-center rounded-md px-3 text-[13px] transition-colors duration-150",
+                  "flex h-9 items-center justify-center rounded-md px-3 text-[13px] transition-colors duration-150 sm:h-8",
                   active
-                    ? "bg-surface-2 font-medium text-fg"
+                    ? "bg-fg font-medium text-bg"
                     : "text-fg-muted hover:bg-surface-2 hover:text-fg",
                 )}
               >
@@ -27,6 +28,15 @@ export function WorkstationTabs({ tab }: { tab: WorkstationTab }) {
         })}
       </ul>
     </nav>
+  );
+}
+
+/** One ruled strip of figures (2 columns on phones, 4 from lg). */
+export function StatStrip({ children }: { children: ReactNode }) {
+  return (
+    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border lg:grid-cols-4">
+      {children}
+    </div>
   );
 }
 
@@ -44,19 +54,21 @@ export function Stat({
   testId?: string;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-0.5 rounded-lg border border-border bg-surface px-4 py-3">
-      <span className="text-xs text-fg-muted">{label}</span>
+    <div className="flex min-w-0 flex-col gap-1 bg-surface px-4 py-3 sm:px-5 sm:py-4">
+      <span className="text-[11px] font-medium tracking-[0.08em] text-fg-muted uppercase">
+        {label}
+      </span>
       <span
         data-testid={testId}
         className={cn(
-          "font-mono text-lg font-semibold tabular-nums",
+          "font-mono text-xl font-semibold tabular-nums sm:text-2xl",
           tone === "warning" && "text-warning",
           tone === "accent" && "text-accent",
         )}
       >
         {value}
       </span>
-      {detail ? <span className="truncate text-xs text-fg-muted">{detail}</span> : null}
+      {detail ? <span className="text-xs text-pretty text-fg-muted">{detail}</span> : null}
     </div>
   );
 }

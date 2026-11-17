@@ -69,7 +69,17 @@ export function AppShell({ email, userMenu, children }: AppShellProps) {
         )}
       >
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
-          <span className="font-display text-base font-semibold tracking-tight">Habit Tracker</span>
+          <span className="flex items-center gap-2.5">
+            <span
+              aria-hidden
+              className="grid size-7 place-items-center rounded-md bg-fg font-display text-[15px] font-semibold text-bg"
+            >
+              H
+            </span>
+            <span className="font-display text-[17px] font-semibold tracking-tight">
+              Habit Tracker
+            </span>
+          </span>
           <button
             type="button"
             className="inline-flex size-8 items-center justify-center rounded-md text-fg-muted hover:bg-surface-2 md:hidden"
@@ -99,7 +109,7 @@ export function AppShell({ email, userMenu, children }: AppShellProps) {
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border bg-bg px-4 sm:px-6">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border bg-bg/90 px-4 backdrop-blur sm:px-6 lg:px-8">
           <button
             ref={menuButtonRef}
             type="button"
@@ -111,13 +121,17 @@ export function AppShell({ email, userMenu, children }: AppShellProps) {
           >
             <Menu className="size-4" aria-hidden />
           </button>
-          <h1 className="font-display text-lg font-semibold tracking-tight">{title}</h1>
+          <h1 className="font-display text-xl font-semibold tracking-tight">{title}</h1>
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
             {userMenu}
           </div>
         </header>
-        <main id="main" tabIndex={-1} className="flex-1 px-4 py-6 outline-none sm:px-6">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="flex-1 px-4 py-5 outline-none sm:px-6 sm:py-6 lg:px-8"
+        >
           {children}
         </main>
       </div>

@@ -46,7 +46,7 @@ export default async function FocusPage({ params, searchParams }: PageProps<"/ta
   ]);
 
   return (
-    <div className="enter mx-auto flex w-full max-w-5xl flex-col gap-4">
+    <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <Link

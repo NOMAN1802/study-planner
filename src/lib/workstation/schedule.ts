@@ -4,7 +4,8 @@
  * out instead of leaving a stale timetable.
  *
  * Days 1…learningDays: subjects one at a time (in order), one vocabulary cycle
- * a day, weekly revision + exam on Fridays, and a revision + final exam after
+ * a day (10 new words Saturday–Thursday, revising the week's words on Friday),
+ * weekly revision + exam on Fridays, and a revision + final exam after
  * each subject's last topic. The next revisionDays: rotating revision with a
  * mock test every second day. Learning work that does not fit spills into the
  * revision phase (and beyond) and is reported as overflow.
@@ -18,6 +19,9 @@ export const WEEKLY_EXAM_CYCLES = 1;
 export const FINAL_REVISION_CYCLES = 2;
 export const FINAL_EXAM_CYCLES = 1;
 export const MOCK_CYCLES = 3;
+/** New vocabulary words per word day (every day except Friday). */
+export const WORDS_PER_DAY = 10;
+const WORD_DAYS_PER_WEEK = 6;
 /** Revision days give each subject a block of this many cycles before rotating. */
 export const REVISION_BLOCK = 4;
 /** How far past the planned end overflowing work is still laid out. */
@@ -54,6 +58,8 @@ export type ScheduleInput = {
   doneToday: number;
   /** A cycle on the daily subject was already completed today. */
   dailyDoneToday: boolean;
+  /** Word days (non-Friday days with a vocabulary cycle) already done, today included. */
+  vocabDaysDone: number;
   /** Days that already have a recorded weekly exam / mock test. */
   weeklyExamDays: readonly string[];
   mockDays: readonly string[];
@@ -178,6 +184,7 @@ export function buildSchedule(input: ScheduleInput): Schedule {
   let learningCapacityLeft = 0;
   let projectedLearningEnd: string | null = null;
   let revisionTurn = 0;
+  let wordDays = input.vocabDaysDone;
 
   for (let day = from; ; day = addDays(day, 1)) {
     const index = Math.round((Date.parse(day) - Date.parse(startDay)) / 86_400_000) + 1;
@@ -201,16 +208,28 @@ export function buildSchedule(input: ScheduleInput): Schedule {
       return cycles;
     };
 
-    // Daily subject (vocabulary) first, every day of the plan.
+    // Daily subject (vocabulary) first, every day of the plan: 10 new words
+    // Saturday–Thursday, and a revision of the week's words on Friday.
     if (daily && !(isToday && input.dailyDoneToday)) {
-      const topic = nextDailyTopic(daily);
-      take({
-        kind: "daily",
-        cycles: DAILY_CYCLES,
-        label: topic ? topic.title : `${daily.name} — practice`,
-        subjectId: daily.id,
-        topicId: topic?.id,
-      });
+      if (weekday === FRIDAY) {
+        take({
+          kind: "daily",
+          cycles: DAILY_CYCLES,
+          label: `Vocabulary revision: this week's ${WORD_DAYS_PER_WEEK * WORDS_PER_DAY} words`,
+          subjectId: daily.id,
+        });
+      } else {
+        const topic = nextDailyTopic(daily);
+        const first = wordDays * WORDS_PER_DAY + 1;
+        take({
+          kind: "daily",
+          cycles: DAILY_CYCLES,
+          label: `Words ${first}–${first + WORDS_PER_DAY - 1} · ${topic ? topic.title : daily.name}`,
+          subjectId: daily.id,
+          topicId: topic?.id,
+        });
+        wordDays += 1;
+      }
     }
 
     // Friday reservations (learning phase only; revision days have their own shape).

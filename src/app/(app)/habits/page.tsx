@@ -20,7 +20,7 @@ export default async function HabitsPage({ searchParams }: PageProps<"/habits">)
   const habits = await getHabitRows(user, view);
 
   return (
-    <div className="enter mx-auto flex w-full max-w-5xl flex-col gap-4">
+    <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <nav
           aria-label="Habit views"

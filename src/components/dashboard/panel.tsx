@@ -32,13 +32,16 @@ export function Panel({
         className,
       )}
     >
-      <header className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border px-4 py-1.5">
-        <h2 id={`${id}-title`} className="text-sm font-medium text-fg">
+      <header className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 pt-3 pb-1.5 sm:px-5">
+        <h2
+          id={`${id}-title`}
+          className="font-display text-base font-semibold tracking-tight text-fg"
+        >
           {title}
         </h2>
         {aside ? <div className="text-xs text-fg-muted">{aside}</div> : null}
       </header>
-      <div className={cn("flex-1 p-4", bodyClassName)}>{children}</div>
+      <div className={cn("flex-1 p-4 sm:px-5", bodyClassName)}>{children}</div>
     </section>
   );
 }

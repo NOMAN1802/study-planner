@@ -6,7 +6,7 @@ export default function AppError({ error, retry }: { error: unknown; retry: () =
   const digest =
     typeof error === "object" && error !== null && "digest" in error ? String(error.digest) : null;
   return (
-    <div className="enter mx-auto w-full max-w-5xl">
+    <div className="enter mx-auto w-full max-w-page">
       <div
         role="alert"
         className="flex flex-col items-start gap-3 rounded-lg border border-danger/30 bg-danger-soft p-6"

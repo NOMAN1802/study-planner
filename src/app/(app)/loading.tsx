@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
     <div
-      className="mx-auto flex w-full max-w-5xl flex-col gap-2"
+      className="mx-auto flex w-full max-w-page flex-col gap-2"
       role="status"
       aria-label="Loading"
     >

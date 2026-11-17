@@ -26,7 +26,7 @@ function PanelSkeleton({ className, rows = 3 }: { className?: string; rows?: num
 export default function Loading() {
   return (
     <div
-      className="mx-auto grid w-full max-w-5xl gap-4 lg:grid-cols-5"
+      className="mx-auto grid w-full max-w-page gap-4 lg:grid-cols-5"
       role="status"
       aria-label="Loading"
     >

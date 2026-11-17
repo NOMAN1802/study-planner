@@ -11,7 +11,7 @@ type DailyRingsProps = {
 export function DailyRings({ ring, habits, taskRing }: DailyRingsProps) {
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+      <div className="grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:items-center sm:gap-x-6">
         <Summary
           testId="ring-daily"
           stat={ring}
@@ -83,13 +83,13 @@ function Summary({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
       <ProgressRing ratio={stat.ratio} size={72} stroke={7} label={label}>
         <span className="font-mono text-sm font-medium text-fg tabular-nums" data-testid={testId}>
           {stat.done}/{stat.total}
         </span>
       </ProgressRing>
-      <p className="max-w-24 text-xs text-fg-muted">{stat.total === 0 ? empty : caption}</p>
+      <p className="text-xs text-fg-muted sm:max-w-24">{stat.total === 0 ? empty : caption}</p>
     </div>
   );
 }

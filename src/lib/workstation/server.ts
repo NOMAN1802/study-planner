@@ -1,8 +1,9 @@
 import type { CurrentUser } from "@/lib/auth";
 import { parseLocalDateTime } from "@/lib/dates";
-import { addDays, dayKeyOf, startOfWeekKey } from "@/lib/planner";
+import { addDays, dayKeyOf, startOfWeekKey, weekdayOf } from "@/lib/planner";
 import { prisma } from "@/lib/prisma";
 import {
+  FRIDAY,
   cyclesByWeekday,
   localNow,
   type LocalNow,
@@ -115,11 +116,14 @@ export async function getWorkstationData(
   const spent = new Map<string, number>();
   const dailyTaskIds = new Set(plan.subjects.filter((s) => s.isDaily).map((s) => s.taskId));
   let dailyDoneToday = false;
+  const wordDays = new Set<string>();
   for (const s of sessions) {
     const day = dayKeyOf(s.startedAt, user.timezone);
     cyclesByDay[day] = (cyclesByDay[day] ?? 0) + 1;
     if (s.topicId) spent.set(s.topicId, (spent.get(s.topicId) ?? 0) + 1);
-    if (day === now.dayKey && dailyTaskIds.has(s.taskId)) dailyDoneToday = true;
+    if (!dailyTaskIds.has(s.taskId)) continue;
+    if (day === now.dayKey) dailyDoneToday = true;
+    if (day >= plan.startDay && weekdayOf(day) !== FRIDAY) wordDays.add(day);
   }
   const doneToday = cyclesByDay[now.dayKey] ?? 0;
 
@@ -169,6 +173,7 @@ export async function getWorkstationData(
     today: now.dayKey,
     doneToday,
     dailyDoneToday,
+    vocabDaysDone: wordDays.size,
     weeklyExamDays: exams.filter((e) => e.kind === "WEEKLY").map((e) => e.day),
     mockDays: exams.filter((e) => e.kind === "MOCK").map((e) => e.day),
   });

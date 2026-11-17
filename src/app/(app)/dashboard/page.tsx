@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
   if (data.empty) {
     return (
-      <div className="enter mx-auto flex w-full max-w-5xl flex-col gap-6">
+      <div className="enter mx-auto flex w-full max-w-page flex-col gap-6">
         <EmptyState
           title="Nothing to track yet"
           description="Add your first habit or task and today's progress, streaks, and focus time will show up here."
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
   const tasksLeft = data.tasks.filter((t) => !t.done).length;
 
   return (
-    <div className="mx-auto grid w-full max-w-5xl gap-4 lg:grid-cols-5">
+    <div className="mx-auto grid w-full max-w-page gap-4 lg:grid-cols-5 2xl:grid-cols-12">
       <Panel
         id="today"
         index={0}
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
             {tasksLeft === 1 ? "task" : "tasks"} left
           </span>
         }
-        className="lg:col-span-5"
+        className={study ? "lg:col-span-5 2xl:col-span-7" : "lg:col-span-5 2xl:col-span-12"}
       >
         <TodayPanel habits={data.habits} tasks={data.tasks} />
       </Panel>
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
               Open Work-Station
             </Link>
           }
-          className="lg:col-span-5"
+          className="lg:col-span-5 2xl:col-span-5"
         >
           <dl className="grid grid-cols-2 gap-4 text-sm">
             {[
@@ -87,7 +87,7 @@ export default async function DashboardPage() {
               <div key={row.id} className="flex flex-col gap-1.5">
                 <dt className="text-xs text-fg-muted">{row.label} · study cycles</dt>
                 <dd
-                  className="font-mono text-lg font-semibold tabular-nums"
+                  className="font-mono text-2xl font-semibold tabular-nums"
                   data-testid={`study-${row.id}`}
                 >
                   {row.done}/{row.target}
@@ -106,11 +106,11 @@ export default async function DashboardPage() {
         </Panel>
       ) : null}
 
-      <Panel index={1} id="targets" title="Daily targets" className="lg:col-span-2">
+      <Panel index={1} id="targets" title="Daily targets" className="lg:col-span-2 2xl:col-span-4">
         <DailyRings ring={data.dailyRing} habits={data.dailyHabits} taskRing={data.taskRing} />
       </Panel>
 
-      <Panel index={2} id="focus" title="Focus minutes" className="lg:col-span-3">
+      <Panel index={2} id="focus" title="Focus minutes" className="lg:col-span-3 2xl:col-span-8">
         <FocusChart series={data.focus} />
       </Panel>
 
@@ -130,16 +130,27 @@ export default async function DashboardPage() {
             days
           </>
         }
-        className="lg:col-span-5"
+        className="lg:col-span-5 2xl:col-span-12"
       >
         <YearHeatmap heatmap={data.heatmap} weekStartsOn={user.weekStartsOn} />
       </Panel>
 
-      <Panel index={4} id="streaks" title="Streaks" className="lg:col-span-2" bodyClassName="py-2">
+      <Panel
+        index={4}
+        id="streaks"
+        title="Streaks"
+        className="lg:col-span-2 2xl:col-span-4"
+        bodyClassName="py-2"
+      >
         <StreakList rows={data.streaks} />
       </Panel>
 
-      <Panel index={5} id="task-time" title="Target vs. actual time" className="lg:col-span-3">
+      <Panel
+        index={5}
+        id="task-time"
+        title="Target vs. actual time"
+        className="lg:col-span-3 2xl:col-span-8"
+      >
         <TaskTime rows={data.taskTime} />
       </Panel>
     </div>
