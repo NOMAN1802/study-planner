@@ -1,23 +1,27 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ExternalLink, Play } from "lucide-react";
+import { ArrowDown, ArrowUp, Play } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { moveSubject, setTopicEstimate } from "@/actions/workstation";
 import { iconButton, plural } from "@/components/workstation/format";
+import { LectureLinks } from "@/components/workstation/lecture-links";
+import { SubjectRoutine } from "@/components/workstation/subject-routine";
 import { TopicDone } from "@/components/workstation/topic-done";
 import { Bar } from "@/components/workstation/ws-header";
 import type { WsSubject, WsTopic } from "@/lib/workstation/server";
-import type { SubjectProjection } from "@/lib/workstation/schedule";
+import { subjectRoutine, type PlanDay, type SubjectProjection } from "@/lib/workstation/schedule";
 
 const ESTIMATES = [1, 2, 3, 4, 5, 6];
 
 export function SubjectsTab({
   subjects,
   projections,
+  days,
 }: {
   subjects: WsSubject[];
   projections: SubjectProjection[];
+  days: PlanDay[];
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -112,6 +116,13 @@ export function SubjectsTab({
                       </span>
                     </div>
                   ) : null}
+                  {!s.isDaily ? (
+                    <SubjectRoutine
+                      name={s.name}
+                      color={s.color}
+                      routine={subjectRoutine(days, s.id)}
+                    />
+                  ) : null}
                   <ul
                     className="divide-y divide-border border-t border-border"
                     aria-label={`${s.name} lectures`}
@@ -148,16 +159,7 @@ function TopicRow({
           {topic.title}
         </p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-fg-muted">
-          {topic.url ? (
-            <a
-              href={topic.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-accent hover:underline"
-            >
-              Lecture <ExternalLink className="size-3" aria-hidden />
-            </a>
-          ) : null}
+          <LectureLinks parts={topic.parts} />
           {topic.spentCycles > 0 ? (
             <span className="font-mono tabular-nums">
               {plural(topic.spentCycles, "cycle")} spent

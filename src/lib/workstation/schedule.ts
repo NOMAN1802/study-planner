@@ -5,8 +5,11 @@
  *
  * Days 1…learningDays: subjects one at a time (in order), one vocabulary cycle
  * a day (10 new words Saturday–Thursday, revising the week's words on Friday),
- * weekly revision + exam on Fridays, and a revision + final exam after
- * each subject's last topic. The next revisionDays: rotating revision with a
+ * at most LECTURE_CYCLES of lectures a day (HOLIDAY_LECTURE_CYCLES on Friday and
+ * holidays, which follow the Friday routine)
+ * with the rest of the study session spent revising what was covered, weekly
+ * revision + exam on Fridays, and a subject final day after each subject's
+ * last topic (its revision + final exam, no lectures, the rest of the day off). The next revisionDays: rotating revision with a
  * mock test every second day. Learning work that does not fit spills into the
  * revision phase (and beyond) and is reported as overflow.
  */
@@ -19,6 +22,10 @@ export const WEEKLY_EXAM_CYCLES = 1;
 export const FINAL_REVISION_CYCLES = 2;
 export const FINAL_EXAM_CYCLES = 1;
 export const MOCK_CYCLES = 3;
+/** Lecture cycles a day: 2 lectures at the default 2-cycle estimate. */
+export const LECTURE_CYCLES = 4;
+/** Lecture cycles on Friday and holidays: 4 lectures. */
+export const HOLIDAY_LECTURE_CYCLES = 8;
 /** New vocabulary words per word day (every day except Friday). */
 export const WORDS_PER_DAY = 10;
 const WORD_DAYS_PER_WEEK = 6;
@@ -51,6 +58,10 @@ export type ScheduleInput = {
   revisionDays: number;
   /** Study cycles per weekday, index 0 (Sun) … 6 (Sat). */
   capacityByWeekday: readonly number[];
+  /** Extra off days (`YYYY-MM-DD`), studied like a Friday. */
+  holidays?: readonly string[];
+  /** Study cycles on a holiday falling on each weekday (defaults to capacityByWeekday). */
+  holidayCapacityByWeekday?: readonly number[];
   /** In study order; the daily subject (vocabulary) may appear anywhere. */
   subjects: readonly PlanSubject[];
   today: string;
@@ -113,10 +124,8 @@ export type Schedule = {
   /** Day the last learning-phase item lands on (null when nothing is left). */
   projectedLearningEnd: string | null;
   remainingLearningCycles: number;
-  /** Free cycles left in the learning phase after daily/weekly reservations. */
-  learningCapacityLeft: number;
-  /** Positive = spare cycles; negative = cycles that don't fit before the revision phase. */
-  bufferCycles: number;
+  /** Days between the projected and planned learning end: positive = spare, negative = late. */
+  bufferDays: number;
 };
 
 type Work = PlanItem & { learning: true };
@@ -173,6 +182,7 @@ export function buildSchedule(input: ScheduleInput): Schedule {
   const planEnd = addDays(startDay, learningDays + revisionDays - 1);
   const from = today > startDay ? today : startDay;
   const weeklyDone = new Set(input.weeklyExamDays);
+  const holidays = new Set(input.holidays ?? []);
   const mockDone = new Set(input.mockDays);
 
   const daily = subjects.find((s) => s.isDaily);
@@ -180,8 +190,8 @@ export function buildSchedule(input: ScheduleInput): Schedule {
   const queue = learningQueue(subjects);
   const remainingLearningCycles = queue.reduce((n, w) => n + w.cycles, 0);
 
+  const subjectName = new Map(subjects.map((s) => [s.id, s.name]));
   const days: PlanDay[] = [];
-  let learningCapacityLeft = 0;
   let projectedLearningEnd: string | null = null;
   let revisionTurn = 0;
   let wordDays = input.vocabDaysDone;
@@ -196,7 +206,11 @@ export function buildSchedule(input: ScheduleInput): Schedule {
       break;
 
     const weekday = weekdayOf(day);
-    const fullCapacity = input.capacityByWeekday[weekday] ?? 0;
+    const holiday = holidays.has(day) && weekday !== FRIDAY;
+    const fullCapacity =
+      (holiday ? input.holidayCapacityByWeekday : input.capacityByWeekday)?.[weekday] ??
+      input.capacityByWeekday[weekday] ??
+      0;
     const isToday = day === today;
     let free = isToday ? Math.max(0, fullCapacity - input.doneToday) : fullCapacity;
     const items: PlanItem[] = [];
@@ -242,12 +256,28 @@ export function buildSchedule(input: ScheduleInput): Schedule {
     const reserve = Math.min(free, fridayReserve + mockReserve);
     free -= reserve;
 
-    if (phase === "learning") learningCapacityLeft += free;
-
     // Learning work: always first in line, even after the learning phase (overflow).
+    // Lectures are capped per day; a subject's revision + final get a day of their own.
+    const lectureCap = weekday === FRIDAY || holiday ? HOLIDAY_LECTURE_CYCLES : LECTURE_CYCLES;
+    const doneLectures = isToday
+      ? Math.max(0, input.doneToday - (input.dailyDoneToday && daily ? DAILY_CYCLES : 0))
+      : 0;
+    let lectureLeft = Math.max(0, lectureCap - doneLectures);
+    let lecturedOn: string | undefined;
+    let finalDay = false;
     while (free > 0 && queue.length > 0) {
       const head = queue[0];
-      const used = take(head);
+      let used: number;
+      if (head.kind === "topic") {
+        if (finalDay || lectureLeft <= 0) break;
+        used = take({ ...head, cycles: Math.min(head.cycles, lectureLeft) });
+        lectureLeft -= used;
+        lecturedOn = head.subjectId;
+      } else {
+        if (lecturedOn !== undefined) break;
+        used = take(head);
+        finalDay = true;
+      }
       head.cycles -= used;
       if (head.cycles <= 0) queue.shift();
       projectedLearningEnd = day;
@@ -262,8 +292,19 @@ export function buildSchedule(input: ScheduleInput): Schedule {
       take({ kind: "mock", cycles: MOCK_CYCLES, label: "Mock test (full syllabus)" });
     }
 
+    // The rest of a lecture day's session revises the subject being covered.
+    const reviseId = lecturedOn ?? queue[0]?.subjectId;
+    if (!finalDay && phase !== "revision" && queue.length > 0 && reviseId && free > 0) {
+      take({
+        kind: "revision",
+        cycles: free,
+        label: `Revise ${subjectName.get(reviseId) ?? "covered lectures"}`,
+        subjectId: reviseId,
+      });
+    }
+
     // Revision phase (or learning finished early): rotate through subjects in blocks.
-    if ((phase === "revision" || queue.length === 0) && study.length > 0) {
+    if (!finalDay && (phase === "revision" || queue.length === 0) && study.length > 0) {
       while (free > 0) {
         const s = study[revisionTurn % study.length];
         revisionTurn += 1;
@@ -286,8 +327,10 @@ export function buildSchedule(input: ScheduleInput): Schedule {
     learningEnd,
     projectedLearningEnd,
     remainingLearningCycles,
-    learningCapacityLeft,
-    bufferCycles: learningCapacityLeft - remainingLearningCycles,
+    bufferDays: Math.round(
+      (Date.parse(learningEnd) - Date.parse(projectedLearningEnd ?? addDays(from, -1))) /
+        86_400_000,
+    ),
   };
 }
 
@@ -338,4 +381,28 @@ export function cycleLabels(items: readonly PlanItem[]): PlanItem[] {
   return items.flatMap((item) =>
     Array.from({ length: item.cycles }, () => ({ ...item, cycles: 1 })),
   );
+}
+
+export type SubjectRoutineDay = {
+  day: string;
+  index: number;
+  phase: Phase;
+  items: PlanItem[];
+};
+
+const SUBJECT_KINDS: ReadonlySet<ItemKind> = new Set([
+  "topic",
+  "subject-revision",
+  "subject-final",
+  "revision",
+]);
+
+/** One subject's slice of the schedule: the days it is studied and what on each. */
+export function subjectRoutine(days: readonly PlanDay[], subjectId: string): SubjectRoutineDay[] {
+  const out: SubjectRoutineDay[] = [];
+  for (const d of days) {
+    const items = d.items.filter((i) => i.subjectId === subjectId && SUBJECT_KINDS.has(i.kind));
+    if (items.length > 0) out.push({ day: d.day, index: d.index, phase: d.phase, items });
+  }
+  return out;
 }

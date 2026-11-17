@@ -101,7 +101,13 @@ export async function setupPlan(_prev: SetupState, formData: FormData): Promise<
     }),
     prisma.topic.createMany({
       data: subjects.flatMap((s) =>
-        s.topics.map((t, j) => ({ subjectId: s.id, sortOrder: j, title: t.title, url: t.url })),
+        s.topics.map((t, j) => ({
+          subjectId: s.id,
+          sortOrder: j,
+          title: t.title,
+          url: t.parts[0]?.url ?? null,
+          parts: t.parts,
+        })),
       ),
     }),
     ...(hasRoutine
@@ -120,13 +126,15 @@ export async function setupPlan(_prev: SetupState, formData: FormData): Promise<
   redirect("/work-station");
 }
 
-/** Changes the learning/revision split of the plan; progress is kept. */
+/** Changes the first study day, learning/revision split and holidays; progress is kept. */
 export async function updatePlanLength(
   _prev: PlanLengthState,
   formData: FormData,
 ): Promise<PlanLengthState> {
   const user = await requireUser();
-  const parsed = planLengthSchema.safeParse(formValues(formData, ["learningDays", "revisionDays"]));
+  const parsed = planLengthSchema.safeParse(
+    formValues(formData, ["startDay", "learningDays", "revisionDays", "holidays"]),
+  );
   if (!parsed.success) return { fieldErrors: firstErrors<PlanLengthField>(parsed.error) };
   const { count } = await prisma.studyPlan.updateMany({
     where: { userId: user.id },

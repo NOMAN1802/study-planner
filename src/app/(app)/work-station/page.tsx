@@ -12,7 +12,7 @@ import { requireUser } from "@/lib/auth";
 import { addDays } from "@/lib/planner";
 import { getTaskRows } from "@/lib/tasks";
 import { BCS_SYLLABUS } from "@/lib/workstation/bcs-syllabus";
-import { cyclesByWeekday, defaultRoutine, localNow } from "@/lib/workstation/routine";
+import { defaultRoutine, localNow, studyCyclesByWeekday } from "@/lib/workstation/routine";
 import { getRoutineSlots, getWorkstationData } from "@/lib/workstation/server";
 import { DEFAULT_FILTERS } from "@/schemas/task";
 import { parseTab } from "@/schemas/workstation";
@@ -51,7 +51,11 @@ export default async function WorkstationPage({ searchParams }: PageProps<"/work
       {tab === "today" ? <TodayTab data={data} /> : null}
       {tab === "plan" ? <PlanTab data={data} weekStartsOn={user.weekStartsOn} /> : null}
       {tab === "subjects" ? (
-        <SubjectsTab subjects={data.subjects} projections={data.schedule.subjects} />
+        <SubjectsTab
+          subjects={data.subjects}
+          projections={data.schedule.subjects}
+          days={data.schedule.days}
+        />
       ) : null}
       {tab === "exams" ? <ExamsTab data={data} /> : null}
       {tab === "office" ? <OfficeTab tasks={officeTasks} slots={data.slots} /> : null}
@@ -64,7 +68,7 @@ async function Setup({ timezone }: { timezone: string }) {
   const user = await requireUser();
   const existing = await getRoutineSlots(user.id);
   const routine = existing.length > 0 ? existing : defaultRoutine();
-  const perDay = cyclesByWeekday(routine);
+  const perDay = studyCyclesByWeekday(routine);
   const study = BCS_SYLLABUS.filter((s) => !s.isDaily);
   const lectures = study.reduce((n, s) => n + s.topics.length, 0);
   const tomorrow = addDays(localNow(new Date(), timezone).dayKey, 1);

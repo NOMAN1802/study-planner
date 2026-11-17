@@ -4,6 +4,7 @@ import {
   examSchema,
   firstErrors,
   parseTab,
+  planLengthSchema,
   setupSchema,
   slotSchema,
 } from "@/schemas/workstation";
@@ -27,6 +28,24 @@ describe("setupSchema", () => {
         learningDays: "Learning days must be at least 7",
         revisionDays: "Revision days must be at least 0",
       });
+  });
+});
+
+describe("planLengthSchema holidays", () => {
+  const base = { startDay: "2026-11-18", learningDays: "80", revisionDays: "20" };
+  it("parses a comma list into sorted unique dates", () => {
+    expect(
+      planLengthSchema.parse({ ...base, holidays: "2026-12-25, 2026-12-16,2026-12-25" }).holidays,
+    ).toEqual(["2026-12-16", "2026-12-25"]);
+  });
+  it("accepts no holidays", () => {
+    expect(planLengthSchema.parse({ ...base, holidays: "" }).holidays).toEqual([]);
+    expect(planLengthSchema.parse(base).holidays).toEqual([]);
+  });
+  it("rejects a bad date", () => {
+    const r = planLengthSchema.safeParse({ ...base, holidays: "2026-12-16,2026-02-30" });
+    expect(r.success).toBe(false);
+    if (!r.success) expect(firstErrors(r.error)).toEqual({ holidays: "Pick valid dates" });
   });
 });
 

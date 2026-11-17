@@ -1,22 +1,27 @@
 import type { CurrentUser } from "@/lib/auth";
 import { parseLocalDateTime } from "@/lib/dates";
-import { addDays, dayKeyOf, startOfWeekKey, weekdayOf } from "@/lib/planner";
+import { addDays, startOfWeekKey, weekdayOf } from "@/lib/planner";
 import { prisma } from "@/lib/prisma";
 import {
+  DAY_START_MIN,
   FRIDAY,
-  cyclesByWeekday,
+  formatMinute,
   localNow,
+  studyCyclesByWeekday,
+  studyDayKeyOf,
   type LocalNow,
   type RoutineKind,
   type Slot,
 } from "@/lib/workstation/routine";
 import { buildSchedule, type PlanSubject, type Schedule } from "@/lib/workstation/schedule";
 import type { ExamKind } from "@/schemas/workstation";
+import type { LecturePart } from "@/lib/workstation/bcs-syllabus";
+import { lectureParts } from "@/lib/workstation/lecture-parts";
 
 export type WsTopic = {
   id: string;
   title: string;
-  url: string | null;
+  parts: LecturePart[];
   estCycles: number;
   done: boolean;
   spentCycles: number;
@@ -42,7 +47,16 @@ export type WsExam = {
 export type WsSlot = Slot & { id: string };
 
 export type WorkstationData = {
-  plan: { id: string; name: string; startDay: string; learningDays: number; revisionDays: number };
+  plan: {
+    id: string;
+    name: string;
+    startDay: string;
+    learningDays: number;
+    revisionDays: number;
+    holidays: string[];
+  };
+  /** The current study day is a holiday (studied like a Friday). */
+  isHoliday: boolean;
   subjects: WsSubject[];
   slots: WsSlot[];
   exams: WsExam[];
@@ -118,7 +132,7 @@ export async function getWorkstationData(
   let dailyDoneToday = false;
   const wordDays = new Set<string>();
   for (const s of sessions) {
-    const day = dayKeyOf(s.startedAt, user.timezone);
+    const day = studyDayKeyOf(s.startedAt, user.timezone);
     cyclesByDay[day] = (cyclesByDay[day] ?? 0) + 1;
     if (s.topicId) spent.set(s.topicId, (spent.get(s.topicId) ?? 0) + 1);
     if (!dailyTaskIds.has(s.taskId)) continue;
@@ -137,7 +151,7 @@ export async function getWorkstationData(
     topics: s.topics.map((t) => ({
       id: t.id,
       title: t.title,
-      url: t.url,
+      parts: lectureParts(t.parts, t.url),
       estCycles: t.estCycles,
       done: t.doneAt !== null,
       spentCycles: spent.get(t.id) ?? 0,
@@ -168,7 +182,9 @@ export async function getWorkstationData(
     startDay: plan.startDay,
     learningDays: plan.learningDays,
     revisionDays: plan.revisionDays,
-    capacityByWeekday: cyclesByWeekday(slots),
+    capacityByWeekday: studyCyclesByWeekday(slots),
+    holidayCapacityByWeekday: studyCyclesByWeekday(slots, true),
+    holidays: plan.holidays,
     subjects: planSubjects,
     today: now.dayKey,
     doneToday,
@@ -186,7 +202,9 @@ export async function getWorkstationData(
       startDay: plan.startDay,
       learningDays: plan.learningDays,
       revisionDays: plan.revisionDays,
+      holidays: plan.holidays,
     },
+    isHoliday: plan.holidays.includes(now.dayKey),
     subjects,
     slots,
     exams,
@@ -203,12 +221,16 @@ export async function getWorkstationData(
 export async function getStudySummary(user: CurrentUser, at = new Date()) {
   const plan = await prisma.studyPlan.findUnique({
     where: { userId: user.id },
-    select: { subjects: { select: { taskId: true } } },
+    select: { holidays: true, subjects: { select: { taskId: true } } },
   });
   if (!plan) return null;
   const now = localNow(at, user.timezone);
+  const holiday = plan.holidays.includes(now.dayKey);
   const weekStart = startOfWeekKey(now.dayKey, user.weekStartsOn);
-  const since = parseLocalDateTime(`${weekStart}T00:00`, user.timezone) ?? at;
+  // The study week starts the evening before its first day.
+  const since =
+    parseLocalDateTime(`${addDays(weekStart, -1)}T${formatMinute(DAY_START_MIN)}`, user.timezone) ??
+    at;
   const [sessions, slots] = await Promise.all([
     prisma.pomodoroSession.findMany({
       where: {
@@ -222,11 +244,14 @@ export async function getStudySummary(user: CurrentUser, at = new Date()) {
     }),
     getRoutineSlots(user.id),
   ]);
-  const capacity = cyclesByWeekday(slots);
-  const today = sessions.filter((s) => dayKeyOf(s.startedAt, user.timezone) === now.dayKey).length;
+  const capacity = studyCyclesByWeekday(slots);
+  const todayCapacity = studyCyclesByWeekday(slots, holiday);
+  const today = sessions.filter(
+    (s) => studyDayKeyOf(s.startedAt, user.timezone) === now.dayKey,
+  ).length;
   return {
     today,
-    todayTarget: capacity[now.weekday],
+    todayTarget: todayCapacity[now.weekday],
     week: sessions.length,
     weekTarget: capacity.reduce((a, b) => a + b, 0),
   };

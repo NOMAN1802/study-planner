@@ -1,8 +1,10 @@
-import { ArrowLeft, Clock, ExternalLink } from "lucide-react";
+import { ArrowLeft, Clock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { LectureLinks } from "@/components/workstation/lecture-links";
+import { lectureParts } from "@/lib/workstation/lecture-parts";
 import { savePomodoroConfig } from "@/actions/pomodoro";
 import { PomodoroSettingsForm } from "@/components/pomodoro/pomodoro-settings-form";
 import { PomodoroTimer } from "@/components/pomodoro/pomodoro-timer";
@@ -33,7 +35,7 @@ export default async function FocusPage({ params, searchParams }: PageProps<"/ta
     study && topicId
       ? await prisma.topic.findFirst({
           where: { id: topicId, subject: { taskId: task.id, plan: { userId: user.id } } },
-          select: { id: true, title: true, url: true },
+          select: { id: true, title: true, url: true, parts: true },
         })
       : null;
   const back = study
@@ -87,17 +89,9 @@ export default async function FocusPage({ params, searchParams }: PageProps<"/ta
             >
               <span className="text-fg-muted">Studying</span>
               <span className="font-medium text-fg">{topic.title}</span>
-              {topic.url ? (
-                <a
-                  href={topic.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-accent hover:underline"
-                >
-                  Lecture
-                  <ExternalLink className="size-3" aria-hidden />
-                </a>
-              ) : null}
+              <span className="inline-flex flex-wrap items-center gap-x-2 text-xs">
+                <LectureLinks parts={lectureParts(topic.parts, topic.url)} />
+              </span>
             </p>
           ) : null}
         </div>

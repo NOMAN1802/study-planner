@@ -1,4 +1,4 @@
-import { Briefcase, ExternalLink, Play, Timer } from "lucide-react";
+import { Briefcase, Play, Timer } from "lucide-react";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import {
@@ -9,15 +9,18 @@ import {
   plural,
   secondaryLink,
 } from "@/components/workstation/format";
+import { LectureLinks } from "@/components/workstation/lecture-links";
 import { TopicDone } from "@/components/workstation/topic-done";
 import { Bar, Stat, StatStrip } from "@/components/workstation/ws-header";
 import { cn } from "@/lib/utils";
 import {
   KIND_LABEL,
+  DAY_START_MIN,
+  WEEKDAY_SHORT,
   cycleMarks,
-  cyclesByWeekday,
   formatMinute,
-  slotsForWeekday,
+  studyCyclesByWeekday,
+  studyDaySlots,
   weekCycles,
 } from "@/lib/workstation/routine";
 import { cycleLabels, type PlanItem } from "@/lib/workstation/schedule";
@@ -34,7 +37,7 @@ export function TodayTab({ data }: { data: WorkstationData }) {
   const preview = started ? schedule.days.find((d) => d.day === now.dayKey) : schedule.days[0];
   const items = preview?.items ?? [];
 
-  const capacity = cyclesByWeekday(slots);
+  const capacity = studyCyclesByWeekday(slots, data.isHoliday);
   const todayTarget = capacity[now.weekday];
   const weekDone = data.week.reduce((n, d) => n + (data.cyclesByDay[d] ?? 0), 0);
   const weekTarget = weekCycles(slots);
@@ -52,7 +55,7 @@ export function TodayTab({ data }: { data: WorkstationData }) {
 
   // Today's cycles in order: completed ones first, then the plan's labels.
   const labels = cycleLabels(items);
-  const daySlots = slotsForWeekday(slots, now.weekday);
+  const daySlots = studyDaySlots(slots, now.weekday, data.isHoliday);
   const marksBySlot = new Map<string, { start: number; end: number; index: number }[]>();
   let k = 0;
   for (const slot of daySlots) {
@@ -92,11 +95,9 @@ export function TodayTab({ data }: { data: WorkstationData }) {
         />
         <Stat
           label="Buffer"
-          value={`${schedule.bufferCycles >= 0 ? "+" : ""}${schedule.bufferCycles}`}
-          detail={
-            schedule.bufferCycles >= 0 ? "spare cycles before revision" : "cycles behind plan"
-          }
-          tone={schedule.bufferCycles < 0 ? "warning" : "accent"}
+          value={`${schedule.bufferDays >= 0 ? "+" : ""}${schedule.bufferDays}`}
+          detail={schedule.bufferDays >= 0 ? "spare days before revision" : "days behind plan"}
+          tone={schedule.bufferDays < 0 ? "warning" : "accent"}
           testId="ws-buffer"
         />
       </StatStrip>
@@ -171,16 +172,7 @@ export function TodayTab({ data }: { data: WorkstationData }) {
                         <span className="font-mono tabular-nums">
                           {plural(item.cycles, "cycle")}
                         </span>
-                        {topic?.url ? (
-                          <a
-                            href={topic.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-accent hover:underline"
-                          >
-                            Lecture <ExternalLink className="size-3" aria-hidden />
-                          </a>
-                        ) : null}
+                        {topic ? <LectureLinks parts={topic.parts} /> : null}
                       </p>
                     </div>
                     {href ? (
@@ -213,7 +205,11 @@ export function TodayTab({ data }: { data: WorkstationData }) {
             <h2 id="timeline-title" className="font-display text-base font-semibold tracking-tight">
               Routine ·{" "}
               {formatDay(now.dayKey, { weekday: "long", day: undefined, month: undefined })}
+              {data.isHoliday ? " · Holiday" : ""}
             </h2>
+            <span className="sr-only">
+              Study days start at {formatMinute(DAY_START_MIN)} the evening before.
+            </span>
             <span className="font-mono text-xs text-fg-muted tabular-nums">
               {formatMinute(now.minute)}
             </span>
@@ -244,6 +240,11 @@ export function TodayTab({ data }: { data: WorkstationData }) {
                           <Briefcase className="size-3.5 text-fg-muted" aria-hidden />
                         ) : null}
                         {slot.label}
+                        {slot.startMin >= DAY_START_MIN ? (
+                          <span className="rounded bg-surface-2 px-1.5 py-px text-[11px] font-normal text-fg-muted">
+                            {WEEKDAY_SHORT[slot.weekday]} evening
+                          </span>
+                        ) : null}
                       </span>
                       <span className="font-mono text-xs text-fg-muted tabular-nums">
                         {formatMinute(slot.startMin)}–{formatMinute(slot.endMin)}

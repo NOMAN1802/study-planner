@@ -182,11 +182,48 @@ tests/               unit/, components/, e2e/
 - [x] Weekly routine: office 09:00–18:00 Sat–Thu, Friday off; study 05:20–08:20 + 19:00–23:00 (7 cycles), Friday 14 cycles; 56 a week; editable slots with overlap checks
 - [x] 1 study cycle = 50 min focus + 10 min break; each subject runs the existing pomodoro timer pre-set to 50/10, sessions record the lecture
 - [x] BCS syllabus from `Doc/study-resource` (9 subjects, 164 lectures + daily vocabulary), hardest first, reorderable
-- [x] Rolling 90-day plan (70 learning + 20 revision): daily vocabulary, Friday weekly revision + exam, subject revision + final after each subject, revision with mock tests every 2nd day; buffer/behind and projected dates
+- [x] Rolling 100-day plan (default 80 learning + 20 revision since 2026-11-17; start day and lengths editable on the Plan tab): daily vocabulary, Friday weekly revision + exam, subject revision + final after each subject, revision with mock tests every 2nd day; buffer/behind and projected dates
 - [x] Exams: record weekly / subject final / mock scores; upcoming exams from the plan
 - [x] Office task list (task category OFFICE), shown in Tasks with an Office tag
 - [x] Dashboard study card (today and week cycles)
 - [x] Tests: unit (routine, schedule, schemas), component (routine editor, setup form), e2e (setup → lecture → cycle → office task → exam; axe on every tab in both themes)
+
+**Gate:** all checks green on a production build.
+
+---
+
+## Phase 10 — Lighter study days
+
+- [x] At most 2 lectures a day (4 lecture cycles at the 2-cycle estimate); 4 lectures (8 cycles) on Fridays and holidays; the cap also applies to lectures that spill into the revision phase
+- [x] Holidays (e.g. govt holidays 16 Dec, 25 Dec) are a per-plan list (`StudyPlan.holidays`, migration `plan_holidays`), edited on the Plan tab; a holiday follows the Friday routine (evening before + Friday daytime) but has no weekly revision/exam
+- [x] The rest of each day's study session (7 cycles, 14 on Fridays/holidays) revises the subject being covered; this is where the daily exam will sit (Phase 11)
+- [x] A subject's revision + final exam get a day of their own: no lectures, no revision blocks, the rest of the day free
+- [x] Study days start at 18:00 the evening before (like the Islamic day): a study day = the previous evening's session + its own morning (Friday = Thursday evening + Friday daytime); "today", cycle counts, vocabulary days and the Today timeline follow it; habits, tasks and planner keep calendar days
+- [x] Buffer shown in days (projected vs planned learning end) instead of cycles
+- [x] Subjects tab: day-by-day routine per subject (lectures, revision, final day, later revision blocks); plan start day editable
+- [x] Lectures merged following `Doc/New Routine .pdf` (one lecture per routine class; self study, Q-solve and open-book rows ignored): 164 videos → 134 lectures (+ vocabulary 8 → 2), each lecture keeps its original videos as Part 1, Part 2… links (`Topic.parts`, migration `topic_parts`); at 2 lectures a day the syllabus finishes ~11 days inside the 80 learning days from an 18 Nov start
+- [x] Tests: unit (caps per weekday/holiday, revision fill, final day, holidays, study-day boundary, buffer days, real syllabus), e2e (edit start day, add holiday)
+
+**Gate:** all checks green on a production build.
+
+---
+
+## Phase 11 — Question-bank exams (BCS Preliminary standard)
+
+Questions come from the user's topic-wise question-bank PDFs in `Doc/study-resource`. Claude converts each PDF (question, 4 options, correct answer, source) and links every question to its lecture (`Topic`); questions are loaded into the database per subject. New PDFs go through Claude again.
+
+| Exam | Questions | Time | Drawn from |
+|---|---|---|---|
+| Daily | 20 | 15 min | lectures covered that day |
+| Weekly (Friday) | 50 | 30 min | lectures covered that week |
+| Subject final | 100 | 60 min | all lectures of the subject |
+
+- [ ] Marking: +1 correct, −0.50 wrong, 0 unanswered; negative totals allowed
+- [ ] "Covered" = lectures ticked done; questions not yet seen first, then ones answered wrong, then the rest
+- [ ] Taken in the app: countdown, A–D options, auto-submit at time-out, instant marking with the right answers shown; score saved to Exams
+- [ ] Daily exam placed in the day's revision time; weekly and subject-final exams replace the manual score entry for those exams
+- [ ] Open: topics whose bank has fewer questions than the exam needs; daily exam on a day with no lectures done
+- [ ] Tests: unit (marking, question selection), e2e (sit a timed exam, auto-submit, score recorded)
 
 **Gate:** all checks green on a production build.
 

@@ -6,7 +6,7 @@ import type { WeekStart } from "@/lib/dates";
 import { addDays, startOfWeekKey, weekdayOf } from "@/lib/planner";
 import { cn } from "@/lib/utils";
 import { WEEKDAY_SHORT } from "@/lib/workstation/routine";
-import type { PlanDay } from "@/lib/workstation/schedule";
+import { HOLIDAY_LECTURE_CYCLES, LECTURE_CYCLES, type PlanDay } from "@/lib/workstation/schedule";
 import type { WorkstationData } from "@/lib/workstation/server";
 
 /** The subject that takes most of a day's learning cycles, if any. */
@@ -81,8 +81,12 @@ export function PlanTab({
         <Stat
           label="Learning left"
           value={`${schedule.remainingLearningCycles}`}
-          detail={`cycles · ${schedule.learningCapacityLeft} available`}
-          tone={schedule.bufferCycles < 0 ? "warning" : undefined}
+          detail={
+            schedule.bufferDays >= 0
+              ? `cycles · ${plural(schedule.bufferDays, "spare day")}`
+              : `cycles · ${plural(-schedule.bufferDays, "day")} late`
+          }
+          tone={schedule.bufferDays < 0 ? "warning" : undefined}
         />
       </StatStrip>
 
@@ -91,9 +95,9 @@ export function PlanTab({
           role="status"
           className="rounded-lg border border-warning/40 px-4 py-2.5 text-sm text-warning"
         >
-          The remaining lectures need {plural(-schedule.bufferCycles, "more cycle")} than the
-          learning phase has left. Add study time in Routine, lower estimates, or catch up with
-          spare cycles.
+          At {LECTURE_CYCLES / 2} lectures a day ({HOLIDAY_LECTURE_CYCLES / 2} on Fridays and
+          holidays) the remaining lectures run {plural(-schedule.bufferDays, "day")} past the
+          learning phase. Add learning days, lower lecture estimates, or catch up on your off day.
         </p>
       ) : null}
 
@@ -268,7 +272,12 @@ export function PlanTab({
       </section>
 
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <PlanLengthForm learningDays={plan.learningDays} revisionDays={plan.revisionDays} />
+        <PlanLengthForm
+          startDay={plan.startDay}
+          learningDays={plan.learningDays}
+          revisionDays={plan.revisionDays}
+          holidays={plan.holidays}
+        />
         <ResetPlan />
       </div>
     </div>

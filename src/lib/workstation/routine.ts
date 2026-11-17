@@ -4,7 +4,7 @@
  * One study cycle = 50 min focus + 10 min break = 60 minutes.
  */
 import { toLocalDateTimeInput } from "@/lib/dates";
-import { weekdayOf } from "@/lib/planner";
+import { addDays, weekdayOf } from "@/lib/planner";
 
 export type RoutineKind = "STUDY" | "OFFICE" | "PERSONAL";
 export const ROUTINE_KINDS: readonly RoutineKind[] = ["STUDY", "OFFICE", "PERSONAL"];
@@ -124,13 +124,61 @@ export function cycleMarks(slot: Pick<Slot, "kind" | "startMin" | "endMin">) {
   });
 }
 
-export type LocalNow = { dayKey: string; weekday: number; minute: number };
+/**
+ * Study days begin in the evening, like the Islamic day at Maghrib: from 18:00
+ * a study day belongs to the next date. Saturday's study day is Friday 18:00 →
+ * Saturday 18:00, so it holds Friday evening's session and Saturday morning's.
+ */
+export const DAY_START_MIN = 18 * 60;
+
+/** The study day a local wall-clock moment belongs to. */
+export function studyDayOf(calendarDay: string, minute: number): string {
+  return minute >= DAY_START_MIN ? addDays(calendarDay, 1) : calendarDay;
+}
+
+export type LocalNow = {
+  /** The current study day (see DAY_START_MIN). */
+  dayKey: string;
+  /** Weekday of the study day. */
+  weekday: number;
+  /** Local wall-clock minute (0–1439). */
+  minute: number;
+};
 
 export function localNow(now: Date, timezone: string): LocalNow {
   const local = toLocalDateTimeInput(now, timezone); // YYYY-MM-DDTHH:mm
-  const dayKey = local.slice(0, 10);
   const minute = Number(local.slice(11, 13)) * 60 + Number(local.slice(14, 16));
+  const dayKey = studyDayOf(local.slice(0, 10), minute);
   return { dayKey, weekday: weekdayOf(dayKey), minute };
+}
+
+/** The study day an instant belongs to, in the user's timezone. */
+export function studyDayKeyOf(instant: Date, timezone: string): string {
+  return localNow(instant, timezone).dayKey;
+}
+
+/**
+ * The slots of one study day, in order: the previous weekday's slots from
+ * 18:00 (evening), then this weekday's slots that start before 18:00. On a
+ * holiday the daytime part follows Friday's (the weekly off day) routine.
+ */
+export function studyDaySlots<T extends Slot>(
+  slots: readonly T[],
+  weekday: number,
+  holiday = false,
+): T[] {
+  const eve = slotsForWeekday(slots, (weekday + 6) % 7).filter((s) => s.startMin >= DAY_START_MIN);
+  const day = slotsForWeekday(slots, holiday ? FRIDAY : weekday).filter(
+    (s) => s.startMin < DAY_START_MIN,
+  );
+  return [...eve, ...day];
+}
+
+/** Study cycles in each study day, indexed by its weekday 0 (Sun) … 6 (Sat). */
+export function studyCyclesByWeekday(slots: readonly Slot[], holiday = false): number[] {
+  return Array.from({ length: 7 }, (_, w) =>
+    studyDaySlots(slots, w, holiday).reduce((n, s) => n + slotCycles(s), 0),
+  );
 }
 
 export function slotAt<T extends Slot>(slots: readonly T[], weekday: number, minute: number) {

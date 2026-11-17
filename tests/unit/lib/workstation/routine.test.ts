@@ -3,6 +3,7 @@ import {
   cycleMarks,
   cyclesByWeekday,
   cyclesOnDay,
+  DAY_START_MIN,
   defaultRoutine,
   formatMinute,
   localNow,
@@ -11,6 +12,10 @@ import {
   slotAt,
   slotCycles,
   slotProblem,
+  studyCyclesByWeekday,
+  studyDayKeyOf,
+  studyDayOf,
+  studyDaySlots,
   weekCycles,
   type Slot,
 } from "@/lib/workstation/routine";
@@ -102,5 +107,43 @@ describe("local now", () => {
     expect(now).toEqual({ dayKey: "2026-11-20", weekday: 5, minute: 330 });
     const slot = slotAt(defaultRoutine(), now.weekday, now.minute);
     expect(slot?.label).toBe("Morning study");
+  });
+});
+
+describe("study days start at 18:00", () => {
+  const routine = defaultRoutine();
+
+  it("assigns evening moments to the next date", () => {
+    expect(studyDayOf("2026-11-20", 17 * 60 + 59)).toBe("2026-11-20");
+    expect(studyDayOf("2026-11-20", DAY_START_MIN)).toBe("2026-11-21");
+    expect(studyDayOf("2026-11-20", 23 * 60)).toBe("2026-11-21");
+  });
+
+  it("knows the current study day in the user's timezone", () => {
+    // 2026-11-17 13:30Z = 19:30 in Dhaka (UTC+6): Wednesday's study day.
+    expect(localNow(new Date("2026-11-17T13:30:00Z"), "Asia/Dhaka")).toEqual({
+      dayKey: "2026-11-18",
+      weekday: 3,
+      minute: 19 * 60 + 30,
+    });
+    expect(studyDayKeyOf(new Date("2026-11-17T23:30:00Z"), "Asia/Dhaka")).toBe("2026-11-18");
+    expect(studyDayKeyOf(new Date("2026-11-18T12:30:00Z"), "Asia/Dhaka")).toBe("2026-11-19");
+  });
+
+  it("puts the evening before first, then the morning", () => {
+    const sat = studyDaySlots(routine, 6).map((s) => `${s.weekday}:${s.label}`);
+    expect(sat).toEqual([
+      "5:Evening study", // Friday evening
+      "6:Bath & prep",
+      "6:Morning study",
+      "6:Commute",
+      "6:Office",
+    ]);
+  });
+
+  it("keeps 7 cycles on office days and 14 on Friday, 56 a week", () => {
+    const perDay = studyCyclesByWeekday(routine);
+    expect(perDay).toEqual([7, 7, 7, 7, 7, 14, 7]);
+    expect(perDay.reduce((a, b) => a + b, 0)).toBe(56);
   });
 });

@@ -219,8 +219,10 @@ model StudyPlan {
   name         String
   /// First study day, `YYYY-MM-DD` in the user's timezone.
   startDay     String
-  learningDays Int      @default(70)
+  learningDays Int      @default(80)
   revisionDays Int      @default(20)
+  /// Extra off days (`YYYY-MM-DD`), e.g. government holidays: studied like a Friday.
+  holidays     String[] @default([])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -258,7 +260,10 @@ model Topic {
   subjectId String    @db.Uuid
   sortOrder Int       @default(0)
   title     String
+  /// First part's link (kept for single-part lectures and older rows).
   url       String?
+  /// The original videos this lecture is made of: `[{ title, url }]`.
+  parts     Json      @default("[]")
   estCycles Int       @default(2)
   doneAt    DateTime?
   createdAt DateTime  @default(now())

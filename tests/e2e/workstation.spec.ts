@@ -2,15 +2,22 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { serverActionDone, signUp, taskRow } from "./helpers";
 
-/** Today's date in the browser (the account's timezone comes from the browser at signup). */
+/**
+ * Today's study day in the browser (the account's timezone comes from the browser at
+ * signup). Study days start at 18:00, so an evening belongs to the next date.
+ */
 async function browserToday(page: Page): Promise<string> {
-  return page.evaluate(() => new Date().toLocaleDateString("en-CA"));
+  return page.evaluate(() => {
+    const d = new Date();
+    if (d.getHours() >= 18) d.setDate(d.getDate() + 1);
+    return d.toLocaleDateString("en-CA");
+  });
 }
 
 async function setUpPlan(page: Page) {
   await page.goto("/work-station");
   await expect(page.getByRole("heading", { name: "Set up your BCS study plan" })).toBeVisible();
-  await expect(page.getByText("164 lectures")).toBeVisible();
+  await expect(page.getByText("134 lectures")).toBeVisible();
   await page.getByLabel("First study day").fill(await browserToday(page));
   await page.getByRole("button", { name: "Create study plan" }).click();
   await expect(page.getByRole("heading", { name: "BCS Preliminary" })).toBeVisible({
@@ -34,13 +41,13 @@ test.describe("work-station", () => {
     await expect(page.getByRole("heading", { name: "Up next today" })).toBeVisible();
     const items = page.getByTestId("ws-item");
     // Vocabulary: 10 new words Saturday–Thursday, the week's revision on Friday.
-    if (new Date().getDay() === 5)
+    if (new Date(`${await browserToday(page)}T12:00:00Z`).getUTCDay() === 5)
       await expect(items.first()).toContainText("Vocabulary revision: this week's 60 words");
-    else await expect(items.first()).toContainText("Words 1–10 · Vocabulary 1.1 (Part-1)");
+    else await expect(items.first()).toContainText("Words 1–10 · Vocabulary Marathon-1");
     await expect(items.nth(1)).toContainText("Lit 01: Literary Terms");
     await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^0\/(7|14)$/);
     await expect(page.getByTestId("ws-week-cycles")).toHaveText("0/56");
-    await expect(page.getByTestId("ws-buffer")).toHaveText(/^\+\d+$/);
+    await expect(page.getByTestId("ws-buffer")).toHaveText(/^[+-]\d+$/);
 
     // Routine: 56 cycles a week.
     await page.getByRole("link", { name: "Routine", exact: true }).click();
@@ -51,32 +58,67 @@ test.describe("work-station", () => {
     await page.getByRole("link", { name: "Subjects", exact: true }).click();
     await expect(page.getByTestId("ws-subject")).toHaveCount(10);
     const english = subjectCard(page, "English Literature + Grammar");
-    await expect(english.getByTestId("ws-subject-progress")).toHaveText("0/30");
+    await expect(english.getByTestId("ws-subject-progress")).toHaveText("0/25");
+    // A merged lecture links each of its original videos as a part.
+    const anatomy = english
+      .getByTestId("ws-topic")
+      .filter({ hasText: "Grammar 01: Anatomy of English Sentence" });
+    await expect(anatomy.getByRole("link", { name: /^Part 1/ })).toHaveAttribute(
+      "href",
+      "https://youtu.be/VPCPjHUP3FY",
+    );
+    await expect(anatomy.getByRole("link", { name: /^Part 2/ })).toHaveAttribute(
+      "href",
+      "https://youtu.be/3v6N-2270EU",
+    );
+    // Each subject has a day-by-day routine: English starts on day 1 with its first lecture.
+    const routine = english.getByTestId("ws-subject-routine");
+    await routine.getByText("Day-by-day routine").click();
+    const firstDay = routine.getByTestId("ws-subject-routine-day").first();
+    await expect(firstDay).toContainText("Day 1");
+    await expect(firstDay).toContainText("Lit 01: Literary Terms");
+    await expect(routine.getByText("Subject final")).toBeVisible();
     const done = serverActionDone(page);
     await english.getByRole("checkbox", { name: "Mark Lit 01: Literary Terms as done" }).check();
     await done;
     await page.reload();
     await expect(
       subjectCard(page, "English Literature + Grammar").getByTestId("ws-subject-progress"),
-    ).toHaveText("1/30");
+    ).toHaveText("1/25");
 
     // Plan: lecture count and subject order.
     await page.getByRole("link", { name: "Plan", exact: true }).click();
-    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/164");
+    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/134");
     await expect(page.getByTestId("ws-plan-subject").first()).toContainText(
       "English Literature + Grammar",
     );
     await expect(page.getByTestId("ws-plan-subject").nth(2)).toContainText("Math + Mental Ability");
-    await expect(page.getByText("75 learning + 25 revision days")).toBeVisible();
-    // Plan length can change without losing progress.
-    const plan = page.getByRole("form", { name: "Plan length" });
-    await plan.getByLabel("Learning days").fill("80");
-    await plan.getByLabel("Revision days").fill("20");
-    const saved = serverActionDone(page);
-    await plan.getByRole("button", { name: "Save plan length" }).click();
-    await saved;
     await expect(page.getByText("80 learning + 20 revision days")).toBeVisible();
-    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/164");
+    // Start day and plan length can change without losing progress.
+    const plan = page.getByRole("form", { name: "Plan settings" });
+    const startDay = await plan.getByLabel("First study day").inputValue();
+    const nextDay = new Date(Date.parse(`${startDay}T00:00:00Z`) + 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    await plan.getByLabel("First study day").fill(nextDay);
+    await plan.getByLabel("Learning days").fill("85");
+    await plan.getByLabel("Revision days").fill("15");
+    const saved = serverActionDone(page);
+    await plan.getByRole("button", { name: "Save plan" }).click();
+    await saved;
+    await expect(page.getByText("85 learning + 15 revision days")).toBeVisible();
+    await expect(plan.getByLabel("First study day")).toHaveValue(nextDay);
+    // Holidays: studied like a Friday.
+    await plan.getByLabel("Holidays").fill("2026-12-16");
+    await plan.getByRole("button", { name: "Add holiday" }).click();
+    const savedHoliday = serverActionDone(page);
+    await plan.getByRole("button", { name: "Save plan" }).click();
+    await savedHoliday;
+    await page.reload();
+    await expect(
+      page.getByRole("form", { name: "Plan settings" }).getByRole("list", { name: "Holiday list" }),
+    ).toContainText("Wed 16 Dec");
+    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/134");
 
     // Office: a task created here comes back here, and shows in Tasks with an Office tag.
     await page.getByRole("link", { name: "Office", exact: true }).click();

@@ -25,7 +25,31 @@ export const setupSchema = z.object({
 });
 export type SetupField = keyof z.input<typeof setupSchema>;
 
-export const planLengthSchema = setupSchema.pick({ learningDays: true, revisionDays: true });
+/** Comma-separated `YYYY-MM-DD` dates → sorted, unique list. */
+const holidayList = z
+  .string()
+  .optional()
+  .transform((v, ctx) => {
+    const days = [
+      ...new Set(
+        (v ?? "")
+          .split(",")
+          .map((d) => d.trim())
+          .filter(Boolean),
+      ),
+    ].sort();
+    if (days.some((d) => !isDayKey(d))) {
+      ctx.addIssue({ code: "custom", message: "Pick valid dates" });
+      return z.NEVER;
+    }
+    if (days.length > 60) {
+      ctx.addIssue({ code: "custom", message: "At most 60 holidays" });
+      return z.NEVER;
+    }
+    return days;
+  });
+
+export const planLengthSchema = setupSchema.extend({ holidays: holidayList });
 export type PlanLengthField = keyof z.input<typeof planLengthSchema>;
 export type PlanLengthState = {
   ok?: boolean;
