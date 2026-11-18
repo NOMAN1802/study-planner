@@ -95,12 +95,9 @@ export function PlanTab({
           role="status"
           className="rounded-lg border border-warning/40 px-4 py-2.5 text-sm text-warning"
         >
-          At {LECTURE_CYCLES / 2} lectures a day
-          {HOLIDAY_LECTURE_CYCLES === LECTURE_CYCLES
-            ? ""
-            : ` (${HOLIDAY_LECTURE_CYCLES / 2} on Fridays and holidays)`}{" "}
-          the remaining lectures run {plural(-schedule.bufferDays, "day")} past the learning phase.
-          Add learning days, lower lecture estimates, or catch up on your off day.
+          At {LECTURE_CYCLES / 2} lectures a day ({HOLIDAY_LECTURE_CYCLES / 2} on Fridays and
+          holidays) the remaining lectures run {plural(-schedule.bufferDays, "day")} past the
+          learning phase. Add learning days, lower lecture estimates, or catch up on your off day.
         </p>
       ) : null}
 

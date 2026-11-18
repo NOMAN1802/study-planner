@@ -58,19 +58,15 @@ test.describe("work-station", () => {
     await page.getByRole("link", { name: "Subjects", exact: true }).click();
     await expect(page.getByTestId("ws-subject")).toHaveCount(10);
     const english = subjectCard(page, "English Literature + Grammar");
-    await expect(english.getByTestId("ws-subject-progress")).toHaveText("0/25");
-    // A merged lecture links each of its original videos as a part.
-    const anatomy = english
-      .getByTestId("ws-topic")
-      .filter({ hasText: "Grammar 01: Anatomy of English Sentence" });
-    await expect(anatomy.getByRole("link", { name: /^Part 1/ })).toHaveAttribute(
-      "href",
-      "https://youtu.be/VPCPjHUP3FY",
-    );
-    await expect(anatomy.getByRole("link", { name: /^Part 2/ })).toHaveAttribute(
-      "href",
-      "https://youtu.be/3v6N-2270EU",
-    );
+    await expect(english.getByTestId("ws-subject-progress")).toHaveText("0/30");
+    // One lecture per video: each part of a split video is its own lecture with one link.
+    for (const [title, url] of [
+      ["Grammar 1.1: Basic & Gerund Participle (Part-1)", "https://youtu.be/VPCPjHUP3FY"],
+      ["Grammar 1.2: Basic & Gerund Participle (Part-2)", "https://youtu.be/3v6N-2270EU"],
+    ]) {
+      const topic = english.getByTestId("ws-topic").filter({ hasText: title });
+      await expect(topic.getByRole("link", { name: /^Lecture/ })).toHaveAttribute("href", url);
+    }
     // Each subject has a day-by-day routine: English starts on day 1 with its first lecture.
     const routine = english.getByTestId("ws-subject-routine");
     await routine.getByText("Day-by-day routine").click();
@@ -93,7 +89,7 @@ test.describe("work-station", () => {
       "English Literature + Grammar",
     );
     await expect(page.getByTestId("ws-plan-subject").nth(2)).toContainText("Math + Mental Ability");
-    await expect(page.getByText("93 learning + 15 revision days")).toBeVisible();
+    await expect(page.getByText("87 learning + 15 revision days")).toBeVisible();
     // Start day and plan length can change without losing progress.
     const plan = page.getByRole("form", { name: "Plan settings" });
     const startDay = await plan.getByLabel("First study day").inputValue();

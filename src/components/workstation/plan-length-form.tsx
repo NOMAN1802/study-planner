@@ -74,7 +74,7 @@ export function PlanLengthForm({
           id="plan-holiday"
           label="Holidays"
           error={errors.holidays}
-          hint="Govt holidays are studied like a Friday: 2 lectures, then revision."
+          hint="Govt holidays are studied like a Friday: 3 lectures, then revision."
         >
           <div className="flex flex-wrap items-center gap-2">
             <Input

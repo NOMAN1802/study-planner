@@ -85,13 +85,14 @@ describe("buildSchedule", () => {
   it("reserves weekly revision and exam on Fridays", () => {
     const big = input({ subjects: [subject("eng", 60)] });
     const s = buildSchedule(big);
-    // 2026-11-27 is the first Friday: 14 cycles = 2 lectures + weekly revision 3 + exam 1 + 6 revision.
+    // 2026-11-27 is the first Friday: 14 cycles = 3 lectures + weekly revision 3 + exam 1 + 4 revision.
     expect(kinds(s, "2026-11-27")).toEqual([
+      "topic:2",
       "topic:2",
       "topic:2",
       "weekly-revision:3",
       "weekly-exam:1",
-      "revision:6",
+      "revision:4",
     ]);
   });
 
@@ -152,11 +153,11 @@ describe("buildSchedule", () => {
   });
 
   it("falling behind a day pushes projections out", () => {
-    // 19 topics = 38 lecture cycles at 4 a day (Friday too): Sat 21 … Mon 30, Tuesday the final.
+    // 19 topics = 38 lecture cycles: Sat–Thu 4 + Fri 6 = 30, Sat 4, Sun 4, Monday the final.
     const onTime = buildSchedule(input({ subjects: [subject("eng", 19)] }));
     const late = buildSchedule(input({ subjects: [subject("eng", 19)], today: "2026-11-22" }));
-    expect(onTime.projectedLearningEnd).toBe("2026-12-01");
-    expect(late.projectedLearningEnd).toBe("2026-12-02");
+    expect(onTime.projectedLearningEnd).toBe("2026-11-30");
+    expect(late.projectedLearningEnd).toBe("2026-12-01");
     expect(late.bufferDays).toBe(onTime.bufferDays - 1); // the missed Saturday
   });
 
@@ -193,7 +194,7 @@ describe("buildSchedule", () => {
     expect(s.days[0].items[0].label).toContain("Words 41–50");
   });
 
-  it("lays out the real BCS syllabus (164 videos) at 2 lectures a day, a little past 80 days", () => {
+  it("lays out the real BCS syllabus (164 videos) at 2 lectures a day (3 on Fridays), a little past 80 days", () => {
     const subjects: PlanSubject[] = BCS_SYLLABUS.map((sub, i) => ({
       id: `s${i}`,
       name: sub.name,
@@ -239,7 +240,7 @@ describe("daily lecture limit", () => {
       .items.filter((i) => i.kind === "topic")
       .reduce((n, i) => n + i.cycles, 0);
 
-  it("caps lectures at 2 a day, Friday included", () => {
+  it("caps lectures at 2 on office days and 3 on Friday", () => {
     const s = buildSchedule(busy());
     expect(lectureCycles(s, "2026-11-21")).toBe(LECTURE_CYCLES); // Saturday
     expect(lectureCycles(s, "2026-11-26")).toBe(LECTURE_CYCLES); // Thursday
@@ -265,7 +266,7 @@ describe("daily lecture limit", () => {
 });
 
 describe("holidays", () => {
-  it("studies a holiday like a Friday: 2 lectures, but no weekly exam", () => {
+  it("studies a holiday like a Friday: 3 lectures, but no weekly exam", () => {
     const s = buildSchedule(
       input({
         subjects: [subject("eng", 60)],

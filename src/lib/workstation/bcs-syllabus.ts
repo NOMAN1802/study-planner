@@ -34,8 +34,11 @@ export const REVISION_PLAN: readonly { subjects: readonly string[]; days: number
   { subjects: ["Geography", "Morality, Values & Good Governance"], days: 1 },
 ];
 export const REVISION_PLAN_DAYS = REVISION_PLAN.reduce((n, b) => n + b.days, 0);
-/** 164 lectures at 2 a day plus 9 subject final days, from a 20 Nov 2026 start. */
-export const DEFAULT_LEARNING_DAYS = 93;
+/**
+ * 164 lectures (2 a day, 3 on Fridays and holidays) plus 9 subject final days,
+ * from a 20 Nov 2026 start with holidays 16 Dec, 25 Dec and 24 Jan.
+ */
+export const DEFAULT_LEARNING_DAYS = 87;
 
 export const BCS_SYLLABUS: readonly SyllabusSubject[] = [
   {

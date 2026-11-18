@@ -53,10 +53,10 @@ describe("RoutineTab", () => {
 });
 
 describe("SetupForm", () => {
-  it("defaults to a 93 + 15 day plan from the given start", () => {
+  it("defaults to an 87 + 15 day plan from the given start", () => {
     render(<SetupForm defaultStart="2026-11-17" />);
     expect(screen.getByLabelText("First study day")).toHaveValue("2026-11-17");
-    expect(screen.getByLabelText("Learning days")).toHaveValue(93);
+    expect(screen.getByLabelText("Learning days")).toHaveValue(87);
     expect(screen.getByLabelText("Revision days")).toHaveValue(15);
     expect(screen.getByRole("button", { name: "Create study plan" })).toBeEnabled();
   });

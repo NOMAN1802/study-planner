@@ -6,7 +6,7 @@
  * Days 1…learningDays: subjects one at a time (in order), one vocabulary cycle
  * a day (10 new words Saturday–Thursday, revising the week's words on Friday),
  * at most LECTURE_CYCLES of lectures a day (HOLIDAY_LECTURE_CYCLES on Friday and
- * holidays, which follow the Friday routine; both are 2 lectures)
+ * holidays, which follow the Friday routine: 2 and 3 lectures)
  * with the rest of the study session spent revising what was covered, weekly
  * revision + exam on Fridays, and a subject final day after each subject's
  * last topic (its revision + final exam, no lectures, the rest of the day off).
@@ -27,10 +27,10 @@ export const MOCK_CYCLES = 3;
 /** Lecture cycles a day: 2 lectures at the default 2-cycle estimate. */
 export const LECTURE_CYCLES = 4;
 /**
- * Lecture cycles on Friday and holidays: still 2 lectures, so the rest of the
- * day goes to revision and the weekly exam.
+ * Lecture cycles on Friday and holidays: 3 lectures, leaving room for the
+ * weekly revision and exam (Friday) and some revision.
  */
-export const HOLIDAY_LECTURE_CYCLES = LECTURE_CYCLES;
+export const HOLIDAY_LECTURE_CYCLES = 6;
 /** New vocabulary words per word day (every day except Friday). */
 export const WORDS_PER_DAY = 10;
 const WORD_DAYS_PER_WEEK = 6;
