@@ -17,7 +17,7 @@ async function browserToday(page: Page): Promise<string> {
 async function setUpPlan(page: Page) {
   await page.goto("/work-station");
   await expect(page.getByRole("heading", { name: "Set up your BCS study plan" })).toBeVisible();
-  await expect(page.getByText("134 lectures")).toBeVisible();
+  await expect(page.getByText("164 lectures")).toBeVisible();
   await page.getByLabel("First study day").fill(await browserToday(page));
   await page.getByRole("button", { name: "Create study plan" }).click();
   await expect(page.getByRole("heading", { name: "BCS Preliminary" })).toBeVisible({
@@ -84,16 +84,16 @@ test.describe("work-station", () => {
     await page.reload();
     await expect(
       subjectCard(page, "English Literature + Grammar").getByTestId("ws-subject-progress"),
-    ).toHaveText("1/25");
+    ).toHaveText("1/30");
 
     // Plan: lecture count and subject order.
     await page.getByRole("link", { name: "Plan", exact: true }).click();
-    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/134");
+    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/164");
     await expect(page.getByTestId("ws-plan-subject").first()).toContainText(
       "English Literature + Grammar",
     );
     await expect(page.getByTestId("ws-plan-subject").nth(2)).toContainText("Math + Mental Ability");
-    await expect(page.getByText("80 learning + 20 revision days")).toBeVisible();
+    await expect(page.getByText("93 learning + 15 revision days")).toBeVisible();
     // Start day and plan length can change without losing progress.
     const plan = page.getByRole("form", { name: "Plan settings" });
     const startDay = await plan.getByLabel("First study day").inputValue();
@@ -118,7 +118,7 @@ test.describe("work-station", () => {
     await expect(
       page.getByRole("form", { name: "Plan settings" }).getByRole("list", { name: "Holiday list" }),
     ).toContainText("Wed 16 Dec");
-    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/134");
+    await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/164");
 
     // Office: a task created here comes back here, and shows in Tasks with an Office tag.
     await page.getByRole("link", { name: "Office", exact: true }).click();

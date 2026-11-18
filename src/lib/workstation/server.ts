@@ -15,7 +15,7 @@ import {
 } from "@/lib/workstation/routine";
 import { buildSchedule, type PlanSubject, type Schedule } from "@/lib/workstation/schedule";
 import type { ExamKind } from "@/schemas/workstation";
-import type { LecturePart } from "@/lib/workstation/bcs-syllabus";
+import { REVISION_PLAN, type LecturePart } from "@/lib/workstation/bcs-syllabus";
 import { lectureParts } from "@/lib/workstation/lecture-parts";
 
 export type WsTopic = {
@@ -186,6 +186,13 @@ export async function getWorkstationData(
     holidayCapacityByWeekday: studyCyclesByWeekday(slots, true),
     holidays: plan.holidays,
     subjects: planSubjects,
+    revisionPlan: REVISION_PLAN.map((block) => ({
+      days: block.days,
+      subjectIds: block.subjects.flatMap((name) => {
+        const s = planSubjects.find((x) => x.name === name);
+        return s ? [s.id] : [];
+      }),
+    })),
     today: now.dayKey,
     doneToday,
     dailyDoneToday,

@@ -33,19 +33,25 @@ describe("lectureParts", () => {
 });
 
 describe("merged syllabus", () => {
-  it("keeps every original video exactly once", () => {
+  it("has one lecture per video, each video exactly once", () => {
+    const lectures = BCS_SYLLABUS.filter((s) => !s.isDaily).flatMap((s) => s.topics);
+    expect(lectures).toHaveLength(164);
+    expect(lectures.every((t) => t.parts.length === 1)).toBe(true);
     const urls = BCS_SYLLABUS.flatMap((s) => s.topics.flatMap((t) => t.parts.map((p) => p.url)));
     expect(urls).toHaveLength(172); // 164 lecture videos + 8 vocabulary
     expect(new Set(urls).size).toBe(172);
   });
 
-  it("merges multi-part lectures following the routine", () => {
+  it("orders videos by the routine's classes and keeps vocabulary merged", () => {
     const english = BCS_SYLLABUS.find((s) => s.name === "English Literature + Grammar")!;
-    const anatomy = english.topics.find((t) => t.title.startsWith("Grammar 01"))!;
-    expect(anatomy.parts.map((p) => p.title)).toEqual([
-      "Grammar 1.1: Basic & Gerund Participle (Part-1)",
-      "Grammar 1.2: Basic & Gerund Participle (Part-2)",
-    ]);
+    const titles = english.topics.map((t) => t.title);
+    // Grammar 1.1 and 1.2 are separate lectures, one after the other.
+    const anatomy = titles.indexOf("Grammar 1.1: Basic & Gerund Participle (Part-1)");
+    expect(titles[anatomy + 1]).toBe("Grammar 1.2: Basic & Gerund Participle (Part-2)");
+    // The routine teaches Tense (video 8) before Preposition-1 (video 6).
+    expect(titles.indexOf("Grammar 8: Tense")).toBeLessThan(
+      titles.indexOf("Grammar 6: Preposition-1"),
+    );
     const vocab = BCS_SYLLABUS.find((s) => s.isDaily)!;
     expect(vocab.topics.map((t) => t.title)).toEqual([
       "Vocabulary Marathon-1",

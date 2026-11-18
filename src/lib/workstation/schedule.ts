@@ -6,11 +6,13 @@
  * Days 1…learningDays: subjects one at a time (in order), one vocabulary cycle
  * a day (10 new words Saturday–Thursday, revising the week's words on Friday),
  * at most LECTURE_CYCLES of lectures a day (HOLIDAY_LECTURE_CYCLES on Friday and
- * holidays, which follow the Friday routine)
+ * holidays, which follow the Friday routine; both are 2 lectures)
  * with the rest of the study session spent revising what was covered, weekly
  * revision + exam on Fridays, and a subject final day after each subject's
- * last topic (its revision + final exam, no lectures, the rest of the day off). The next revisionDays: rotating revision with a
- * mock test every second day. Learning work that does not fit spills into the
+ * last topic (its revision + final exam, no lectures, the rest of the day off).
+ * The next revisionDays: whole days per subject following the revision plan
+ * when one is given, otherwise (and after it) rotating revision with a mock
+ * test every second day. Learning work that does not fit spills into the
  * revision phase (and beyond) and is reported as overflow.
  */
 import { addDays, weekdayOf } from "@/lib/planner";
@@ -24,8 +26,11 @@ export const FINAL_EXAM_CYCLES = 1;
 export const MOCK_CYCLES = 3;
 /** Lecture cycles a day: 2 lectures at the default 2-cycle estimate. */
 export const LECTURE_CYCLES = 4;
-/** Lecture cycles on Friday and holidays: 4 lectures. */
-export const HOLIDAY_LECTURE_CYCLES = 8;
+/**
+ * Lecture cycles on Friday and holidays: still 2 lectures, so the rest of the
+ * day goes to revision and the weekly exam.
+ */
+export const HOLIDAY_LECTURE_CYCLES = LECTURE_CYCLES;
 /** New vocabulary words per word day (every day except Friday). */
 export const WORDS_PER_DAY = 10;
 const WORD_DAYS_PER_WEEK = 6;
@@ -71,6 +76,12 @@ export type ScheduleInput = {
   dailyDoneToday: boolean;
   /** Word days (non-Friday days with a vocabulary cycle) already done, today included. */
   vocabDaysDone: number;
+  /**
+   * Revision days by subject, in order (subject ids). When given, revision day N
+   * goes wholly to its block's subjects (no mock test); days past the plan fall
+   * back to rotating revision with mock tests.
+   */
+  revisionPlan?: readonly { subjectIds: readonly string[]; days: number }[];
   /** Days that already have a recorded weekly exam / mock test. */
   weeklyExamDays: readonly string[];
   mockDays: readonly string[];
@@ -170,6 +181,16 @@ function nextDailyTopic(subject: PlanSubject | undefined) {
   return subject?.topics.find((t) => !t.done);
 }
 
+/** The revision-plan block covering revision day `n` (1-based), if any. */
+function revisionBlock(plan: ScheduleInput["revisionPlan"], n: number) {
+  let end = 0;
+  for (const block of plan ?? []) {
+    end += block.days;
+    if (n <= end) return block.subjectIds.length > 0 ? block : undefined;
+  }
+  return undefined;
+}
+
 function phaseOf(index: number, learningDays: number, revisionDays: number): Phase {
   if (index <= learningDays) return "learning";
   if (index <= learningDays + revisionDays) return "revision";
@@ -251,7 +272,9 @@ export function buildSchedule(input: ScheduleInput): Schedule {
       phase === "learning" && weekday === FRIDAY && !weeklyDone.has(day)
         ? WEEKLY_REVISION_CYCLES + WEEKLY_EXAM_CYCLES
         : 0;
-    const mockDay = phase === "revision" && (index - learningDays) % 2 === 0;
+    const block =
+      phase === "revision" ? revisionBlock(input.revisionPlan, index - learningDays) : undefined;
+    const mockDay = phase === "revision" && !block && (index - learningDays) % 2 === 0;
     const mockReserve = mockDay && !mockDone.has(day) ? MOCK_CYCLES : 0;
     const reserve = Math.min(free, fridayReserve + mockReserve);
     free -= reserve;
@@ -301,6 +324,21 @@ export function buildSchedule(input: ScheduleInput): Schedule {
         label: `Revise ${subjectName.get(reviseId) ?? "covered lectures"}`,
         subjectId: reviseId,
       });
+    }
+
+    // Revision phase by subject: the day is split evenly between the block's subjects.
+    if (!finalDay && block && free > 0) {
+      const ids = block.subjectIds;
+      const share = Math.floor(free / ids.length);
+      const extra = free % ids.length;
+      ids.forEach((id, i) =>
+        take({
+          kind: "revision",
+          cycles: share + (i < extra ? 1 : 0),
+          label: `Revise ${subjectName.get(id) ?? "subject"}`,
+          subjectId: id,
+        }),
+      );
     }
 
     // Revision phase (or learning finished early): rotate through subjects in blocks.

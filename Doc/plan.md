@@ -202,6 +202,8 @@ tests/               unit/, components/, e2e/
 - [x] Buffer shown in days (projected vs planned learning end) instead of cycles
 - [x] Subjects tab: day-by-day routine per subject (lectures, revision, final day, later revision blocks); plan start day editable
 - [x] Lectures merged following `Doc/New Routine .pdf` (one lecture per routine class; self study, Q-solve and open-book rows ignored): 164 videos → 134 lectures (+ vocabulary 8 → 2), each lecture keeps its original videos as Part 1, Part 2… links (`Topic.parts`, migration `topic_parts`); at 2 lectures a day the syllabus finishes ~11 days inside the 80 learning days from an 18 Nov start
+- [x] One lecture per video: 164 lectures (+ vocabulary 2 marathons), titled as in `Doc/study-resource`, ordered within each subject by the routine's classes; 2 lectures a day on every day, Fridays and holidays included (the rest of Friday is revision + weekly exam). From a 20 Nov start the lectures and 9 subject final days take 93 days (20 Nov → 20 Feb)
+- [x] Revision by subject (`REVISION_PLAN`): English 3 days, Bangla 2, Math + Mental 3, International 2, Bangladesh Affairs 2, Science 1, ICT 1, Geography + Morality 1 (shared) = 15 days, whole days per subject, no mock tests; days past the plan fall back to rotating revision with mocks. New plans default to 93 learning + 15 revision days (108 days, 20 Nov → 7 Mar)
 - [x] Tests: unit (caps per weekday/holiday, revision fill, final day, holidays, study-day boundary, buffer days, real syllabus), e2e (edit start day, add holiday)
 
 **Gate:** all checks green on a production build.

@@ -5,6 +5,7 @@ import { setupPlan } from "@/actions/workstation";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { DEFAULT_LEARNING_DAYS, REVISION_PLAN_DAYS } from "@/lib/workstation/bcs-syllabus";
 
 export function SetupForm({ defaultStart }: { defaultStart: string }) {
   const [state, action, pending] = useActionState(setupPlan, {});
@@ -41,7 +42,7 @@ export function SetupForm({ defaultStart }: { defaultStart: string }) {
             type="number"
             inputMode="numeric"
             min={7}
-            defaultValue={80}
+            defaultValue={DEFAULT_LEARNING_DAYS}
             invalid={Boolean(errors.learningDays)}
             aria-describedby={errors.learningDays ? "learningDays-error" : "learningDays-hint"}
           />
@@ -50,7 +51,7 @@ export function SetupForm({ defaultStart }: { defaultStart: string }) {
           id="revisionDays"
           label="Revision days"
           error={errors.revisionDays}
-          hint="Revision and mock tests."
+          hint="Whole days per subject."
         >
           <Input
             id="revisionDays"
@@ -58,7 +59,7 @@ export function SetupForm({ defaultStart }: { defaultStart: string }) {
             type="number"
             inputMode="numeric"
             min={0}
-            defaultValue={20}
+            defaultValue={REVISION_PLAN_DAYS}
             invalid={Boolean(errors.revisionDays)}
             aria-describedby={errors.revisionDays ? "revisionDays-error" : "revisionDays-hint"}
           />
