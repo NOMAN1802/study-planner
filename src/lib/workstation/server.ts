@@ -43,6 +43,10 @@ export type WsExam = {
   score: number | null;
   total: number | null;
   note: string | null;
+  /** Taken in the app (questions, timer, marking) rather than recorded by hand. */
+  taken: boolean;
+  /** Taken in the app and not submitted yet. */
+  inProgress: boolean;
 };
 export type WsSlot = Slot & { id: string };
 
@@ -166,8 +170,14 @@ export async function getWorkstationData(
     score: e.score,
     total: e.total,
     note: e.note,
+    taken: e.questions !== null,
+    inProgress: e.startedAt !== null && e.submittedAt === null,
   }));
-  const finals = new Set(exams.filter((e) => e.kind === "SUBJECT_FINAL").map((e) => e.subjectId));
+  // An exam still being taken does not count as done for the plan yet.
+  const finished = exams.filter((e) => !e.inProgress);
+  const finals = new Set(
+    finished.filter((e) => e.kind === "SUBJECT_FINAL").map((e) => e.subjectId),
+  );
 
   const planSubjects: PlanSubject[] = subjects.map((s) => ({
     id: s.id,
@@ -197,8 +207,8 @@ export async function getWorkstationData(
     doneToday,
     dailyDoneToday,
     vocabDaysDone: wordDays.size,
-    weeklyExamDays: exams.filter((e) => e.kind === "WEEKLY").map((e) => e.day),
-    mockDays: exams.filter((e) => e.kind === "MOCK").map((e) => e.day),
+    weeklyExamDays: finished.filter((e) => e.kind === "WEEKLY").map((e) => e.day),
+    mockDays: finished.filter((e) => e.kind === "MOCK").map((e) => e.day),
   });
 
   const weekStart = startOfWeekKey(now.dayKey, user.weekStartsOn);

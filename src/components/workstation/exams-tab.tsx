@@ -1,4 +1,8 @@
+import Link from "next/link";
 import { DeleteExam, ExamForm, type ExamPreset } from "@/components/workstation/exam-form";
+import { ExamStart } from "@/components/workstation/exam-start";
+import type { ExamChoices } from "@/lib/workstation/exam-server";
+import { formatScore } from "@/lib/workstation/exam";
 import { Bar } from "@/components/workstation/ws-header";
 import { formatDay, isExam } from "@/components/workstation/format";
 import type { WorkstationData } from "@/lib/workstation/server";
@@ -12,7 +16,7 @@ const EXAM_OF: Partial<Record<ItemKind, ExamKind>> = {
   mock: "MOCK",
 };
 
-export function ExamsTab({ data }: { data: WorkstationData }) {
+export function ExamsTab({ data, choices }: { data: WorkstationData; choices: ExamChoices }) {
   const { schedule, subjects, exams, now } = data;
   const study = subjects.filter((s) => !s.isDaily);
   const name = new Map(subjects.map((s) => [s.id, s.name]));
@@ -39,11 +43,21 @@ export function ExamsTab({ data }: { data: WorkstationData }) {
   return (
     <div className="flex flex-col gap-4">
       <section
+        aria-labelledby="take-title"
+        className="enter rounded-lg border border-border bg-surface p-4 sm:p-5"
+      >
+        <h2 id="take-title" className="mb-4 text-sm font-medium">
+          Take an exam
+        </h2>
+        <ExamStart choices={choices} />
+      </section>
+
+      <section
         aria-labelledby="record-title"
         className="enter rounded-lg border border-border bg-surface p-4 sm:p-5"
       >
         <h2 id="record-title" className="mb-4 text-sm font-medium">
-          Record a result
+          Record a result taken elsewhere
         </h2>
         <ExamForm subjects={study.map((s) => ({ id: s.id, name: s.name }))} preset={preset} />
       </section>
@@ -97,7 +111,9 @@ export function ExamsTab({ data }: { data: WorkstationData }) {
             <ul className="divide-y divide-border" aria-label="Exam results">
               {exams.map((e) => {
                 const pct =
-                  e.score !== null && e.total ? Math.round((e.score / e.total) * 100) : null;
+                  e.score !== null && e.total
+                    ? Math.max(0, Math.round((e.score / e.total) * 100))
+                    : null;
                 const title = `${EXAM_LABEL[e.kind]}${e.subjectId ? ` · ${name.get(e.subjectId) ?? ""}` : ""}`;
                 return (
                   <li
@@ -106,7 +122,19 @@ export function ExamsTab({ data }: { data: WorkstationData }) {
                     data-testid="ws-exam"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm">{title}</p>
+                      <p className="truncate text-sm">
+                        {e.taken ? (
+                          <Link
+                            href={`/work-station/exam/${e.id}`}
+                            className="hover:underline"
+                            data-testid="ws-exam-open"
+                          >
+                            {title}
+                          </Link>
+                        ) : (
+                          title
+                        )}
+                      </p>
                       <p className="text-xs text-fg-muted">
                         {formatDay(e.day)}
                         {e.note ? ` · ${e.note}` : ""}
@@ -121,9 +149,11 @@ export function ExamsTab({ data }: { data: WorkstationData }) {
                       className="shrink-0 font-mono text-sm tabular-nums"
                       data-testid="ws-exam-score"
                     >
-                      {e.score !== null
-                        ? `${e.score}${e.total !== null ? `/${e.total}` : ""}`
-                        : "—"}
+                      {e.inProgress
+                        ? "In progress"
+                        : e.score !== null
+                          ? `${formatScore(e.score)}${e.total !== null ? `/${e.total}` : ""}`
+                          : "—"}
                       {pct !== null ? (
                         <span className="ml-1.5 text-xs text-fg-muted">{pct}%</span>
                       ) : null}

@@ -13,6 +13,7 @@ import { addDays } from "@/lib/planner";
 import { getTaskRows } from "@/lib/tasks";
 import { BCS_SYLLABUS } from "@/lib/workstation/bcs-syllabus";
 import { defaultRoutine, localNow, studyCyclesByWeekday } from "@/lib/workstation/routine";
+import { getExamChoices } from "@/lib/workstation/exam-server";
 import { getRoutineSlots, getWorkstationData } from "@/lib/workstation/server";
 import { DEFAULT_FILTERS } from "@/schemas/task";
 import { parseTab } from "@/schemas/workstation";
@@ -30,6 +31,10 @@ export default async function WorkstationPage({ searchParams }: PageProps<"/work
     tab === "office"
       ? await getTaskRows(user, { ...DEFAULT_FILTERS, status: "all" }, new Date(), "OFFICE")
       : [];
+  const examChoices =
+    tab === "exams"
+      ? await getExamChoices(user, { id: data.plan.id, subjects: data.subjects })
+      : null;
 
   return (
     <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
@@ -57,7 +62,7 @@ export default async function WorkstationPage({ searchParams }: PageProps<"/work
           days={data.schedule.days}
         />
       ) : null}
-      {tab === "exams" ? <ExamsTab data={data} /> : null}
+      {tab === "exams" && examChoices ? <ExamsTab data={data} choices={examChoices} /> : null}
       {tab === "office" ? <OfficeTab tasks={officeTasks} slots={data.slots} /> : null}
       {tab === "routine" ? <RoutineTab slots={data.slots} /> : null}
     </div>

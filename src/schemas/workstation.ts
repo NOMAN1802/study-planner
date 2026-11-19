@@ -2,9 +2,10 @@ import { z } from "zod";
 import { isDayKey } from "@/lib/planner";
 import { ROUTINE_KINDS, parseMinute } from "@/lib/workstation/routine";
 
-export const EXAM_KINDS = ["WEEKLY", "SUBJECT_FINAL", "MOCK"] as const;
+export const EXAM_KINDS = ["DAILY", "WEEKLY", "SUBJECT_FINAL", "MOCK"] as const;
 export type ExamKind = (typeof EXAM_KINDS)[number];
 export const EXAM_LABEL: Record<ExamKind, string> = {
+  DAILY: "Daily exam",
   WEEKLY: "Weekly exam",
   SUBJECT_FINAL: "Subject final",
   MOCK: "Mock test",

@@ -216,3 +216,38 @@ export async function seedDashboard(email: string): Promise<DashboardSeed> {
     await db.end();
   }
 }
+
+/**
+ * Gives an e2e user three private questions on "Lit 01: Literary Terms" (answer
+ * always option A), so exam tests work whether or not the shared bank is loaded.
+ */
+export async function seedQuestions(email: string): Promise<void> {
+  const db = new Client({
+    connectionString: process.env.DATABASE_URL,
+    connectionTimeoutMillis: 15_000,
+    query_timeout: 15_000,
+  });
+  await db.connect();
+  try {
+    const profile = await db.query<{ id: string }>(
+      'SELECT "id" FROM "Profile" WHERE "email" = $1',
+      [email],
+    );
+    if (profile.rowCount !== 1) throw new Error(`No profile for ${email}`);
+    const ownerId = profile.rows[0].id;
+    for (let i = 1; i <= 3; i += 1) {
+      await db.query(
+        `INSERT INTO "Question" ("id", "ownerId", "subject", "lecture", "section", "text", "options", "answer", "explanation", "updatedAt")
+         VALUES ($1, $2, 'English Literature + Grammar', 'Lit 01: Literary Terms', 'E2E', $3, $4, 0, 'E2E explanation', now())`,
+        [
+          `e2e-${ownerId}-${i}`,
+          ownerId,
+          `E2E question ${i}?`,
+          ["Right", "Wrong 1", "Wrong 2", "Wrong 3"],
+        ],
+      );
+    }
+  } finally {
+    await db.end();
+  }
+}

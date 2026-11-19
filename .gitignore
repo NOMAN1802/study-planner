@@ -51,3 +51,6 @@ next-env.d.ts
 
 # prisma generated client
 /src/generated/
+
+# question banks transcribed from books: kept out of the public repo, loaded into the database
+/Doc/question-bank/

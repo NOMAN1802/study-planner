@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { serverActionDone, signUp, taskRow } from "./helpers";
+import { seedQuestions } from "./seed";
 
 /**
  * Today's study day in the browser (the account's timezone comes from the browser at
@@ -137,6 +138,61 @@ test.describe("work-station", () => {
     await form.getByLabel("Out of").fill("50");
     await form.getByRole("button", { name: "Save result" }).click();
     await expect(page.getByTestId("ws-exam-score").first()).toHaveText("40/5080%");
+  });
+
+  test("a daily exam from the question bank: timed, marked, recorded", async ({ page }) => {
+    test.setTimeout(120_000);
+    const email = await signUp(page);
+    await setUpPlan(page);
+    await seedQuestions(email);
+
+    // Nothing ticked done today yet: the daily exam is locked.
+    await page.goto("/work-station?tab=exams");
+    const daily = page.getByTestId("exam-start-daily");
+    await expect(daily.getByRole("button", { name: "Start daily exam" })).toBeDisabled();
+
+    // Tick a lecture done; its questions unlock the daily exam.
+    await page.goto("/work-station?tab=subjects");
+    const done = serverActionDone(page);
+    await subjectCard(page, "English Literature + Grammar")
+      .getByRole("checkbox", { name: "Mark Lit 01: Literary Terms as done" })
+      .check();
+    await done;
+    await page.goto("/work-station?tab=exams");
+    await expect(daily).toContainText(/\d+ questions · 15 min · from 1 lecture/);
+    await daily.getByRole("button", { name: "Start daily exam" }).click();
+
+    await expect(page).toHaveURL(/\/work-station\/exam\/[0-9a-f-]+$/, { timeout: 30_000 });
+    await expect(page.getByTestId("exam-timer")).toHaveText(/1[45]:\d\d/);
+    const questions = page.getByTestId("exam-question");
+    const count = await questions.count();
+    expect(count).toBeGreaterThanOrEqual(3);
+    expect(count).toBeLessThanOrEqual(20);
+
+    // Answer the first question, reload: the choice is kept.
+    await questions.first().getByRole("radio").first().check();
+    await expect(page.getByTestId("exam-progress")).toContainText(`1/${count} answered`);
+    await page.reload();
+    await expect(questions.first().getByRole("radio").first()).toBeChecked();
+
+    await page.getByRole("button", { name: "Submit answers" }).first().click();
+    await expect(page.getByText(`${count - 1} left blank. Submit?`)).toBeVisible();
+    await page.getByRole("button", { name: "Submit", exact: true }).click();
+
+    // Marked straight away, with the right answers shown.
+    await expect(page.getByTestId("exam-result-score")).toContainText(`/${count}`, {
+      timeout: 30_000,
+    });
+    await expect(page.getByTestId("exam-review-question")).toHaveCount(count);
+    await expect(page.getByLabel("Unanswered")).toHaveCount(count - 1);
+
+    // Recorded under Exams, linking back to the review.
+    await page.goto("/work-station?tab=exams");
+    const result = page.getByTestId("ws-exam").first();
+    await expect(result).toContainText("Daily exam");
+    await expect(result.getByTestId("ws-exam-score")).toContainText(`/${count}`);
+    await result.getByTestId("ws-exam-open").click();
+    await expect(page.getByTestId("exam-result-score")).toBeVisible();
   });
 
   test("a study cycle on a lecture counts toward today", async ({ page }) => {

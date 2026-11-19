@@ -52,6 +52,7 @@ enum RoutineKind {
 }
 
 enum ExamKind {
+  DAILY
   WEEKLY
   SUBJECT_FINAL
   MOCK
@@ -77,6 +78,7 @@ model Profile {
   timeBlocks       TimeBlock[]
   studyPlan        StudyPlan?
   routineSlots     RoutineSlot[]
+  questions        Question[]
 }
 
 model Habit {
@@ -303,6 +305,12 @@ model StudyExam {
   score     Float?
   total     Float?
   note      String?
+  /// Taken in the app: `[{ id, chosen }]` (question ids in the order shown, chosen
+  /// option 0–3 or null). Null for results recorded by hand.
+  questions   Json?
+  startedAt   DateTime?
+  durationSec Int?
+  submittedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -310,4 +318,28 @@ model StudyExam {
   subject Subject?  @relation(fields: [subjectId], references: [id], onDelete: SetNull)
 
   @@index([planId, day])
+}
+
+/// A multiple-choice question from a question bank, linked to a lecture by the
+/// subject and lecture titles of BCS_SYLLABUS. `ownerId` null = shared bank.
+model Question {
+  /// Stable key from the bank file, e.g. `lit-terms-001`.
+  id          String   @id
+  ownerId     String?  @db.Uuid
+  subject     String
+  lecture     String
+  section     String
+  text        String
+  options     String[]
+  /// Index (0–3) of the correct option.
+  answer      Int
+  explanation String?
+  /// Where it was asked, e.g. `37th BCS`.
+  source      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner Profile? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([subject, lecture])
 }

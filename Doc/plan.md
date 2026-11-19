@@ -221,12 +221,13 @@ Questions come from the user's topic-wise question-bank PDFs in `Doc/study-resou
 | Weekly (Friday) | 50 | 30 min | lectures covered that week |
 | Subject final | 100 | 60 min | all lectures of the subject |
 
-- [ ] Marking: +1 correct, −0.50 wrong, 0 unanswered; negative totals allowed
-- [ ] "Covered" = lectures ticked done; questions not yet seen first, then ones answered wrong, then the rest
-- [ ] Taken in the app: countdown, A–D options, auto-submit at time-out, instant marking with the right answers shown; score saved to Exams
-- [ ] Daily exam placed in the day's revision time; weekly and subject-final exams replace the manual score entry for those exams
-- [ ] Open: topics whose bank has fewer questions than the exam needs; daily exam on a day with no lectures done
-- [ ] Tests: unit (marking, question selection), e2e (sit a timed exam, auto-submit, score recorded)
+- [x] Question bank: transcribed files in `Doc/question-bank/*.json` (git-ignored: copied from books, and the repo is public), one subject per file, sections linked to a lecture title; `pnpm db:questions <file…>` validates and upserts into `Question` (id `<section>-<n>`, migration `question_bank`); `ownerId` null = shared bank, set = private (e2e). First bank: English Literature, 194 questions (Literary Terms → Lit 01; Old & Middle English, Renaissance, Preparation for the Renaissance → Lit 02; Elizabethan, Spenser → Lit 03)
+- [x] Marking: +1 correct, −0.50 wrong, 0 unanswered; negative totals allowed
+- [x] "Covered" = lectures ticked done (daily: today's study day; weekly: this week); subject final = every lecture of the subject; questions not yet seen first, then ones answered wrong or left blank last time, then the rest
+- [x] Taken in the app (`/work-station/exam/[id]`): countdown from the server deadline, A–D options, answers kept in the browser across reloads, confirm before submitting blanks, auto-submit at time-out (2-min grace for late sheets), instant marking with right answers and explanations; score saved to Exams and linked to the review
+- [x] Exams tab: start daily / weekly / subject final with the question count; one exam at a time (an unfinished exam is offered again; one past its time is marked as it stands); manual entry kept for exams taken elsewhere; in-progress exams don't count as done for the plan
+- [x] Open questions settled: an exam with fewer questions in the bank than its size asks what there is; with none (e.g. no lecture ticked today) it can't start
+- [x] Tests: unit (marking, selection order, history, coverage, bank files incl. the real bank), component (countdown, answers kept, confirm, auto-submit), e2e (sit a daily exam, reload, submit, review, recorded)
 
 **Gate:** all checks green on a production build.
 
