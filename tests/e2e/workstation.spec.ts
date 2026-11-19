@@ -46,13 +46,13 @@ test.describe("work-station", () => {
       await expect(items.first()).toContainText("Vocabulary revision: this week's 60 words");
     else await expect(items.first()).toContainText("Words 1–10 · Vocabulary Marathon-1");
     await expect(items.nth(1)).toContainText("Lit 01: Literary Terms");
-    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^0\/(7|14)$/);
-    await expect(page.getByTestId("ws-week-cycles")).toHaveText("0/56");
+    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^0\/(8|16)$/);
+    await expect(page.getByTestId("ws-week-cycles")).toHaveText("0/64");
     await expect(page.getByTestId("ws-buffer")).toHaveText(/^[+-]\d+$/);
 
-    // Routine: 56 cycles a week.
+    // Routine: 64 cycles a week.
     await page.getByRole("link", { name: "Routine", exact: true }).click();
-    await expect(page.getByTestId("ws-routine-total")).toHaveText("56");
+    await expect(page.getByTestId("ws-routine-total")).toHaveText("64");
     await expect(page.getByTestId("ws-routine-day")).toHaveCount(7);
 
     // Subjects: 9 in order + daily vocabulary; mark a lecture done.
@@ -146,12 +146,12 @@ test.describe("work-station", () => {
     await setUpPlan(page);
     await seedQuestions(email);
 
-    // Nothing ticked done today yet: the daily exam is locked.
+    // Nothing ticked done yet: no topics to take a real exam on.
     await page.goto("/work-station?tab=exams");
-    const daily = page.getByTestId("exam-start-daily");
-    await expect(daily.getByRole("button", { name: "Start daily exam" })).toBeDisabled();
+    const real = page.getByTestId("exam-start-topics");
+    await expect(real.getByRole("button", { name: "Start daily exam" })).toBeDisabled();
 
-    // Tick a lecture done; its questions unlock the daily exam.
+    // Tick a lecture done: it becomes a topic, picked by default for today's exam.
     await page.goto("/work-station?tab=subjects");
     const done = serverActionDone(page);
     await subjectCard(page, "English Literature + Grammar")
@@ -159,8 +159,16 @@ test.describe("work-station", () => {
       .check();
     await done;
     await page.goto("/work-station?tab=exams");
-    await expect(daily).toContainText(/\d+ questions · 15 min · from 1 lecture/);
-    await daily.getByRole("button", { name: "Start daily exam" }).click();
+    const topic = real.getByRole("checkbox", { name: /Lit 01: Literary Terms/ });
+    await expect(topic).toBeChecked();
+    await expect(real.getByTestId("exam-start-summary")).toHaveText(
+      /\d+ questions · 15 min · real exam/,
+    );
+    // Untick it: nothing to ask. Tick it again and start.
+    await topic.uncheck();
+    await expect(real.getByRole("button", { name: "Start daily exam" })).toBeDisabled();
+    await topic.check();
+    await real.getByRole("button", { name: "Start daily exam" }).click();
 
     await expect(page).toHaveURL(/\/work-station\/exam\/[0-9a-f-]+$/, { timeout: 30_000 });
     await expect(page.getByTestId("exam-timer")).toHaveText(/1[45]:\d\d/);
@@ -193,6 +201,30 @@ test.describe("work-station", () => {
     await expect(result.getByTestId("ws-exam-score")).toContainText(`/${count}`);
     await result.getByTestId("ws-exam-open").click();
     await expect(page.getByTestId("exam-result-score")).toBeVisible();
+
+    // The real exam reaches the dashboard.
+    await page.goto("/dashboard");
+    const panel = page.getByTestId("panel-exams");
+    await expect(panel.getByTestId("exam-count")).toHaveText("1 real exam");
+    await expect(panel.getByTestId("exam-recent")).toHaveCount(1);
+    await expect(panel.getByTestId("exam-recent").first()).toContainText(`/${count}`);
+
+    // Practice: same topic, checked as you go, not saved.
+    await page.goto("/work-station?tab=exams");
+    const practice = page.getByTestId("practice-start");
+    await expect(practice.getByRole("checkbox", { name: /Lit 01: Literary Terms/ })).toBeChecked();
+    await practice.getByLabel("Questions").selectOption("10");
+    await practice.getByRole("button", { name: "Start practice" }).click();
+    await expect(page).toHaveURL(/\/work-station\/practice\?topic=[0-9a-f-]+&n=10$/);
+    const first = page.getByTestId("practice-question").first();
+    await first.getByRole("button").first().click();
+    await expect(first.getByTestId("practice-feedback")).toHaveText(/^(Correct\.|Wrong — )/);
+    await expect(page.getByTestId("practice-tally")).toContainText(/1 (correct|wrong)/);
+
+    await page.goto("/dashboard");
+    await expect(page.getByTestId("panel-exams").getByTestId("exam-count")).toHaveText(
+      "1 real exam",
+    );
   });
 
   test("a study cycle on a lecture counts toward today", async ({ page }) => {
@@ -219,7 +251,7 @@ test.describe("work-station", () => {
     await expect(page.getByTestId("timer-phase")).toHaveText(/Short break/, { timeout: 80_000 });
 
     await page.goto("/work-station");
-    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^1\/(7|14)$/);
+    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^1\/(8|16)$/);
     // The auto-started break is still running.
     await expect(page.getByRole("link", { name: "Open timer" })).toBeVisible();
     await page.goto("/work-station?tab=subjects");
@@ -230,8 +262,8 @@ test.describe("work-station", () => {
     ).toContainText("1 cycle spent");
 
     await page.goto("/dashboard");
-    await expect(page.getByTestId("study-today")).toHaveText(/^1\/(7|14)$/);
-    await expect(page.getByTestId("study-week")).toHaveText("1/56");
+    await expect(page.getByTestId("study-today")).toHaveText(/^1\/(8|16)$/);
+    await expect(page.getByTestId("study-week")).toHaveText("1/64");
   });
 });
 

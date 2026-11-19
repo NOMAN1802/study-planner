@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   EXAM_SPEC,
   applyAnswers,
-  coveredLectures,
+  examStats,
   markExam,
   parseRecords,
   pickQuestions,
   questionHistory,
-  type CoverageTopic,
+  type QuestionInfo,
 } from "@/lib/workstation/exam";
 import { bankFileSchema, expandBank } from "@/lib/workstation/question-bank";
 
@@ -129,39 +129,74 @@ describe("pickQuestions", () => {
   });
 });
 
-describe("coveredLectures", () => {
-  const topics: CoverageTopic[] = [
-    { subject: "ENG", lecture: "L1", doneDay: "2026-11-20" },
-    { subject: "ENG", lecture: "L2", doneDay: "2026-11-21" },
-    { subject: "ENG", lecture: "L3", doneDay: null },
-    { subject: "BAN", lecture: "B1", doneDay: "2026-11-21" },
-    { subject: "BAN", lecture: "B2", doneDay: "2026-11-10" },
-  ];
-  const week = Array.from({ length: 7 }, (_, i) => `2026-11-${String(21 + i).padStart(2, "0")}`);
+describe("examStats", () => {
+  const info = new Map<string, QuestionInfo>([
+    ["t1", { answer: 0, section: "Literary Terms", lecture: "Lit 01" }],
+    ["t2", { answer: 0, section: "Literary Terms", lecture: "Lit 01" }],
+    ["t3", { answer: 0, section: "Literary Terms", lecture: "Lit 01" }],
+    ["r1", { answer: 1, section: "Renaissance", lecture: "Lit 02" }],
+    ["r2", { answer: 1, section: "Renaissance", lecture: "Lit 02" }],
+    ["r3", { answer: 1, section: "Renaissance", lecture: "Lit 02" }],
+    ["s1", { answer: 2, section: "Spenser", lecture: "Lit 03" }],
+  ]);
+  const at = new Date("2026-11-20T00:00:00Z");
+  const stats = examStats(
+    [
+      {
+        id: "e1",
+        kind: "DAILY",
+        day: "2026-11-20",
+        at,
+        score: 2.5,
+        total: 4,
+        records: [
+          { id: "t1", chosen: 0 },
+          { id: "t2", chosen: 0 },
+          { id: "t3", chosen: 0 },
+          { id: "r1", chosen: 0 },
+        ],
+      },
+      {
+        id: "e2",
+        kind: "DAILY",
+        day: "2026-11-21",
+        at,
+        score: -1,
+        total: 3,
+        records: [
+          { id: "r2", chosen: 0 },
+          { id: "r3", chosen: 0 },
+          { id: "s1", chosen: null },
+        ],
+      },
+      // Recorded by hand: counts for scores, has no questions for topics.
+      { id: "e3", kind: "WEEKLY", day: "2026-11-27", at, score: 40, total: 50, records: null },
+      // No score (nothing to average).
+      { id: "e4", kind: "MOCK", day: "2026-11-28", at, score: null, total: null, records: null },
+    ],
+    info,
+  );
 
-  it("daily: lectures ticked done today", () => {
-    const out = coveredLectures("DAILY", topics, { today: "2026-11-21", week });
-    expect(out).toEqual([
-      { subject: "ENG", lecture: "L2" },
-      { subject: "BAN", lecture: "B1" },
+  it("averages percentages, counting negative scores as 0%", () => {
+    expect(stats.count).toBe(3);
+    // 63% (2.5/4), 0% (−1/3), 80% (40/50) → 48%.
+    expect(stats.averagePct).toBe(48);
+    expect(stats.byKind).toEqual([
+      { kind: "DAILY", count: 2, averagePct: 32 },
+      { kind: "WEEKLY", count: 1, averagePct: 80 },
     ]);
   });
 
-  it("weekly: lectures ticked done this week", () => {
-    const out = coveredLectures("WEEKLY", topics, {
-      today: "2026-11-21",
-      week: ["2026-11-20", ...week.slice(0, 6)],
-    });
-    expect(out.map((l) => l.lecture)).toEqual(["L1", "L2", "B1"]);
+  it("lists recent results newest first and the trend oldest first", () => {
+    expect(stats.recent.map((r) => r.id)).toEqual(["e3", "e2", "e1"]);
+    expect(stats.trend.map((t) => t.pct)).toEqual([63, 0, 80]);
   });
 
-  it("subject final: every lecture of the subject, done or not", () => {
-    const out = coveredLectures("SUBJECT_FINAL", topics, {
-      today: "2026-11-21",
-      week,
-      subject: "ENG",
-    });
-    expect(out.map((l) => l.lecture)).toEqual(["L1", "L2", "L3"]);
+  it("finds weak topics from answered questions (at least 3 asked)", () => {
+    expect(stats.weakTopics).toEqual([
+      { topic: "Renaissance", lecture: "Lit 02", correct: 0, asked: 3, pct: 0 },
+      { topic: "Literary Terms", lecture: "Lit 01", correct: 3, asked: 3, pct: 100 },
+    ]);
   });
 });
 

@@ -228,6 +228,11 @@ Questions come from the user's topic-wise question-bank PDFs in `Doc/study-resou
 - [x] Exams tab: start daily / weekly / subject final with the question count; one exam at a time (an unfinished exam is offered again; one past its time is marked as it stands); manual entry kept for exams taken elsewhere; in-progress exams don't count as done for the plan
 - [x] Open questions settled: an exam with fewer questions in the bank than its size asks what there is; with none (e.g. no lecture ticked today) it can't start
 - [x] Tests: unit (marking, selection order, history, coverage, bank files incl. the real bank), component (countdown, answers kept, confirm, auto-submit), e2e (sit a daily exam, reload, submit, review, recorded)
+- [x] Topic-wise exams: the daily / weekly exam is taken on topics you pick from the lectures ticked done (only lectures with questions), pre-ticked with today's / this week's; subject finals still cover the whole subject
+- [x] Practice exams (`/work-station/practice`): any topics in the bank, 10 / 20 / 50 questions, no timer, each answer checked at once with the explanation, a running tally and an end summary; never saved, so it never reaches Exams or the dashboard
+- [x] Dashboard "Exam results" panel (real exams only, incl. results recorded by hand): average % overall and per exam type, recent 5 scores, score trend chart, weak topics (question-bank sections with the lowest share correct, at least 3 asked)
+- [x] Tests: unit (exam stats), component (practice feedback and summary), e2e (pick topics, real exam on the dashboard, practice not counted)
+- [x] Longer study days: office days 8 cycles (morning 04:35–08:35, commute 08:35–09:00, night 18:45–22:45 after 45 min rest; sleep 22:45–04:15), Friday and holidays 16 (evening before 4 + 04:50–12:50 + 14:30–18:30, then Friday night 18:30–22:30; Jumu'ah & lunch 12:50–14:30), 64 a week; every night at least 5.5 h sleep (unit-tested); lecture caps unchanged, so the extra time goes to revision. Plan setup now runs in one interactive transaction with a 30 s timeout (the pooled connection could pass Prisma's 5 s default)
 
 **Gate:** all checks green on a production build.
 

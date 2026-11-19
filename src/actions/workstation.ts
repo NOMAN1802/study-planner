@@ -63,63 +63,66 @@ export async function setupPlan(_prev: SetupState, formData: FormData): Promise<
   }));
   const hasRoutine = (await prisma.routineSlot.count({ where: { userId: user.id } })) > 0;
 
-  await prisma.$transaction([
-    prisma.studyPlan.create({
-      data: { id: planId, userId: user.id, name: "BCS Preliminary", ...parsed.data },
-    }),
-    prisma.task.createMany({
-      data: subjects.map((s) => ({
-        id: s.taskId,
-        userId: user.id,
-        title: `BCS · ${s.name}`,
-        category: "STUDY" as const,
-        status: "IN_PROGRESS" as const,
-      })),
-    }),
-    prisma.pomodoroConfig.createMany({
-      data: subjects.map((s) => ({
-        userId: user.id,
-        taskId: s.taskId,
-        focusMinutes: FOCUS_MINUTES,
-        shortBreakMinutes: BREAK_MINUTES,
-        longBreakMinutes: BREAK_MINUTES,
-        cyclesBeforeLongBreak: 4,
-        autoStartNext: true,
-      })),
-    }),
-    prisma.subject.createMany({
-      data: subjects.map((s) => ({
-        id: s.id,
-        planId,
-        taskId: s.taskId,
-        name: s.name,
-        color: s.color,
-        sortOrder: s.i,
-        isDaily: Boolean(s.isDaily),
-        resourceFile: s.resourceFile,
-      })),
-    }),
-    prisma.topic.createMany({
-      data: subjects.flatMap((s) =>
-        s.topics.map((t, j) => ({
-          subjectId: s.id,
-          sortOrder: j,
-          title: t.title,
-          url: t.parts[0]?.url ?? null,
-          parts: t.parts,
+  // A handful of bulk inserts (166 topics among them): over the connection pooler this can
+  // pass Prisma's 5-second default, so the transaction gets more room.
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.studyPlan.create({
+        data: { id: planId, userId: user.id, name: "BCS Preliminary", ...parsed.data },
+      });
+      await tx.task.createMany({
+        data: subjects.map((s) => ({
+          id: s.taskId,
+          userId: user.id,
+          title: `BCS · ${s.name}`,
+          category: "STUDY" as const,
+          status: "IN_PROGRESS" as const,
         })),
-      ),
-    }),
-    ...(hasRoutine
-      ? []
-      : [
-          prisma.routineSlot.createMany({
-            data: defaultRoutine().map((slot) => ({ ...slot, userId: user.id })),
-          }),
-        ]),
-    // Friday is the weekly holiday, so weeks run Saturday–Friday.
-    prisma.profile.update({ where: { id: user.id }, data: { weekStartsOn: 6 } }),
-  ]);
+      });
+      await tx.pomodoroConfig.createMany({
+        data: subjects.map((s) => ({
+          userId: user.id,
+          taskId: s.taskId,
+          focusMinutes: FOCUS_MINUTES,
+          shortBreakMinutes: BREAK_MINUTES,
+          longBreakMinutes: BREAK_MINUTES,
+          cyclesBeforeLongBreak: 4,
+          autoStartNext: true,
+        })),
+      });
+      await tx.subject.createMany({
+        data: subjects.map((s) => ({
+          id: s.id,
+          planId,
+          taskId: s.taskId,
+          name: s.name,
+          color: s.color,
+          sortOrder: s.i,
+          isDaily: Boolean(s.isDaily),
+          resourceFile: s.resourceFile,
+        })),
+      });
+      await tx.topic.createMany({
+        data: subjects.flatMap((s) =>
+          s.topics.map((t, j) => ({
+            subjectId: s.id,
+            sortOrder: j,
+            title: t.title,
+            url: t.parts[0]?.url ?? null,
+            parts: t.parts,
+          })),
+        ),
+      });
+      if (!hasRoutine) {
+        await tx.routineSlot.createMany({
+          data: defaultRoutine().map((slot) => ({ ...slot, userId: user.id })),
+        });
+      }
+      // Friday is the weekly holiday, so weeks run Saturday–Friday.
+      await tx.profile.update({ where: { id: user.id }, data: { weekStartsOn: 6 } });
+    },
+    { maxWait: 10_000, timeout: 30_000 },
+  );
 
   revalidate();
   revalidatePath("/settings");

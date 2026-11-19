@@ -10,16 +10,19 @@ import { YearHeatmap } from "@/components/dashboard/year-heatmap";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireUser } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard-server";
+import { getExamStats } from "@/lib/workstation/exam-server";
 import { getStudySummary } from "@/lib/workstation/server";
+import { ExamResults } from "@/components/dashboard/exam-results";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
   const user = await requireUser();
   const now = new Date();
-  const [data, study] = await Promise.all([
+  const [data, study, exams] = await Promise.all([
     getDashboardData(user, now),
     getStudySummary(user, now),
+    getExamStats(user),
   ]);
 
   if (data.empty) {
@@ -103,6 +106,22 @@ export default async function DashboardPage() {
               </div>
             ))}
           </dl>
+        </Panel>
+      ) : null}
+
+      {exams ? (
+        <Panel
+          id="exams"
+          index={1}
+          title="Exam results"
+          aside={
+            <span data-testid="exam-count">
+              {exams.count} real {exams.count === 1 ? "exam" : "exams"}
+            </span>
+          }
+          className="lg:col-span-5 2xl:col-span-12"
+        >
+          <ExamResults stats={exams} />
         </Panel>
       ) : null}
 

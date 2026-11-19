@@ -3,14 +3,15 @@ import { addDays, startOfWeekKey } from "@/lib/planner";
 import { prisma } from "@/lib/prisma";
 import {
   EXAM_SPEC,
-  coveredLectures,
   deadlineOf,
+  examStats,
   parseRecords,
   pickQuestions,
   questionHistory,
   type AnswerRecord,
-  type CoverageTopic,
+  type ExamStats,
   type LectureRef,
+  type QuestionInfo,
   type TakenExamKind,
 } from "@/lib/workstation/exam";
 import { localNow, studyDayKeyOf } from "@/lib/workstation/routine";
@@ -26,12 +27,22 @@ export function examScope(user: CurrentUser, at = new Date()) {
   return { today, week: Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)) };
 }
 
-async function planTopics(planId: string, timezone: string): Promise<CoverageTopic[]> {
+type PlanTopic = LectureRef & { id: string; subjectId: string; doneDay: string | null };
+
+async function planTopics(planId: string, timezone: string): Promise<PlanTopic[]> {
   const topics = await prisma.topic.findMany({
     where: { subject: { planId, isDaily: false } },
-    select: { title: true, doneAt: true, subject: { select: { name: true } } },
+    orderBy: [{ subject: { sortOrder: "asc" } }, { sortOrder: "asc" }],
+    select: {
+      id: true,
+      title: true,
+      doneAt: true,
+      subject: { select: { id: true, name: true } },
+    },
   });
   return topics.map((t) => ({
+    id: t.id,
+    subjectId: t.subject.id,
     subject: t.subject.name,
     lecture: t.title,
     doneDay: t.doneAt ? studyDayKeyOf(t.doneAt, timezone) : null,
@@ -40,73 +51,86 @@ async function planTopics(planId: string, timezone: string): Promise<CoverageTop
 
 const keyOf = (l: LectureRef) => `${l.subject}\u0000${l.lecture}`;
 
-export type ExamChoice = {
-  kind: TakenExamKind;
-  subjectId: string | null;
-  label: string;
-  /** Lectures the exam covers. */
+/** A lecture that has questions in the bank, as offered in the topic pickers. */
+export type TopicChoice = {
+  id: string;
+  subject: string;
+  lecture: string;
+  questions: number;
+  done: boolean;
+  doneToday: boolean;
+  doneThisWeek: boolean;
+};
+
+export type FinalChoice = {
+  subjectId: string;
+  subject: string;
   lectures: number;
-  /** Questions in the bank for those lectures. */
   available: number;
-  /** Questions the exam will ask. */
   questions: number;
   minutes: number;
 };
 
 export type ExamChoices = {
-  daily: ExamChoice;
-  weekly: ExamChoice;
-  finals: ExamChoice[];
+  topics: TopicChoice[];
+  finals: FinalChoice[];
   /** Question-bank size, all subjects. */
   bankSize: number;
   inProgress: { id: string; kind: ExamKind; deadline: string } | null;
 };
 
-/** What can be taken now, and how many questions each exam would have. */
+/** What can be taken now: lectures with questions (for daily, weekly and practice) and finals. */
 export async function getExamChoices(
   user: CurrentUser,
-  plan: { id: string; subjects: { id: string; name: string; isDaily: boolean }[] },
+  planId: string,
   at = new Date(),
 ): Promise<ExamChoices> {
   const scope = examScope(user, at);
+  const week = new Set(scope.week);
   const [topics, counts, open] = await Promise.all([
-    planTopics(plan.id, user.timezone),
+    planTopics(planId, user.timezone),
     prisma.question.groupBy({
       by: ["subject", "lecture"],
       where: visibleTo(user.id),
       _count: { _all: true },
     }),
     prisma.studyExam.findFirst({
-      where: { planId: plan.id, startedAt: { not: null }, submittedAt: null },
+      where: { planId, startedAt: { not: null }, submittedAt: null },
       orderBy: { startedAt: "desc" },
       select: { id: true, kind: true, startedAt: true, durationSec: true },
     }),
   ]);
   const perLecture = new Map(counts.map((c) => [keyOf(c), c._count._all]));
-  const choice = (
-    kind: TakenExamKind,
-    label: string,
-    subject?: { id: string; name: string },
-  ): ExamChoice => {
-    const lectures = coveredLectures(kind, topics, { ...scope, subject: subject?.name });
-    const available = lectures.reduce((n, l) => n + (perLecture.get(keyOf(l)) ?? 0), 0);
-    const spec = EXAM_SPEC[kind];
-    return {
-      kind,
-      subjectId: subject?.id ?? null,
-      label,
-      lectures: lectures.length,
-      available,
-      questions: Math.min(available, spec.questions),
-      minutes: spec.minutes,
+
+  const finals = new Map<string, FinalChoice>();
+  for (const t of topics) {
+    const f = finals.get(t.subjectId) ?? {
+      subjectId: t.subjectId,
+      subject: t.subject,
+      lectures: 0,
+      available: 0,
+      questions: 0,
+      minutes: EXAM_SPEC.SUBJECT_FINAL.minutes,
     };
-  };
+    f.lectures += 1;
+    f.available += perLecture.get(keyOf(t)) ?? 0;
+    f.questions = Math.min(f.available, EXAM_SPEC.SUBJECT_FINAL.questions);
+    finals.set(t.subjectId, f);
+  }
+
   return {
-    daily: choice("DAILY", "Daily exam"),
-    weekly: choice("WEEKLY", "Weekly exam"),
-    finals: plan.subjects
-      .filter((s) => !s.isDaily)
-      .map((s) => choice("SUBJECT_FINAL", `${s.name} final`, s)),
+    topics: topics
+      .filter((t) => (perLecture.get(keyOf(t)) ?? 0) > 0)
+      .map((t) => ({
+        id: t.id,
+        subject: t.subject,
+        lecture: t.lecture,
+        questions: perLecture.get(keyOf(t)) ?? 0,
+        done: t.doneDay !== null,
+        doneToday: t.doneDay === scope.today,
+        doneThisWeek: t.doneDay !== null && week.has(t.doneDay),
+      })),
+    finals: [...finals.values()],
     bankSize: counts.reduce((n, c) => n + c._count._all, 0),
     inProgress:
       open?.startedAt && open.durationSec
@@ -119,34 +143,40 @@ export async function getExamChoices(
   };
 }
 
-/** The question ids for a new exam: covered lectures, unseen first, then missed ones. */
-export async function pickExamQuestions(
-  user: CurrentUser,
-  planId: string,
-  kind: TakenExamKind,
-  subjectName: string | undefined,
-  at = new Date(),
-): Promise<string[]> {
-  const topics = await planTopics(planId, user.timezone);
-  const lectures = coveredLectures(kind, topics, { ...examScope(user, at), subject: subjectName });
+/** The plan's lectures by id (only the given ids that belong to the plan). */
+export async function lecturesOf(user: CurrentUser, planId: string, topicIds: readonly string[]) {
+  const wanted = new Set(topicIds);
+  return (await planTopics(planId, user.timezone)).filter((t) => wanted.has(t.id));
+}
+
+async function poolFor(userId: string, lectures: readonly LectureRef[]) {
   if (lectures.length === 0) return [];
   const bySubject = new Map<string, string[]>();
   for (const l of lectures) {
     bySubject.set(l.subject, [...(bySubject.get(l.subject) ?? []), l.lecture]);
   }
+  return prisma.question.findMany({
+    where: {
+      AND: [
+        visibleTo(userId),
+        { OR: [...bySubject].map(([subject, titles]) => ({ subject, lecture: { in: titles } })) },
+      ],
+    },
+  });
+}
 
+/**
+ * The question ids for a new exam: the chosen lectures (or all of a subject's
+ * for a final), never-seen questions first, then ones missed last time.
+ */
+export async function pickExamQuestions(
+  user: CurrentUser,
+  planId: string,
+  kind: TakenExamKind,
+  lectures: readonly LectureRef[],
+): Promise<string[]> {
   const [pool, past] = await Promise.all([
-    prisma.question.findMany({
-      where: {
-        AND: [
-          visibleTo(user.id),
-          {
-            OR: [...bySubject].map(([subject, titles]) => ({ subject, lecture: { in: titles } })),
-          },
-        ],
-      },
-      select: { id: true, answer: true },
-    }),
+    poolFor(user.id, lectures),
     prisma.studyExam.findMany({
       where: { planId, submittedAt: { not: null } },
       select: { submittedAt: true, questions: true },
@@ -170,11 +200,38 @@ export type ExamQuestion = {
   options: string[];
   section: string;
   lecture: string;
-  /** Only once the exam is submitted. */
+  /** Only once the exam is submitted (always for practice). */
   answer: number | null;
   explanation: string | null;
   source: string | null;
 };
+
+/** Random questions from the chosen lectures, with answers: practice is checked as you go. */
+export async function getPracticeQuestions(
+  user: CurrentUser,
+  lectures: readonly LectureRef[],
+  count: number,
+): Promise<ExamQuestion[]> {
+  const pool = await poolFor(user.id, lectures);
+  const byId = new Map(pool.map((q) => [q.id, q]));
+  return pickQuestions(
+    pool.map((q) => q.id),
+    new Map(),
+    count,
+  ).map((id) => {
+    const q = byId.get(id)!;
+    return {
+      id: q.id,
+      text: q.text,
+      options: q.options,
+      section: q.section,
+      lecture: q.lecture,
+      answer: q.answer,
+      explanation: q.explanation,
+      source: q.source,
+    };
+  });
+}
 
 export type ExamSheet = {
   id: string;
@@ -230,4 +287,44 @@ export async function getExamSheet(user: CurrentUser, examId: string): Promise<E
       ];
     }),
   };
+}
+
+/** Real exam results for the dashboard (exams still running are left out). */
+export async function getExamStats(user: CurrentUser): Promise<ExamStats | null> {
+  const plan = await prisma.studyPlan.findUnique({
+    where: { userId: user.id },
+    select: {
+      exams: {
+        where: { OR: [{ startedAt: null }, { submittedAt: { not: null } }] },
+        select: {
+          id: true,
+          kind: true,
+          day: true,
+          score: true,
+          total: true,
+          questions: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+  if (!plan) return null;
+  const exams = plan.exams.map((e) => ({
+    id: e.id,
+    kind: e.kind,
+    day: e.day,
+    at: e.createdAt,
+    score: e.score,
+    total: e.total,
+    records: parseRecords(e.questions),
+  }));
+  const ids = [...new Set(exams.flatMap((e) => (e.records ?? []).map((r) => r.id)))];
+  const questions = ids.length
+    ? await prisma.question.findMany({
+        where: { id: { in: ids } },
+        select: { id: true, answer: true, section: true, lecture: true },
+      })
+    : [];
+  const info = new Map<string, QuestionInfo>(questions.map((q) => [q.id, q]));
+  return examStats(exams, info);
 }

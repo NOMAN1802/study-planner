@@ -45,24 +45,30 @@ export const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] a
 const hm = (h: number, m = 0) => h * 60 + m;
 
 const OFFICE_DAY: Omit<Slot, "weekday">[] = [
-  { startMin: hm(5), endMin: hm(5, 20), kind: "PERSONAL", label: "Bath & prep" },
-  { startMin: hm(5, 20), endMin: hm(8, 20), kind: "STUDY", label: "Morning study" },
-  { startMin: hm(8, 20), endMin: hm(9), kind: "PERSONAL", label: "Commute" },
+  { startMin: hm(4, 15), endMin: hm(4, 35), kind: "PERSONAL", label: "Bath & prep" },
+  { startMin: hm(4, 35), endMin: hm(8, 35), kind: "STUDY", label: "Morning study" },
+  { startMin: hm(8, 35), endMin: hm(9), kind: "PERSONAL", label: "Commute" },
   { startMin: hm(9), endMin: hm(18), kind: "OFFICE", label: "Office" },
-  { startMin: hm(18), endMin: hm(19), kind: "PERSONAL", label: "Commute & rest" },
-  { startMin: hm(19), endMin: hm(23), kind: "STUDY", label: "Evening study" },
+  { startMin: hm(18), endMin: hm(18, 45), kind: "PERSONAL", label: "Commute & rest" },
+  { startMin: hm(18, 45), endMin: hm(22, 45), kind: "STUDY", label: "Evening study" },
 ];
 
 const HOLIDAY: Omit<Slot, "weekday">[] = [
-  { startMin: hm(5), endMin: hm(5, 20), kind: "PERSONAL", label: "Bath & prep" },
-  { startMin: hm(5, 20), endMin: hm(12, 20), kind: "STUDY", label: "Morning study" },
-  { startMin: hm(12, 20), endMin: hm(14, 20), kind: "PERSONAL", label: "Jumu'ah & lunch" },
-  { startMin: hm(14, 20), endMin: hm(17, 20), kind: "STUDY", label: "Afternoon study" },
-  { startMin: hm(17, 20), endMin: hm(19), kind: "PERSONAL", label: "Break" },
-  { startMin: hm(19), endMin: hm(23), kind: "STUDY", label: "Evening study" },
+  { startMin: hm(4, 30), endMin: hm(4, 50), kind: "PERSONAL", label: "Bath & prep" },
+  { startMin: hm(4, 50), endMin: hm(12, 50), kind: "STUDY", label: "Morning study" },
+  { startMin: hm(12, 50), endMin: hm(14, 30), kind: "PERSONAL", label: "Jumu'ah & lunch" },
+  { startMin: hm(14, 30), endMin: hm(18, 30), kind: "STUDY", label: "Afternoon study" },
+  { startMin: hm(18, 30), endMin: hm(22, 30), kind: "STUDY", label: "Evening study" },
 ];
 
-/** Office 09:00–18:00 Saturday–Thursday, Friday off: 7 + 14 study cycles = 56 a week. */
+/**
+ * Office 09:00–18:00 Saturday–Thursday, Friday off. Every night is at least
+ * 5.5 hours: sleep 22:45–04:15 after office days (22:30–04:15 after Friday,
+ * 22:45–04:30 before Friday), with 45 min rest after office. A study day is the
+ * previous evening (4) plus its own daytime: 4 + 4 = 8 cycles on office days,
+ * 4 + 8 + 4 = 16 on Friday (and holidays) — 64 a week. The afternoon slot
+ * starts before 18:00, so it stays on its own day.
+ */
 export function defaultRoutine(): Slot[] {
   return WEEK_ORDER.flatMap((weekday) =>
     (weekday === FRIDAY ? HOLIDAY : OFFICE_DAY).map((s) => ({ ...s, weekday })),

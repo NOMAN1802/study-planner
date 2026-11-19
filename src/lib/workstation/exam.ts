@@ -1,11 +1,14 @@
 /**
  * Question-bank exams taken in the app (BCS Preliminary standard). Pure rules:
- * exam sizes, which lectures an exam covers, which questions to ask, marking.
+ * exam sizes, which questions to ask, marking and result statistics.
  *
- * | Exam          | Questions | Time   | Drawn from                     |
- * | Daily         | 20        | 15 min | lectures ticked done today     |
- * | Weekly        | 50        | 30 min | lectures ticked done this week |
- * | Subject final | 100       | 60 min | every lecture of the subject   |
+ * | Exam          | Questions | Time   | Drawn from                                         |
+ * | Daily         | 20        | 15 min | topics picked (default: lectures done today)       |
+ * | Weekly        | 50        | 30 min | topics picked (default: lectures done this week)   |
+ * | Subject final | 100       | 60 min | every lecture of the subject                       |
+ *
+ * Practice exams (any topics, no timer, checked as you go) are never saved, so
+ * only real exams reach Exams and the dashboard.
  *
  * Marking: +1 correct, −0.5 wrong, 0 unanswered (totals can be negative).
  * Questions not seen before come first, then ones last answered wrong, then the rest.
@@ -143,30 +146,100 @@ export function pickQuestions(
 /** A lecture as the question bank names it: subject and lecture titles. */
 export type LectureRef = { subject: string; lecture: string };
 
-export type CoverageTopic = LectureRef & {
-  /** Study day the lecture was ticked done, or null. */
-  doneDay: string | null;
-};
-
-/** The lectures an exam covers. */
-export function coveredLectures(
-  kind: TakenExamKind,
-  topics: readonly CoverageTopic[],
-  scope: { today: string; week: readonly string[]; subject?: string },
-): LectureRef[] {
-  const week = new Set(scope.week);
-  return topics
-    .filter((t) => {
-      if (kind === "DAILY") return t.doneDay === scope.today;
-      if (kind === "WEEKLY") return t.doneDay !== null && week.has(t.doneDay);
-      return t.subject === scope.subject;
-    })
-    .map(({ subject, lecture }) => ({ subject, lecture }));
-}
-
 /** When an exam's time is up. */
 export function deadlineOf(startedAt: Date, durationSec: number): Date {
   return new Date(startedAt.getTime() + durationSec * 1000);
+}
+
+/** A score as a percentage of the total (negative scores count as 0%). */
+export function scorePct(score: number, total: number): number {
+  return total > 0 ? Math.round((Math.max(0, score) / total) * 100) : 0;
+}
+
+export type StatsExam = {
+  id: string;
+  kind: string;
+  day: string;
+  /** Tie-break for exams on the same day. */
+  at: Date;
+  score: number | null;
+  total: number | null;
+  /** Answer records for exams taken in the app; null for results recorded by hand. */
+  records: AnswerRecord[] | null;
+};
+
+export type QuestionInfo = { answer: number; section: string; lecture: string };
+
+export type ExamStats = {
+  count: number;
+  averagePct: number | null;
+  byKind: { kind: string; count: number; averagePct: number }[];
+  /** Newest first. */
+  recent: { id: string; kind: string; day: string; score: number; total: number; pct: number }[];
+  /** Oldest first, for the chart. */
+  trend: { id: string; day: string; kind: string; pct: number }[];
+  /** Topics (question-bank sections) with the lowest share answered correctly. */
+  weakTopics: { topic: string; lecture: string; correct: number; asked: number; pct: number }[];
+};
+
+/** Topics need this many questions asked before they can count as weak. */
+export const WEAK_TOPIC_MIN_ASKED = 3;
+
+/** Real (not practice) exam results: averages, recent scores, trend and weak topics. */
+export function examStats(
+  exams: readonly StatsExam[],
+  questionInfo: ReadonlyMap<string, QuestionInfo>,
+  limits = { recent: 5, weak: 5 },
+): ExamStats {
+  const scored = exams
+    .filter(
+      (e): e is StatsExam & { score: number; total: number } =>
+        e.score !== null && e.total !== null && e.total > 0,
+    )
+    .sort((a, b) => a.day.localeCompare(b.day) || a.at.getTime() - b.at.getTime());
+  const rows = scored.map((e) => ({
+    id: e.id,
+    kind: e.kind,
+    day: e.day,
+    score: e.score,
+    total: e.total,
+    pct: scorePct(e.score, e.total),
+  }));
+  const average = (list: { pct: number }[]) =>
+    list.length ? Math.round(list.reduce((n, r) => n + r.pct, 0) / list.length) : null;
+
+  const kinds = [...new Set(rows.map((r) => r.kind))];
+  const topics = new Map<
+    string,
+    { topic: string; lecture: string; correct: number; asked: number }
+  >();
+  for (const e of scored) {
+    for (const r of e.records ?? []) {
+      const q = questionInfo.get(r.id);
+      if (!q) continue;
+      const key = `${q.lecture}\u0000${q.section}`;
+      const t = topics.get(key) ?? { topic: q.section, lecture: q.lecture, correct: 0, asked: 0 };
+      t.asked += 1;
+      if (r.chosen === q.answer) t.correct += 1;
+      topics.set(key, t);
+    }
+  }
+
+  return {
+    count: rows.length,
+    averagePct: average(rows),
+    byKind: kinds.map((kind) => {
+      const of = rows.filter((r) => r.kind === kind);
+      return { kind, count: of.length, averagePct: average(of) ?? 0 };
+    }),
+    recent: rows.slice(-limits.recent).reverse(),
+    trend: rows.map(({ id, day, kind, pct }) => ({ id, day, kind, pct })),
+    weakTopics: [...topics.values()]
+      .filter((t) => t.asked >= WEAK_TOPIC_MIN_ASKED)
+      .map((t) => ({ ...t, pct: Math.round((t.correct / t.asked) * 100) }))
+      .sort((a, b) => a.pct - b.pct || b.asked - a.asked)
+      .slice(0, limits.weak),
+  };
 }
 
 export function formatScore(score: number): string {

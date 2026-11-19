@@ -11,7 +11,7 @@ import {
   type ScheduleInput,
 } from "@/lib/workstation/schedule";
 
-const CAPACITY = cyclesByWeekday(defaultRoutine()); // 7 a day, 14 on Friday
+const CAPACITY = cyclesByWeekday(defaultRoutine()); // 8 a day, 16 on Friday
 
 function subject(id: string, topics: number, extra: Partial<PlanSubject> = {}): PlanSubject {
   return {
@@ -56,23 +56,23 @@ describe("buildSchedule", () => {
   it("starts each day with one vocabulary cycle, then subjects in order", () => {
     const s = buildSchedule(input());
     const first = s.days[0];
-    expect(first.capacity).toBe(7);
+    expect(first.capacity).toBe(8);
     expect(first.items[0]).toMatchObject({ kind: "daily", cycles: 1, topicId: "vocab-1" });
     // 2 lectures (4 cycles), then the rest of the session revises ENG.
-    expect(kinds(s, "2026-11-21")).toEqual(["daily:1", "topic:2", "topic:2", "revision:2"]);
+    expect(kinds(s, "2026-11-21")).toEqual(["daily:1", "topic:2", "topic:2", "revision:3"]);
     expect(first.items.slice(1, 3).map((i) => i.topicId)).toEqual(["eng-1", "eng-2"]);
     expect(first.items[3]).toMatchObject({
       kind: "revision",
       label: "Revise ENG",
       subjectId: "eng",
     });
-    expect(first.items.reduce((n, i) => n + i.cycles, 0)).toBe(7);
+    expect(first.items.reduce((n, i) => n + i.cycles, 0)).toBe(8);
   });
 
   it("gives a subject's revision and final exam a day of their own, with no lectures", () => {
     const s = buildSchedule(input());
     // Day 2 (Sunday): ENG's last 2 lectures, then revision; the final waits for Monday.
-    expect(kinds(s, "2026-11-22")).toEqual(["daily:1", "topic:2", "topic:2", "revision:2"]);
+    expect(kinds(s, "2026-11-22")).toEqual(["daily:1", "topic:2", "topic:2", "revision:3"]);
     // Day 3 (Monday): ENG final day; nothing else, the rest of the day is free.
     expect(kinds(s, "2026-11-23")).toEqual(["daily:1", "subject-revision:2", "subject-final:1"]);
     // Day 4: the next subject starts.
@@ -85,14 +85,14 @@ describe("buildSchedule", () => {
   it("reserves weekly revision and exam on Fridays", () => {
     const big = input({ subjects: [subject("eng", 60)] });
     const s = buildSchedule(big);
-    // 2026-11-27 is the first Friday: 14 cycles = 3 lectures + weekly revision 3 + exam 1 + 4 revision.
+    // 2026-11-27 is the first Friday: 16 cycles = 3 lectures + weekly revision 3 + exam 1 + 6 revision.
     expect(kinds(s, "2026-11-27")).toEqual([
       "topic:2",
       "topic:2",
       "topic:2",
       "weekly-revision:3",
       "weekly-exam:1",
-      "revision:4",
+      "revision:6",
     ]);
   });
 
@@ -108,11 +108,11 @@ describe("buildSchedule", () => {
     base.subjects[1].topics[0].done = true;
     base.subjects[1].topics[1].spentCycles = 1;
     const s = buildSchedule({ ...base, doneToday: 3, dailyDoneToday: true });
-    // 3 done today (1 vocabulary + 2 lecture): 2 of 4 lecture cycles and 4 of 7 cycles left.
+    // 3 done today (1 vocabulary + 2 lecture): 2 of 4 lecture cycles and 5 of 8 cycles left.
     expect(s.days[0].items.map((i) => `${i.topicId ?? i.kind}:${i.cycles}`)).toEqual([
       "eng-2:1",
       "eng-3:1",
-      "revision:2",
+      "revision:3",
     ]);
   });
 
@@ -311,10 +311,10 @@ describe("revision plan", () => {
       s.days
         .find((d) => d.day === day)!
         .items.map((i) => `${i.kind}:${i.subjectId ?? "-"}:${i.cycles}`);
-    expect(revise("2026-11-25")).toEqual(["revision:eng:7"]);
-    expect(revise("2026-11-26")).toEqual(["revision:eng:7"]);
-    // A Friday shared by two subjects: 14 cycles split evenly, no weekly exam, no mock.
-    expect(revise("2026-11-27")).toEqual(["revision:eng:7", "revision:ban:7"]);
+    expect(revise("2026-11-25")).toEqual(["revision:eng:8"]);
+    expect(revise("2026-11-26")).toEqual(["revision:eng:8"]);
+    // A Friday shared by two subjects: 16 cycles split evenly, no weekly exam, no mock.
+    expect(revise("2026-11-27")).toEqual(["revision:eng:8", "revision:ban:8"]);
     // Past the plan: the old rotation with a mock test every second revision day.
     expect(kinds(s, "2026-11-28")).toContain("mock:3");
   });

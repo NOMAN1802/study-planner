@@ -14,13 +14,15 @@ import {
   markExam,
   parseRecords,
 } from "@/lib/workstation/exam";
-import { examScope, pickExamQuestions } from "@/lib/workstation/exam-server";
+import { examScope, lecturesOf, pickExamQuestions } from "@/lib/workstation/exam-server";
 
 export type StartExamState = { error?: string };
 
 const startSchema = z.object({
   kind: z.enum(TAKEN_EXAM_KINDS),
   subjectId: z.preprocess((v) => (v === "" ? undefined : v), z.uuid().optional()),
+  /** Daily and weekly exams: the lectures (topic ids) picked. */
+  topicIds: z.array(z.uuid()).max(500),
 });
 
 function revalidate() {
@@ -63,9 +65,13 @@ export async function startExam(
   const parsed = startSchema.safeParse({
     kind: formData.get("kind"),
     subjectId: formData.get("subjectId") ?? undefined,
+    topicIds: formData.getAll("topicId"),
   });
   if (!parsed.success) return { error: "Pick an exam." };
-  const { kind, subjectId } = parsed.data;
+  const { kind, subjectId, topicIds } = parsed.data;
+  if (kind !== "SUBJECT_FINAL" && topicIds.length === 0) {
+    return { error: "Pick at least one topic." };
+  }
 
   const plan = await prisma.studyPlan.findUnique({
     where: { userId: user.id },
@@ -87,15 +93,20 @@ export async function startExam(
     await finish(open, null, now);
   }
 
-  const ids = await pickExamQuestions(user, plan.id, kind, subject?.name, now);
+  // A final covers every lecture of its subject; daily and weekly exams the topics picked.
+  const lectures =
+    kind === "SUBJECT_FINAL" && subject
+      ? (
+          await prisma.topic.findMany({ where: { subjectId: subject.id }, select: { title: true } })
+        ).map((t) => ({ subject: subject.name, lecture: t.title }))
+      : await lecturesOf(user, plan.id, topicIds);
+  const ids = await pickExamQuestions(user, plan.id, kind, lectures);
   if (ids.length === 0) {
     return {
       error:
         kind === "SUBJECT_FINAL"
           ? `No questions in the bank for ${subject?.name} yet.`
-          : kind === "DAILY"
-            ? "No questions yet for the lectures you ticked done today."
-            : "No questions yet for the lectures you ticked done this week.",
+          : "No questions in the bank for the topics you picked yet.",
     };
   }
 

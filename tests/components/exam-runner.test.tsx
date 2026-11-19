@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ExamRunner, type RunnerQuestion } from "@/components/workstation/exam-runner";
 
-const submitExam = vi.fn(async (..._args: unknown[]) => ({}));
+const submitExam = vi.fn<(...args: unknown[]) => Promise<object>>(async () => ({}));
 vi.mock("@/actions/exam", () => ({
   submitExam: (...args: unknown[]) => submitExam(...args),
 }));

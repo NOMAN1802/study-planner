@@ -31,10 +31,7 @@ export default async function WorkstationPage({ searchParams }: PageProps<"/work
     tab === "office"
       ? await getTaskRows(user, { ...DEFAULT_FILTERS, status: "all" }, new Date(), "OFFICE")
       : [];
-  const examChoices =
-    tab === "exams"
-      ? await getExamChoices(user, { id: data.plan.id, subjects: data.subjects })
-      : null;
+  const examChoices = tab === "exams" ? await getExamChoices(user, data.plan.id) : null;
 
   return (
     <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
