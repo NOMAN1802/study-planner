@@ -150,6 +150,10 @@ test.describe("work-station", () => {
     await page.goto("/work-station?tab=exams");
     const real = page.getByTestId("exam-start-topics");
     await expect(real.getByRole("button", { name: "Start daily exam" })).toBeDisabled();
+    // The Today tab's shortcut is locked too.
+    await page.goto("/work-station");
+    const todayExam = page.getByTestId("today-exam");
+    await expect(todayExam.getByRole("button", { name: "Take today's exam" })).toBeDisabled();
 
     // Tick a lecture done: it becomes a topic, picked by default for today's exam.
     await page.goto("/work-station?tab=subjects");
@@ -158,6 +162,11 @@ test.describe("work-station", () => {
       .getByRole("checkbox", { name: "Mark Lit 01: Literary Terms as done" })
       .check();
     await done;
+    await page.goto("/work-station");
+    await expect(todayExam.getByTestId("today-exam-summary")).toHaveText(
+      /\d+ questions · 15 min · from 1 lecture done today/,
+    );
+    await expect(todayExam.getByRole("button", { name: "Take today's exam" })).toBeEnabled();
     await page.goto("/work-station?tab=exams");
     const topic = real.getByRole("checkbox", { name: /Lit 01: Literary Terms/ });
     await expect(topic).toBeChecked();

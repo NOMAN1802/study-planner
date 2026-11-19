@@ -10,7 +10,9 @@ import {
   secondaryLink,
 } from "@/components/workstation/format";
 import { LectureLinks } from "@/components/workstation/lecture-links";
+import { TodayExam } from "@/components/workstation/today-exam";
 import { TopicDone } from "@/components/workstation/topic-done";
+import type { ExamChoices } from "@/lib/workstation/exam-server";
 import { Bar, Stat, StatStrip } from "@/components/workstation/ws-header";
 import { cn } from "@/lib/utils";
 import {
@@ -26,7 +28,7 @@ import {
 import { cycleLabels, type PlanItem } from "@/lib/workstation/schedule";
 import type { WorkstationData } from "@/lib/workstation/server";
 
-export function TodayTab({ data }: { data: WorkstationData }) {
+export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoices | null }) {
   const { schedule, now, plan, subjects, slots } = data;
   const subjectById = new Map(subjects.map((s) => [s.id, s]));
   const topicById = new Map(subjects.flatMap((s) => s.topics.map((t) => [t.id, t] as const)));
@@ -117,6 +119,8 @@ export function TodayTab({ data }: { data: WorkstationData }) {
           </Link>
         </div>
       ) : null}
+
+      {exam && exam.bankSize > 0 ? <TodayExam choices={exam} /> : null}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         <section

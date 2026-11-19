@@ -31,7 +31,8 @@ export default async function WorkstationPage({ searchParams }: PageProps<"/work
     tab === "office"
       ? await getTaskRows(user, { ...DEFAULT_FILTERS, status: "all" }, new Date(), "OFFICE")
       : [];
-  const examChoices = tab === "exams" ? await getExamChoices(user, data.plan.id) : null;
+  const examChoices =
+    tab === "exams" || tab === "today" ? await getExamChoices(user, data.plan.id) : null;
 
   return (
     <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
@@ -50,7 +51,7 @@ export default async function WorkstationPage({ searchParams }: PageProps<"/work
         <WorkstationTabs tab={tab} />
       </div>
 
-      {tab === "today" ? <TodayTab data={data} /> : null}
+      {tab === "today" ? <TodayTab data={data} exam={examChoices} /> : null}
       {tab === "plan" ? <PlanTab data={data} weekStartsOn={user.weekStartsOn} /> : null}
       {tab === "subjects" ? (
         <SubjectsTab
