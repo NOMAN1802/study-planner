@@ -26,7 +26,7 @@ export async function getTaskRows(
   only?: "OFFICE",
 ): Promise<TaskRow[]> {
   const tasks = await prisma.task.findMany({
-    // Study tasks back Work-Station subjects; they are not listed as tasks.
+    // Study tasks back Study Station subjects; they are not listed as tasks.
     where: { ...taskWhere(user.id, filters, user, now), category: only ?? { not: "STUDY" } },
     orderBy: taskOrderBy(filters.sort),
     include: { habit: { select: { id: true, name: true, color: true } } },

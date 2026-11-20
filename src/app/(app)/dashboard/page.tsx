@@ -77,7 +77,7 @@ export default async function DashboardPage() {
           title="BCS study"
           aside={
             <Link href="/work-station" className="font-medium text-accent hover:underline">
-              Open Work-Station
+              Open Study Station
             </Link>
           }
           className="lg:col-span-5 2xl:col-span-5"

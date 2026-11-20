@@ -4,7 +4,7 @@ export const TASK_STATUSES = ["TODO", "IN_PROGRESS", "DONE"] as const;
 export const TASK_PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
-/** Categories a user can pick. STUDY tasks are created by Work-Station only. */
+/** Categories a user can pick. STUDY tasks are created by Study Station only. */
 export const TASK_CATEGORIES = ["GENERAL", "OFFICE"] as const;
 export type TaskCategory = (typeof TASK_CATEGORIES)[number] | "STUDY";
 export const CATEGORY_LABEL: Record<(typeof TASK_CATEGORIES)[number], string> = {

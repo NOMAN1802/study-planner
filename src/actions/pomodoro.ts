@@ -48,7 +48,7 @@ function revalidateTimer(taskId: string) {
   revalidatePath("/work-station");
 }
 
-/** A Work-Station topic is only accepted on its own subject's task. */
+/** A Study Station topic is only accepted on its own subject's task. */
 async function ownedTopicId(userId: string, taskId: string, topicId: string | null | undefined) {
   if (!topicId || !idSchema.safeParse(topicId).success) return null;
   const topic = await prisma.topic.findFirst({
@@ -201,7 +201,7 @@ export async function runTimer(
         await creditFocus(tx, user, task, focusCreditMinutes(current, end.getTime(), true), end);
         if (next.status === "focus" || next.status === "break") {
           const s = next.session; // auto-started, begins exactly at `end`
-          // The next cycle continues on the same Work-Station topic.
+          // The next cycle continues on the same Study Station topic.
           const prev = await tx.pomodoroSession.findUnique({
             where: { id: current.id },
             select: { topicId: true },

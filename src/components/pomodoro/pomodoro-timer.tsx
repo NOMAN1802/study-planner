@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 type PomodoroTimerProps = {
   taskTitle: string;
   initial: TimerSnapshot;
-  /** Work-Station topic to record on sessions started here. */
+  /** Study Station topic to record on sessions started here. */
   topicId?: string | null;
 };
 

@@ -5,7 +5,7 @@ import { TAB_LABEL, WORKSTATION_TABS, type WorkstationTab } from "@/schemas/work
 
 export function WorkstationTabs({ tab }: { tab: WorkstationTab }) {
   return (
-    <nav aria-label="Work-Station sections" className="w-full sm:w-auto">
+    <nav aria-label="Study Station sections" className="w-full sm:w-auto">
       <ul className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-surface p-1 sm:flex sm:rounded-md">
         {WORKSTATION_TABS.map((t) => {
           const active = t === tab;

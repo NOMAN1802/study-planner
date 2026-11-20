@@ -23,7 +23,7 @@ function revalidateTasks() {
   revalidatePath("/work-station");
 }
 
-/** Office tasks live in Work-Station; everything else in Tasks. */
+/** Office tasks live in Study Station; everything else in Tasks. */
 function listPathFor(category: string) {
   return category === "OFFICE" ? "/work-station?tab=office" : "/tasks";
 }

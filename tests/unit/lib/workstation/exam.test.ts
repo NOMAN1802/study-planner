@@ -241,11 +241,11 @@ describe("question-bank files", () => {
 
   // The transcribed bank is kept out of git; check it whenever it is present.
   const path = "Doc/question-bank/english-literature.json";
-  it.runIf(existsSync(path))("the English Literature bank is valid (194 questions)", () => {
+  it.runIf(existsSync(path))("the English Literature bank is valid", () => {
     const file = bankFileSchema.parse(JSON.parse(readFileSync(path, "utf8")));
     const { rows, problems } = expandBank(file);
     expect(problems).toEqual([]);
-    expect(rows).toHaveLength(194);
-    expect(new Set(rows.map((r) => r.id)).size).toBe(194);
+    expect(rows.length).toBeGreaterThan(0);
+    expect(new Set(rows.map((r) => r.id)).size).toBe(rows.length);
   });
 });

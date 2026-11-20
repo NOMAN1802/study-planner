@@ -90,7 +90,7 @@ test.describe("work-station", () => {
       "English Literature + Grammar",
     );
     await expect(page.getByTestId("ws-plan-subject").nth(2)).toContainText("Math + Mental Ability");
-    await expect(page.getByText("87 learning + 15 revision days")).toBeVisible();
+    await expect(page.getByText("87 learning + 14 revision days")).toBeVisible();
     // Start day and plan length can change without losing progress.
     const plan = page.getByRole("form", { name: "Plan settings" });
     const startDay = await plan.getByLabel("First study day").inputValue();
@@ -244,7 +244,7 @@ test.describe("work-station", () => {
     await page.getByRole("link", { name: "Start Lit 01: Literary Terms" }).click();
     await expect(page).toHaveURL(/\/tasks\/[0-9a-f-]+\/focus\?topic=[0-9a-f-]+$/);
     await expect(page.getByTestId("focus-topic")).toContainText("Lit 01: Literary Terms");
-    await expect(page.getByRole("link", { name: "Work-Station" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Study Station" }).first()).toBeVisible();
 
     // The subject timer is pre-set to 50/10; shorten it for the test.
     const settings = page.getByRole("form", { name: "Timer settings" });

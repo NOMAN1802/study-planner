@@ -14,7 +14,7 @@ export function ExamResults({ stats }: { stats: ExamStats }) {
       <p className="py-6 text-center text-sm text-fg-muted">
         No exam results yet. Take a daily exam on{" "}
         <Link href="/work-station?tab=exams" className="text-accent hover:underline">
-          Work-Station → Exams
+          Study Station → Exams
         </Link>
         ; practice exams are not counted.
       </p>

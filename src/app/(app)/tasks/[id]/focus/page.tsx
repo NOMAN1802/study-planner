@@ -39,7 +39,7 @@ export default async function FocusPage({ params, searchParams }: PageProps<"/ta
         })
       : null;
   const back = study
-    ? { href: "/work-station", label: "Work-Station" }
+    ? { href: "/work-station", label: "Study Station" }
     : { href: "/tasks", label: "Tasks" };
 
   const [snapshot, history] = await Promise.all([

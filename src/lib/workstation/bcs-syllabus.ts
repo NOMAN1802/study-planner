@@ -21,12 +21,13 @@ const video = (id: string, title: string): SyllabusTopic => lecture(title, p(id,
 
 /**
  * The revision phase, in order: whole days given to one subject (or two
- * sharing a day). Subjects are named as in BCS_SYLLABUS.
+ * sharing a day). Subjects are named as in BCS_SYLLABUS. Math gets 2 days:
+ * its first falls on the 21 Feb 2027 holiday (a double study session).
  */
 export const REVISION_PLAN: readonly { subjects: readonly string[]; days: number }[] = [
   { subjects: ["English Literature + Grammar"], days: 3 },
   { subjects: ["Bangla Literature + Grammar"], days: 2 },
-  { subjects: ["Math + Mental Ability"], days: 3 },
+  { subjects: ["Math + Mental Ability"], days: 2 },
   { subjects: ["International Affairs"], days: 2 },
   { subjects: ["Bangladesh Affairs"], days: 2 },
   { subjects: ["General Science"], days: 1 },

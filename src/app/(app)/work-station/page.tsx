@@ -18,7 +18,7 @@ import { getRoutineSlots, getWorkstationData } from "@/lib/workstation/server";
 import { DEFAULT_FILTERS } from "@/schemas/task";
 import { parseTab } from "@/schemas/workstation";
 
-export const metadata: Metadata = { title: "Work-Station" };
+export const metadata: Metadata = { title: "Study Station" };
 
 export default async function WorkstationPage({ searchParams }: PageProps<"/work-station">) {
   const tab = parseTab((await searchParams).tab);
@@ -83,7 +83,7 @@ async function Setup({ timezone }: { timezone: string }) {
           Set up your BCS study plan
         </h2>
         <p className="mt-1 max-w-prose text-sm text-fg-muted">
-          Work-Station plans study around your office hours: {perDay[6]} study cycles on office days
+          Study Station plans study around your office hours: {perDay[6]} study cycles on office days
           and {perDay[5]} on Friday, {perDay.reduce((a, b) => a + b, 0)} a week. One cycle is 50
           minutes of focus and a 10-minute break.
         </p>
