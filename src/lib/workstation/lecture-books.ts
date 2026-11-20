@@ -109,6 +109,18 @@ export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   "Grammar 17: Spelling": slice(ENGLISH, "156-161", "Spelling"),
   "Grammar 18: Phrase & Idioms": slice(ENGLISH, "103-115", "Phrase and Idioms"),
   "Grammar 19: One Word Substitute": slice(ENGLISH, "161-171", "One-Word Substitution"),
+  // The book has no vocabulary chapter; One-Word Substitution is the closest
+  // (BCS synonym/antonym questions, word meanings, word roots).
+  "Vocabulary Marathon-1": slice(
+    ENGLISH,
+    "161-171",
+    "One-Word Substitution (synonyms, antonyms, word roots)",
+  ),
+  "Vocabulary Marathon-2": slice(
+    ENGLISH,
+    "161-171",
+    "One-Word Substitution (synonyms, antonyms, word roots)",
+  ),
 };
 
 /** The lecture's file name in the bucket: its title, lower-cased, as a slug. */
