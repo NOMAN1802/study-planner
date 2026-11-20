@@ -176,7 +176,9 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                         <span className="font-mono tabular-nums">
                           {plural(item.cycles, "cycle")}
                         </span>
-                        {topic ? <LectureLinks parts={topic.parts} /> : null}
+                        {topic ? (
+                          <LectureLinks parts={topic.parts} topicId={topic.id} book={topic.book} />
+                        ) : null}
                       </p>
                     </div>
                     {href ? (

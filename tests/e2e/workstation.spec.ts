@@ -46,6 +46,11 @@ test.describe("work-station", () => {
       await expect(items.first()).toContainText("Vocabulary revision: this week's 60 words");
     else await expect(items.first()).toContainText("Words 1–10 · Vocabulary Marathon-1");
     await expect(items.nth(1)).toContainText("Lit 01: Literary Terms");
+    // Its lecture book pages open through the app (a signed link to private storage).
+    await expect(items.nth(1).getByTestId("ws-book")).toHaveAttribute(
+      "href",
+      /^\/work-station\/book\/[0-9a-f-]+$/,
+    );
     await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^0\/(8|16)$/);
     await expect(page.getByTestId("ws-week-cycles")).toHaveText("0/64");
     await expect(page.getByTestId("ws-buffer")).toHaveText(/^[+-]\d+$/);

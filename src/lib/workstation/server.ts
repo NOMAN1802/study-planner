@@ -16,6 +16,7 @@ import {
 import { buildSchedule, type PlanSubject, type Schedule } from "@/lib/workstation/schedule";
 import type { ExamKind } from "@/schemas/workstation";
 import { REVISION_PLAN, type LecturePart } from "@/lib/workstation/bcs-syllabus";
+import { LECTURE_BOOK_SLICES } from "@/lib/workstation/lecture-books";
 import { lectureParts } from "@/lib/workstation/lecture-parts";
 
 export type WsTopic = {
@@ -25,6 +26,8 @@ export type WsTopic = {
   estCycles: number;
   done: boolean;
   spentCycles: number;
+  /** Chapters of the lecture book covering this lecture, when there is one. */
+  book: string | null;
 };
 export type WsSubject = {
   id: string;
@@ -159,6 +162,7 @@ export async function getWorkstationData(
       estCycles: t.estCycles,
       done: t.doneAt !== null,
       spentCycles: spent.get(t.id) ?? 0,
+      book: LECTURE_BOOK_SLICES[t.title]?.chapters ?? null,
     })),
   }));
 

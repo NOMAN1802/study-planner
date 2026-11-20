@@ -159,7 +159,7 @@ function TopicRow({
           {topic.title}
         </p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-fg-muted">
-          <LectureLinks parts={topic.parts} />
+          <LectureLinks parts={topic.parts} topicId={topic.id} book={topic.book} />
           {topic.spentCycles > 0 ? (
             <span className="font-mono tabular-nums">
               {plural(topic.spentCycles, "cycle")} spent

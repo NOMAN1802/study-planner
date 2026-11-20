@@ -22,6 +22,7 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "db:questions": "tsx prisma/import-questions.ts",
+    "books:upload": "tsx scripts/upload-lecture-books.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

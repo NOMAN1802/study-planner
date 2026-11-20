@@ -55,3 +55,7 @@ next-env.d.ts
 # question banks transcribed from books: kept out of the public repo, loaded into the database
 /Doc/question-bank/
 /Doc/study-resource/*.zip
+
+# Lecture books are paid material: keep the source books and slices local.
+/Doc/study-resource/লেকচার বুক*
+/Doc/lecture-books/
