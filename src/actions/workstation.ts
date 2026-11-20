@@ -37,7 +37,7 @@ const idSchema = z.uuid();
 type Result = { error?: string };
 
 function revalidate() {
-  revalidatePath("/work-station");
+  revalidatePath("/work-station", "layout");
   revalidatePath("/dashboard");
 }
 

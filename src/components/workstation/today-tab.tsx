@@ -189,7 +189,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                         Start
                       </Link>
                     ) : started && isExam(item.kind) ? (
-                      <Link href="/work-station?tab=exams" className={secondaryLink}>
+                      <Link href="/work-station/exams" className={secondaryLink}>
                         Record score
                       </Link>
                     ) : null}
@@ -221,7 +221,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
           {daySlots.length === 0 ? (
             <p className="p-4 text-sm text-fg-muted">
               Nothing in today&apos;s routine.{" "}
-              <Link href="/work-station?tab=routine" className="text-accent hover:underline">
+              <Link href="/work-station/routine" className="text-accent hover:underline">
                 Edit routine
               </Link>
             </p>

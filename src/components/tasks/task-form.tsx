@@ -229,7 +229,7 @@ export function TaskForm({
           {submitLabel}
         </Button>
         <Link
-          href={defaults.category === "OFFICE" ? "/work-station?tab=office" : "/tasks"}
+          href={defaults.category === "OFFICE" ? "/work-station/office" : "/tasks"}
           className="inline-flex h-9 items-center rounded-md px-4 text-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
         >
           Cancel

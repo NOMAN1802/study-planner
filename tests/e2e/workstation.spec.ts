@@ -50,8 +50,16 @@ test.describe("work-station", () => {
     await expect(page.getByTestId("ws-week-cycles")).toHaveText("0/64");
     await expect(page.getByTestId("ws-buffer")).toHaveText(/^[+-]\d+$/);
 
+    // Sections are pages in a sidebar dropdown under Study Station.
+    const station = page.getByRole("button", { name: "Study Station" });
+    await expect(station).toHaveAttribute("aria-expanded", "true");
+    await station.click();
+    await expect(page.getByRole("link", { name: "Routine", exact: true })).toBeHidden();
+    await station.click();
+
     // Routine: 64 cycles a week.
     await page.getByRole("link", { name: "Routine", exact: true }).click();
+    await expect(page).toHaveURL(/\/work-station\/routine$/);
     await expect(page.getByTestId("ws-routine-total")).toHaveText("64");
     await expect(page.getByTestId("ws-routine-day")).toHaveCount(7);
 
@@ -123,7 +131,7 @@ test.describe("work-station", () => {
     await expect(page.getByRole("heading", { name: "New office task" })).toBeVisible();
     await page.getByLabel("Title").fill("Prepare budget sheet");
     await page.getByRole("button", { name: "Create task" }).click();
-    await expect(page).toHaveURL(/\/work-station\?tab=office$/, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\/work-station\/office$/, { timeout: 30_000 });
     await expect(taskRow(page, "Prepare budget sheet")).toBeVisible();
     await page.goto("/tasks");
     await expect(taskRow(page, "Prepare budget sheet")).toContainText("Office");
@@ -131,7 +139,7 @@ test.describe("work-station", () => {
     await expect(page.getByTestId("task-row")).toHaveCount(1);
 
     // Exams: record a weekly exam.
-    await page.goto("/work-station?tab=exams");
+    await page.goto("/work-station/exams");
     const form = page.getByRole("form", { name: "Record exam" });
     await form.getByLabel("Exam").selectOption("WEEKLY");
     await form.getByLabel("Score").fill("40");
@@ -147,7 +155,7 @@ test.describe("work-station", () => {
     await seedQuestions(email);
 
     // Nothing ticked done yet: no topics to take a real exam on.
-    await page.goto("/work-station?tab=exams");
+    await page.goto("/work-station/exams");
     const real = page.getByTestId("exam-start-topics");
     await expect(real.getByRole("button", { name: "Start daily exam" })).toBeDisabled();
     // The Today tab's shortcut is locked too.
@@ -156,7 +164,7 @@ test.describe("work-station", () => {
     await expect(todayExam.getByRole("button", { name: "Take today's exam" })).toBeDisabled();
 
     // Tick a lecture done: it becomes a topic, picked by default for today's exam.
-    await page.goto("/work-station?tab=subjects");
+    await page.goto("/work-station/subjects");
     const done = serverActionDone(page);
     await subjectCard(page, "English Literature + Grammar")
       .getByRole("checkbox", { name: "Mark Lit 01: Literary Terms as done" })
@@ -167,7 +175,7 @@ test.describe("work-station", () => {
       /\d+ questions · 15 min · from 1 lecture done today/,
     );
     await expect(todayExam.getByRole("button", { name: "Take today's exam" })).toBeEnabled();
-    await page.goto("/work-station?tab=exams");
+    await page.goto("/work-station/exams");
     const topic = real.getByRole("checkbox", { name: /Lit 01: Literary Terms/ });
     await expect(topic).toBeChecked();
     await expect(real.getByTestId("exam-start-summary")).toHaveText(
@@ -204,7 +212,7 @@ test.describe("work-station", () => {
     await expect(page.getByLabel("Unanswered")).toHaveCount(count - 1);
 
     // Recorded under Exams, linking back to the review.
-    await page.goto("/work-station?tab=exams");
+    await page.goto("/work-station/exams");
     const result = page.getByTestId("ws-exam").first();
     await expect(result).toContainText("Daily exam");
     await expect(result.getByTestId("ws-exam-score")).toContainText(`/${count}`);
@@ -219,7 +227,7 @@ test.describe("work-station", () => {
     await expect(panel.getByTestId("exam-recent").first()).toContainText(`/${count}`);
 
     // Practice: same topic, checked as you go, not saved.
-    await page.goto("/work-station?tab=exams");
+    await page.goto("/work-station/exams");
     const practice = page.getByTestId("practice-start");
     await expect(practice.getByRole("checkbox", { name: /Lit 01: Literary Terms/ })).toBeChecked();
     await practice.getByLabel("Questions").selectOption("10");
@@ -263,7 +271,7 @@ test.describe("work-station", () => {
     await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^1\/(8|16)$/);
     // The auto-started break is still running.
     await expect(page.getByRole("link", { name: "Open timer" })).toBeVisible();
-    await page.goto("/work-station?tab=subjects");
+    await page.goto("/work-station/subjects");
     await expect(
       subjectCard(page, "English Literature + Grammar")
         .getByTestId("ws-topic")
@@ -288,7 +296,7 @@ test.describe("work-station accessibility", () => {
     await scan(page, "work-station setup");
     await setUpPlan(page);
     for (const tab of ["today", "plan", "subjects", "exams", "office", "routine"]) {
-      await page.goto(tab === "today" ? "/work-station" : `/work-station?tab=${tab}`);
+      await page.goto(tab === "today" ? "/work-station" : `/work-station/${tab}`);
       await expect(page.getByRole("status", { name: "Loading" })).toHaveCount(0);
       for (const theme of ["light", "dark"] as const) {
         await page.evaluate((t) => {

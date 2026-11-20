@@ -1,35 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { TAB_LABEL, WORKSTATION_TABS, type WorkstationTab } from "@/schemas/workstation";
-
-export function WorkstationTabs({ tab }: { tab: WorkstationTab }) {
-  return (
-    <nav aria-label="Study Station sections" className="w-full sm:w-auto">
-      <ul className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-surface p-1 sm:flex sm:rounded-md">
-        {WORKSTATION_TABS.map((t) => {
-          const active = t === tab;
-          return (
-            <li key={t}>
-              <Link
-                href={t === "today" ? "/work-station" : `/work-station?tab=${t}`}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex h-9 items-center justify-center rounded-md px-3 text-[13px] transition-colors duration-150 sm:h-8",
-                  active
-                    ? "bg-fg font-medium text-bg"
-                    : "text-fg-muted hover:bg-surface-2 hover:text-fg",
-                )}
-              >
-                {TAB_LABEL[t]}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
-}
 
 /** One ruled strip of figures (2 columns on phones, 4 from lg). */
 export function StatStrip({ children }: { children: ReactNode }) {

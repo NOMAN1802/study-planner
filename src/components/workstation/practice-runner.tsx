@@ -143,7 +143,7 @@ export function PracticeRunner({
             <Link href={again} className="font-medium text-accent hover:underline">
               New questions, same topics
             </Link>
-            <Link href="/work-station?tab=exams" className="text-fg-muted hover:text-fg">
+            <Link href="/work-station/exams" className="text-fg-muted hover:text-fg">
               Back to exams
             </Link>
           </div>

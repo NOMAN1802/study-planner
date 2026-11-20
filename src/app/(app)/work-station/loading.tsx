@@ -13,7 +13,6 @@ export default function Loading() {
           <Skeleton className="h-6 w-48" />
           <Skeleton className="h-3 w-64" />
         </div>
-        <Skeleton className="h-8 w-80" />
       </div>
       <StatStrip>
         {Array.from({ length: 4 }, (_, i) => (

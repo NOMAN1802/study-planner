@@ -26,7 +26,7 @@ const startSchema = z.object({
 });
 
 function revalidate() {
-  revalidatePath("/work-station");
+  revalidatePath("/work-station", "layout");
   revalidatePath("/dashboard");
 }
 

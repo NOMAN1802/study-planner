@@ -25,7 +25,7 @@ export default async function ExamPage({ params }: PageProps<"/work-station/exam
     <div className="enter mx-auto flex w-full max-w-3xl flex-col gap-4">
       <div>
         <Link
-          href="/work-station?tab=exams"
+          href="/work-station/exams"
           className="mb-1 inline-flex items-center gap-1 text-xs text-fg-muted hover:text-fg"
         >
           <ArrowLeft className="size-3.5" aria-hidden />

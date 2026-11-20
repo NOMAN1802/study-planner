@@ -20,12 +20,12 @@ const idSchema = z.uuid();
 function revalidateTasks() {
   revalidatePath("/tasks");
   revalidatePath("/dashboard");
-  revalidatePath("/work-station");
+  revalidatePath("/work-station", "layout");
 }
 
 /** Office tasks live in Study Station; everything else in Tasks. */
 function listPathFor(category: string) {
-  return category === "OFFICE" ? "/work-station?tab=office" : "/tasks";
+  return category === "OFFICE" ? "/work-station/office" : "/tasks";
 }
 
 async function ownedTask(userId: string, taskId: string) {

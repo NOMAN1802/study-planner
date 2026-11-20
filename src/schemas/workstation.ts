@@ -149,6 +149,7 @@ export function formValues<K extends string>(formData: FormData, keys: readonly 
   >;
 }
 
+/** Study Station sections, for old `?tab=` links (each is now its own page). */
 export const WORKSTATION_TABS = [
   "today",
   "plan",
@@ -158,15 +159,6 @@ export const WORKSTATION_TABS = [
   "routine",
 ] as const;
 export type WorkstationTab = (typeof WORKSTATION_TABS)[number];
-export const TAB_LABEL: Record<WorkstationTab, string> = {
-  today: "Today",
-  plan: "Plan",
-  subjects: "Subjects",
-  exams: "Exams",
-  office: "Office",
-  routine: "Routine",
-};
-
 export function parseTab(value: unknown): WorkstationTab {
   const v = Array.isArray(value) ? value[0] : value;
   return (WORKSTATION_TABS as readonly string[]).includes(v as string)

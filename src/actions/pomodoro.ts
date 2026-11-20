@@ -45,7 +45,7 @@ function revalidateTimer(taskId: string) {
   revalidatePath("/tasks");
   revalidatePath("/habits");
   revalidatePath("/dashboard");
-  revalidatePath("/work-station");
+  revalidatePath("/work-station", "layout");
 }
 
 /** A Study Station topic is only accepted on its own subject's task. */
