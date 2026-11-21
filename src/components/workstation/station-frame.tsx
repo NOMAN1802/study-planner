@@ -42,7 +42,7 @@ export function StationFrame({
             <span className="font-mono tabular-nums">
               {formatDay(data.plan.startDay)} → {formatDay(data.schedule.planEnd)}
             </span>
-            <span className="hidden sm:inline"> · 50-minute focus, 10-minute break</span>
+            <span className="hidden sm:inline"> · tick items done as you study</span>
           </p>
         </div>
       </div>

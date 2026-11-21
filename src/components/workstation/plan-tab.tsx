@@ -7,7 +7,7 @@ import type { WeekStart } from "@/lib/dates";
 import { addDays, startOfWeekKey, weekdayOf } from "@/lib/planner";
 import { cn } from "@/lib/utils";
 import { WEEKDAY_SHORT } from "@/lib/workstation/routine";
-import { HOLIDAY_LECTURE_CYCLES, LECTURE_CYCLES, type PlanDay } from "@/lib/workstation/schedule";
+import { HOLIDAY_LECTURES, LECTURES_PER_DAY, type PlanDay } from "@/lib/workstation/schedule";
 import type { WorkstationData } from "@/lib/workstation/server";
 
 /** The subject that takes most of a day's learning cycles, if any. */
@@ -98,9 +98,9 @@ export function PlanTab({
         >
           <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
           <span>
-            At {LECTURE_CYCLES / 2} lectures a day ({HOLIDAY_LECTURE_CYCLES / 2} on Fridays and
-            holidays) the remaining lectures run {plural(-schedule.bufferDays, "day")} past the
-            learning phase. Add learning days, lower lecture estimates, or catch up on your off day.
+            At {LECTURES_PER_DAY} lectures a day ({HOLIDAY_LECTURES} on Fridays and holidays) the
+            remaining lectures run {plural(-schedule.bufferDays, "day")} past the learning phase.
+            Add learning days, lower lecture estimates, or catch up on your off day.
           </span>
         </p>
       ) : null}

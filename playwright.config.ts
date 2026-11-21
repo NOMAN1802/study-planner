@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 // E2E_PROD=1 runs the suite against `next start` (the production build) on its
 // own port, so it never reuses a dev server that happens to be running.
 const PROD = Boolean(process.env.E2E_PROD);
-const PORT = PROD ? 3100 : 3000;
+const PORT = Number(process.env.E2E_PORT) || (PROD ? 3100 : 3000);
 const baseURL = `http://localhost:${PORT}`;
 
 export default defineConfig({

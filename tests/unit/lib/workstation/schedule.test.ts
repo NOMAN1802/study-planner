@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { BCS_SYLLABUS } from "@/lib/workstation/bcs-syllabus";
 import {
-  LECTURE_CYCLES,
-  HOLIDAY_LECTURE_CYCLES,
+  LECTURES_PER_DAY,
+  HOLIDAY_LECTURES,
   buildSchedule,
   cycleLabels,
   subjectRoutine,
@@ -107,14 +107,14 @@ describe("buildSchedule", () => {
     // Lecture 1 was ticked today without the timer: only one more lecture today.
     const base = input({ subjects: [subject("eng", 10)] });
     base.subjects[0].topics[0].done = true;
-    const s = buildSchedule({ ...base, lectureCyclesDoneToday: 2 });
+    const s = buildSchedule({ ...base, lecturesDoneToday: 1 });
     expect(s.days[0].items.filter((i) => i.kind === "topic").map((i) => i.topicId)).toEqual([
       "eng-2",
     ]);
     // Tomorrow is back to two.
     expect(s.days[1].items.filter((i) => i.kind === "topic")).toHaveLength(2);
-    // Timed cycles and ticked lectures are the same work, not counted twice.
-    const timed = buildSchedule({ ...base, doneToday: 2, lectureCyclesDoneToday: 2 });
+    // Timed cycles on the same lecture do not count it twice.
+    const timed = buildSchedule({ ...base, doneToday: 2, lecturesDoneToday: 1 });
     expect(timed.days[0].items.filter((i) => i.kind === "topic")).toHaveLength(1);
   });
 
@@ -122,12 +122,11 @@ describe("buildSchedule", () => {
     const base = input({ subjects: [subject("vocab", 1, { isDaily: true }), subject("eng", 10)] });
     base.subjects[1].topics[0].done = true;
     base.subjects[1].topics[1].spentCycles = 1;
-    const s = buildSchedule({ ...base, doneToday: 3, dailyDoneToday: true });
-    // 3 done today (1 vocabulary + 2 lecture): 2 of 4 lecture cycles and 5 of 8 cycles left.
+    const s = buildSchedule({ ...base, doneToday: 3, dailyDoneToday: true, lecturesDoneToday: 1 });
+    // 3 done today (1 vocabulary + lecture 1): one more lecture (eng-2, 1 cycle left), 5 of 8 cycles left.
     expect(s.days[0].items.map((i) => `${i.topicId ?? i.kind}:${i.cycles}`)).toEqual([
       "eng-2:1",
-      "eng-3:1",
-      "revision:3",
+      "revision:4",
     ]);
   });
 
@@ -255,11 +254,27 @@ describe("daily lecture limit", () => {
       .items.filter((i) => i.kind === "topic")
       .reduce((n, i) => n + i.cycles, 0);
 
+  const lectures = (s: ReturnType<typeof buildSchedule>, day: string) =>
+    s.days.find((d) => d.day === day)!.items.filter((i) => i.kind === "topic").length;
+
   it("caps lectures at 2 on office days and 3 on Friday", () => {
     const s = buildSchedule(busy());
-    expect(lectureCycles(s, "2026-11-21")).toBe(LECTURE_CYCLES); // Saturday
-    expect(lectureCycles(s, "2026-11-26")).toBe(LECTURE_CYCLES); // Thursday
-    expect(lectureCycles(s, "2026-11-27")).toBe(HOLIDAY_LECTURE_CYCLES); // Friday
+    expect(lectures(s, "2026-11-21")).toBe(LECTURES_PER_DAY); // Saturday
+    expect(lectures(s, "2026-11-26")).toBe(LECTURES_PER_DAY); // Thursday
+    expect(lectures(s, "2026-11-27")).toBe(HOLIDAY_LECTURES); // Friday
+    expect(lectureCycles(s, "2026-11-21")).toBe(4);
+  });
+
+  it("counts lectures, not cycles: short lectures do not let a third one in on an office day", () => {
+    // Lit 01 has 2 cycles left, Lit 02 and Lit 03 only 1 each (studied earlier).
+    const base = busy();
+    base.subjects[0].topics[1].spentCycles = 1;
+    base.subjects[0].topics[2].spentCycles = 1;
+    const s = buildSchedule(base);
+    expect(
+      s.days[0].items.filter((i) => i.kind === "topic").map((i) => `${i.topicId}:${i.cycles}`),
+    ).toEqual(["eng-1:2", "eng-2:1"]);
+    expect(kinds(s, "2026-11-21")).toEqual(["topic:2", "topic:1", "revision:5"]);
   });
 
   it("fills the rest of a lecture day's session with revision of the current subject", () => {
@@ -292,9 +307,7 @@ describe("holidays", () => {
     );
     const day = s.days.find((d) => d.day === "2026-11-25")!;
     expect(day.capacity).toBe(14);
-    expect(day.items.filter((i) => i.kind === "topic").reduce((n, i) => n + i.cycles, 0)).toBe(
-      HOLIDAY_LECTURE_CYCLES,
-    );
+    expect(day.items.filter((i) => i.kind === "topic")).toHaveLength(HOLIDAY_LECTURES);
     expect(day.items.some((i) => i.kind.startsWith("weekly"))).toBe(false);
     expect(day.items.reduce((n, i) => n + i.cycles, 0)).toBe(14);
   });

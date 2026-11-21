@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Play } from "lucide-react";
-import Link from "next/link";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { useState, useTransition } from "react";
 import { moveSubject, setTopicEstimate } from "@/actions/workstation";
 import { iconButton, plural } from "@/components/workstation/format";
@@ -128,7 +127,7 @@ export function SubjectsTab({
                     aria-label={`${s.name} lectures`}
                   >
                     {s.topics.map((t) => (
-                      <TopicRow key={t.id} topic={t} taskId={s.taskId} onError={setError} />
+                      <TopicRow key={t.id} topic={t} onError={setError} />
                     ))}
                   </ul>
                 </div>
@@ -141,15 +140,7 @@ export function SubjectsTab({
   );
 }
 
-function TopicRow({
-  topic,
-  taskId,
-  onError,
-}: {
-  topic: WsTopic;
-  taskId: string;
-  onError: (e: string | null) => void;
-}) {
+function TopicRow({ topic, onError }: { topic: WsTopic; onError: (e: string | null) => void }) {
   const [, start] = useTransition();
   return (
     <li className="flex flex-wrap items-start gap-x-3 gap-y-2 px-4 py-3" data-testid="ws-topic">
@@ -189,16 +180,6 @@ function TopicRow({
           )}
         </select>
       </label>
-      {!topic.done ? (
-        <Link
-          href={`/tasks/${taskId}/focus?topic=${topic.id}`}
-          className={iconButton}
-          aria-label={`Start ${topic.title}`}
-          title="Start a study cycle"
-        >
-          <Play className="size-4" aria-hidden />
-        </Link>
-      ) : null}
     </li>
   );
 }

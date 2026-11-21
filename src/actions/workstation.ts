@@ -11,6 +11,7 @@ import {
   BREAK_MINUTES,
   FOCUS_MINUTES,
   defaultRoutine,
+  localNow,
   overlappingSlot,
   type RoutineKind,
 } from "@/lib/workstation/routine";
@@ -182,6 +183,33 @@ export async function setTopicDone(topicId: string, done: boolean): Promise<Resu
     where: { id: topic.id },
     data: { doneAt: done ? new Date() : null },
   });
+  revalidate();
+  return {};
+}
+
+const checkSchema = z.object({
+  key: z.string().regex(/^(daily|weekly-revision|subject-revision|revision):[0-9a-f-]*:\d{1,2}$/),
+  cycles: z.number().int().min(1).max(24),
+  done: z.boolean(),
+});
+
+/** Ticks a non-lecture item of today's plan (vocabulary, revision) done or not done. */
+export async function setItemDone(key: string, cycles: number, done: boolean): Promise<Result> {
+  const user = await requireUser();
+  const parsed = checkSchema.safeParse({ key, cycles, done });
+  if (!parsed.success) return { error: "That item can't be ticked." };
+  const plan = await ownedPlan(user.id);
+  if (!plan) return { error: "No study plan." };
+  const day = localNow(new Date(), user.timezone).dayKey;
+  if (parsed.data.done) {
+    await prisma.studyCheck.upsert({
+      where: { planId_day_key: { planId: plan.id, day, key: parsed.data.key } },
+      create: { planId: plan.id, day, key: parsed.data.key, cycles: parsed.data.cycles },
+      update: { cycles: parsed.data.cycles },
+    });
+  } else {
+    await prisma.studyCheck.deleteMany({ where: { planId: plan.id, day, key: parsed.data.key } });
+  }
   revalidate();
   return {};
 }

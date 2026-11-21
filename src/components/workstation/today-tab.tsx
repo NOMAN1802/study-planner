@@ -1,4 +1,4 @@
-import { Briefcase, Play, Timer } from "lucide-react";
+import { Briefcase, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/components/workstation/format";
 import { LectureLinks } from "@/components/workstation/lecture-links";
 import { TodayExam } from "@/components/workstation/today-exam";
+import { ItemDone } from "@/components/workstation/item-done";
 import { TopicDone } from "@/components/workstation/topic-done";
 import type { ExamChoices } from "@/lib/workstation/exam-server";
 import { Bar, Stat, StatStrip } from "@/components/workstation/ws-header";
@@ -26,6 +27,7 @@ import {
   weekCycles,
 } from "@/lib/workstation/routine";
 import { cycleLabels, type PlanItem } from "@/lib/workstation/schedule";
+import { todayProgress, type TodayItem } from "@/lib/workstation/today";
 import type { WorkstationData } from "@/lib/workstation/server";
 
 export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoices | null }) {
@@ -36,8 +38,11 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
   const currentSubject = current ? subjectById.get(current.subjectId) : undefined;
 
   const started = now.dayKey >= plan.startDay;
-  const preview = started ? schedule.days.find((d) => d.day === now.dayKey) : schedule.days[0];
-  const items = preview?.items ?? [];
+  // Before the plan starts: a preview of the first day, nothing to tick yet.
+  const items: (PlanItem & Partial<TodayItem>)[] = started
+    ? data.today
+    : (schedule.days[0]?.items ?? []);
+  const progress = todayProgress(data.today);
 
   const capacity = studyCyclesByWeekday(slots, data.isHoliday);
   const todayTarget = capacity[now.weekday];
@@ -46,16 +51,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
   const dayNumber = daysBetween(plan.startDay, now.dayKey) + 1;
   const totalDays = plan.learningDays + plan.revisionDays;
 
-  /** Where a plan item's Start button goes. */
-  function startHref(item: PlanItem): string | null {
-    if (isExam(item.kind)) return null;
-    const subject = item.subjectId ? subjectById.get(item.subjectId) : currentSubject;
-    if (!subject) return null;
-    const q = item.topicId ? `?topic=${item.topicId}` : "";
-    return `/tasks/${subject.taskId}/focus${q}`;
-  }
-
-  // Today's cycles in order: completed ones first, then the plan's labels.
+  // Today's items laid over the routine's cycles, in plan order.
   const labels = cycleLabels(items);
   const daySlots = studyDaySlots(slots, now.weekday, data.isHoliday);
   const marksBySlot = new Map<string, { start: number; end: number; index: number }[]>();
@@ -73,7 +69,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
         <Stat
           label="Today"
           value={`${data.doneToday}/${todayTarget}`}
-          detail="study cycles (50 + 10 min)"
+          detail="study hours ticked done"
           testId="ws-today-cycles"
         />
         <Stat
@@ -104,22 +100,6 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
         />
       </StatStrip>
 
-      {data.activeTimer ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-sm border border-border bg-surface px-4 py-3 text-sm">
-          <span className="inline-flex items-center gap-2">
-            <Timer className="size-4 text-accent" aria-hidden />A study timer is running.
-          </span>
-          <Link
-            className={secondaryLink}
-            href={`/tasks/${data.activeTimer.taskId}/focus${
-              data.activeTimer.topicId ? `?topic=${data.activeTimer.topicId}` : ""
-            }`}
-          >
-            Open timer
-          </Link>
-        </div>
-      ) : null}
-
       {exam && exam.bankSize > 0 ? <TodayExam choices={exam} /> : null}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
@@ -129,7 +109,11 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
         >
           <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-2 sm:px-5">
             <h2 id="up-next-title" className="font-display text-base font-medium tracking-tight">
-              {started ? "Up next today" : `First day · ${formatDay(plan.startDay)}`}
+              {!started
+                ? `First day · ${formatDay(plan.startDay)}`
+                : progress.complete
+                  ? "Study session complete"
+                  : "Today's study"}
             </h2>
             {currentSubject ? (
               <span className="inline-flex items-center gap-2 text-xs text-fg-muted">
@@ -142,55 +126,90 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
               </span>
             ) : null}
           </header>
+          {started && progress.complete ? (
+            <div
+              className="flex items-start gap-3 border-t border-border px-4 py-4 sm:px-5"
+              role="status"
+              data-testid="ws-session-complete"
+            >
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-accent" aria-hidden />
+              <div>
+                <p className="text-sm font-medium text-fg">
+                  All {plural(items.length, "item")} done · {plural(progress.done, "hour")} of study
+                </p>
+                <p className="mt-0.5 text-xs text-fg-muted">
+                  {formatDay(now.dayKey, { weekday: "long" })}. Untick an item below if it
+                  isn&apos;t finished yet.
+                </p>
+              </div>
+            </div>
+          ) : null}
           {items.length === 0 ? (
             <p className="p-4 text-sm text-fg-muted">
               {todayTarget === 0
                 ? "No study slots in today's routine"
-                : "All of today's cycles are done. Rest well."}
+                : "Nothing planned for today. Rest well."}
             </p>
           ) : (
             <ul className="divide-y divide-border" aria-label="Today's study items">
               {items.map((item, i) => {
                 const topic = item.topicId ? topicById.get(item.topicId) : undefined;
                 const subject = item.subjectId ? subjectById.get(item.subjectId) : undefined;
-                const href = started ? startHref(item) : null;
+                const done = started && item.done === true;
                 return (
                   <li
-                    key={`${item.kind}-${item.topicId ?? item.subjectId ?? ""}-${i}`}
+                    key={item.key ?? `${item.kind}-${item.topicId ?? item.subjectId ?? ""}-${i}`}
                     className="flex items-start gap-3 px-4 py-3"
                     data-testid="ws-item"
+                    data-done={done ? "true" : undefined}
                   >
-                    {topic && started ? (
-                      <TopicDone id={topic.id} title={topic.title} done={topic.done} />
-                    ) : (
+                    {!started ? (
                       <span
                         className="mt-2 size-2 shrink-0 rounded-full"
                         style={{ backgroundColor: subject?.color ?? "var(--fg-subtle)" }}
                         aria-hidden
                       />
+                    ) : item.via === "topic" && topic ? (
+                      <TopicDone id={topic.id} title={topic.title} done={topic.done} />
+                    ) : item.via === "check" && item.key ? (
+                      <ItemDone
+                        itemKey={item.key}
+                        cycles={item.cycles}
+                        label={item.label}
+                        done={done}
+                      />
+                    ) : (
+                      <input
+                        type="checkbox"
+                        checked={done}
+                        disabled
+                        aria-label={
+                          done ? `${item.label}: result recorded` : `${item.label}: not taken yet`
+                        }
+                        title="Ticked once the result is recorded"
+                        className="mt-0.5 size-4 shrink-0 rounded-sm accent-(--accent)"
+                      />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-fg">{item.label}</p>
+                      <p
+                        className={cn(
+                          "text-sm font-medium",
+                          done ? "text-fg-subtle line-through" : "text-fg",
+                        )}
+                      >
+                        {item.label}
+                      </p>
                       <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-fg-muted">
                         <span>{KIND_TEXT[item.kind]}</span>
                         <span className="font-mono tabular-nums">
-                          {plural(item.cycles, "cycle")}
+                          {plural(item.cycles, "hour")}
                         </span>
-                        {topic ? (
+                        {topic && item.kind === "topic" ? (
                           <LectureLinks parts={topic.parts} topicId={topic.id} book={topic.book} />
                         ) : null}
                       </p>
                     </div>
-                    {href ? (
-                      <Link
-                        href={href}
-                        className={secondaryLink}
-                        aria-label={`Start ${item.label}`}
-                      >
-                        <Play className="size-3.5" aria-hidden />
-                        Start
-                      </Link>
-                    ) : started && isExam(item.kind) ? (
+                    {started && isExam(item.kind) && !done ? (
                       <Link href="/work-station/exams" className={secondaryLink}>
                         Record score
                       </Link>
@@ -262,8 +281,9 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                     ) : (
                       <ul className="mt-2 flex flex-col gap-1" aria-label={`${slot.label} cycles`}>
                         {(marksBySlot.get(slot.id) ?? []).map((m) => {
-                          const done = m.index < data.doneToday;
-                          const label = done ? "Done" : labels[m.index - data.doneToday]?.label;
+                          const item = labels[m.index];
+                          const done = started && item?.done === true;
+                          const label = item?.label;
                           const live = now.minute >= m.start && now.minute < m.end;
                           return (
                             <li

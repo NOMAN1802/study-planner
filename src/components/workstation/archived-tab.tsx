@@ -10,8 +10,11 @@ import type { SubjectProjection } from "@/lib/workstation/schedule";
 import type { WsExam, WsSubject, WsTopic } from "@/lib/workstation/server";
 import { EXAM_LABEL } from "@/schemas/workstation";
 
-/** One study cycle is an hour (50 min focus + 10 min break). */
+/** One study cycle is an hour. */
 const hours = (cycles: number) => `${cycles} h`;
+
+/** A done lecture counts its planned hours, or the timer hours spent when more. */
+const spentOn = (t: WsTopic) => (t.done ? Math.max(t.spentCycles, t.estCycles) : t.spentCycles);
 
 /** Latest finished first; undated ones last. */
 function byDoneDay(a: WsTopic, b: WsTopic) {
@@ -41,7 +44,7 @@ export function ArchivedTab({
   const study = subjects.filter((s) => !s.isDaily);
   const lecturesDone = study.reduce((n, s) => n + s.topics.filter((t) => t.done).length, 0);
   const totalLectures = study.reduce((n, s) => n + s.topics.length, 0);
-  const spent = groups.reduce((n, g) => n + g.done.reduce((m, t) => m + t.spentCycles, 0), 0);
+  const spent = groups.reduce((n, g) => n + g.done.reduce((m, t) => m + spentOn(t), 0), 0);
   const finishedIds = new Set(
     projections.filter((p) => p.status === "done").map((p) => p.subjectId),
   );
@@ -71,7 +74,7 @@ export function ArchivedTab({
         ) : (
           <ul className="divide-y divide-border">
             {finished.map((s) => {
-              const cycles = s.topics.reduce((n, t) => n + t.spentCycles, 0);
+              const cycles = s.topics.reduce((n, t) => n + spentOn(t), 0);
               const last = [...s.topics].sort(byDoneDay)[0]?.doneDay;
               return (
                 <li
@@ -129,7 +132,7 @@ export function ArchivedTab({
                         <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fg-muted">
                           <span>{t.doneDay ? `Done ${formatDay(t.doneDay)}` : "Done"}</span>
                           <span data-testid="ws-archived-topic-hours">
-                            {hours(t.spentCycles)} spent
+                            {hours(spentOn(t))} spent
                           </span>
                           <LectureLinks parts={t.parts} topicId={t.id} book={t.book} />
                         </p>

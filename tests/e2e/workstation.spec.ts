@@ -39,7 +39,7 @@ test.describe("work-station", () => {
     await setUpPlan(page);
 
     // Today: vocabulary first, then the first English lectures.
-    await expect(page.getByRole("heading", { name: "Up next today" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Today's study" })).toBeVisible();
     const items = page.getByTestId("ws-item");
     // Vocabulary: 10 new words Saturday–Thursday, the week's revision on Friday.
     if (new Date(`${await browserToday(page)}T12:00:00Z`).getUTCDay() === 5)
@@ -256,43 +256,51 @@ test.describe("work-station", () => {
     );
   });
 
-  test("a study cycle on a lecture counts toward today", async ({ page }) => {
-    test.setTimeout(180_000);
+  test("ticking today's items counts them and completes the session", async ({ page }) => {
+    test.setTimeout(120_000);
     await signUp(page);
     await setUpPlan(page);
 
-    await page.getByRole("link", { name: "Start Lit 01: Literary Terms" }).click();
-    await expect(page).toHaveURL(/\/tasks\/[0-9a-f-]+\/focus\?topic=[0-9a-f-]+$/);
-    await expect(page.getByTestId("focus-topic")).toContainText("Lit 01: Literary Terms");
-    await expect(page.getByRole("link", { name: "Study Station" }).first()).toBeVisible();
+    // No study timer: no Start buttons on Today or Subjects.
+    await expect(page.getByRole("link", { name: /^Start / })).toHaveCount(0);
 
-    // The subject timer is pre-set to 50/10; shorten it for the test.
-    const settings = page.getByRole("form", { name: "Timer settings" });
-    await expect(settings.getByLabel("Focus (min)")).toHaveValue("50");
-    await expect(settings.getByLabel("Short break (min)")).toHaveValue("10");
-    await settings.getByLabel("Focus (min)").fill("1");
-    await settings.getByRole("button", { name: "Save timer settings" }).click();
-    await expect(settings.getByRole("status")).toHaveText(/Saved/);
+    const items = page.getByTestId("ws-item");
+    const lecture = items.filter({ hasText: "Lit 01: Literary Terms" });
+    const saved = serverActionDone(page);
+    await lecture.getByRole("checkbox", { name: "Mark Lit 01: Literary Terms as done" }).check();
+    await saved;
+    // A lecture counts its planned 2 hours.
+    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^2\/(7|15)$/);
+    await expect(lecture).toHaveAttribute("data-done", "true");
+    // Ticked items stay on the list.
+    await page.reload();
+    await expect(items.filter({ hasText: "Lit 01: Literary Terms" })).toHaveAttribute(
+      "data-done",
+      "true",
+    );
 
-    await page.getByRole("button", { name: "Start focus" }).click();
-    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
-    // Auto-start is on, so the break begins by itself when focus ends.
-    await expect(page.getByTestId("timer-phase")).toHaveText(/Short break/, { timeout: 80_000 });
+    // Tick everything that can be ticked by hand (exams tick once a result is recorded).
+    const open = page
+      .getByTestId("ws-item")
+      .locator("input[type=checkbox]:not(:checked):not([disabled])");
+    while ((await open.count()) > 0) {
+      const saved = serverActionDone(page);
+      await open.first().check();
+      await saved;
+    }
+    const exams = await page
+      .getByTestId("ws-item")
+      .locator("input[type=checkbox][disabled]")
+      .count();
+    if (exams === 0) {
+      await expect(page.getByRole("heading", { name: "Study session complete" })).toBeVisible();
+      await expect(page.getByTestId("ws-session-complete")).toContainText("All ");
+    }
 
-    await page.goto("/work-station");
-    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^1\/(7|15)$/);
-    // The auto-started break is still running.
-    await expect(page.getByRole("link", { name: "Open timer" })).toBeVisible();
     await page.goto("/work-station/subjects");
-    await expect(
-      subjectCard(page, "English Literature + Grammar")
-        .getByTestId("ws-topic")
-        .filter({ hasText: "Lit 01: Literary Terms" }),
-    ).toContainText("1 cycle spent");
-
+    await expect(page.getByRole("link", { name: /^Start / })).toHaveCount(0);
     await page.goto("/dashboard");
-    await expect(page.getByTestId("study-today")).toHaveText(/^1\/(7|15)$/);
-    await expect(page.getByTestId("study-week")).toHaveText("1/57");
+    await expect(page.getByTestId("study-today")).not.toHaveText(/^0\//);
   });
 });
 

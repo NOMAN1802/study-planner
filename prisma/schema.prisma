@@ -231,6 +231,25 @@ model StudyPlan {
   user     Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
   subjects Subject[]
   exams    StudyExam[]
+  checks   StudyCheck[]
+}
+
+/// A non-lecture study item ticked done on a study day (vocabulary, revision).
+/// Lectures are ticked on Topic.doneAt and exams by being recorded.
+model StudyCheck {
+  id        String   @id @default(uuid()) @db.Uuid
+  planId    String   @db.Uuid
+  /// Study day, `YYYY-MM-DD` in the user's timezone.
+  day       String
+  /// Which item of the day, e.g. `daily:<subjectId>:0` (see itemKey).
+  key       String
+  /// Study cycles the item stood for when it was ticked.
+  cycles    Int
+  createdAt DateTime @default(now())
+
+  plan StudyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, day, key])
 }
 
 /// A subject studied in order. Backed by a STUDY task so the pomodoro timer runs on it.

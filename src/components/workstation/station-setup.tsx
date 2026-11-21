@@ -22,7 +22,7 @@ export async function StationSetup({ userId, timezone }: { userId: string; timez
         <p className="mt-1 max-w-prose text-sm text-fg-muted">
           Study Station plans study around your office hours: {perDay[6]} study cycles on office
           days and {perDay[5]} on Friday, {perDay.reduce((a, b) => a + b, 0)} a week. One cycle is
-          50 minutes of focus and a 10-minute break.
+          an hour; tick each item done as you finish it.
         </p>
       </div>
       <section

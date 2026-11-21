@@ -5,7 +5,7 @@
  *
  * Days 1…learningDays: subjects one at a time (in order), one vocabulary cycle
  * a day (10 new words Saturday–Thursday, revising the week's words on Friday),
- * at most LECTURE_CYCLES of lectures a day (HOLIDAY_LECTURE_CYCLES on Friday and
+ * at most LECTURES_PER_DAY lectures a day (HOLIDAY_LECTURES on Friday and
  * holidays, which follow the Friday routine: 2 and 3 lectures)
  * with the rest of the study session spent revising what was covered, weekly
  * revision + exam on Fridays, and a subject final day after each subject's
@@ -24,13 +24,13 @@ export const WEEKLY_EXAM_CYCLES = 1;
 export const FINAL_REVISION_CYCLES = 2;
 export const FINAL_EXAM_CYCLES = 1;
 export const MOCK_CYCLES = 3;
-/** Lecture cycles a day: 2 lectures at the default 2-cycle estimate. */
-export const LECTURE_CYCLES = 4;
+/** Lectures a day (office days), however long each lecture is. */
+export const LECTURES_PER_DAY = 2;
 /**
- * Lecture cycles on Friday and holidays: 3 lectures, leaving room for the
- * weekly revision and exam (Friday) and some revision.
+ * Lectures on Friday and holidays, leaving room for the weekly revision and
+ * exam (Friday) and some revision.
  */
-export const HOLIDAY_LECTURE_CYCLES = 6;
+export const HOLIDAY_LECTURES = 3;
 /** New vocabulary words per word day (every day except Friday). */
 export const WORDS_PER_DAY = 10;
 const WORD_DAYS_PER_WEEK = 6;
@@ -73,11 +73,11 @@ export type ScheduleInput = {
   /** Study cycles already completed today (any subject). */
   doneToday: number;
   /**
-   * Estimated cycles of the lectures ticked done today. They use up today's
-   * lecture allowance even when studied without the timer, so ticking a
-   * lecture never makes room for an extra one.
+   * Lectures studied today (ticked done, or worked on with the old timer).
+   * They use up today's lecture allowance, so ticking a lecture never makes
+   * room for an extra one.
    */
-  lectureCyclesDoneToday?: number;
+  lecturesDoneToday?: number;
   /** A cycle on the daily subject was already completed today. */
   dailyDoneToday: boolean;
   /** Word days (non-Friday days with a vocabulary cycle) already done, today included. */
@@ -287,14 +287,9 @@ export function buildSchedule(input: ScheduleInput): Schedule {
 
     // Learning work: always first in line, even after the learning phase (overflow).
     // Lectures are capped per day; a subject's revision + final get a day of their own.
-    const lectureCap = weekday === FRIDAY || holiday ? HOLIDAY_LECTURE_CYCLES : LECTURE_CYCLES;
-    const doneLectures = isToday
-      ? Math.max(
-          input.doneToday - (input.dailyDoneToday && daily ? DAILY_CYCLES : 0),
-          input.lectureCyclesDoneToday ?? 0,
-          0,
-        )
-      : 0;
+    // The cap counts lectures, not cycles: a lecture with little left still counts as one.
+    const lectureCap = weekday === FRIDAY || holiday ? HOLIDAY_LECTURES : LECTURES_PER_DAY;
+    const doneLectures = isToday ? (input.lecturesDoneToday ?? 0) : 0;
     let lectureLeft = Math.max(0, lectureCap - doneLectures);
     let lecturedOn: string | undefined;
     let finalDay = false;
@@ -303,8 +298,8 @@ export function buildSchedule(input: ScheduleInput): Schedule {
       let used: number;
       if (head.kind === "topic") {
         if (finalDay || lectureLeft <= 0) break;
-        used = take({ ...head, cycles: Math.min(head.cycles, lectureLeft) });
-        lectureLeft -= used;
+        used = take(head);
+        lectureLeft -= 1;
         lecturedOn = head.subjectId;
       } else {
         if (lecturedOn !== undefined) break;
@@ -425,7 +420,7 @@ function projectSubjects(subjects: readonly PlanSubject[], days: readonly PlanDa
 }
 
 /** The study items of one day, expanded to one label per cycle (for the timeline). */
-export function cycleLabels(items: readonly PlanItem[]): PlanItem[] {
+export function cycleLabels<T extends PlanItem>(items: readonly T[]): T[] {
   return items.flatMap((item) =>
     Array.from({ length: item.cycles }, () => ({ ...item, cycles: 1 })),
   );

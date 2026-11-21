@@ -177,9 +177,7 @@ export function studyDaySlots<T extends Slot>(
   const day = slotsForWeekday(slots, holiday ? FRIDAY : weekday).filter(
     (s) => s.startMin >= DAY_START_MIN,
   );
-  const night = slotsForWeekday(slots, (weekday + 1) % 7).filter(
-    (s) => s.startMin < DAY_START_MIN,
-  );
+  const night = slotsForWeekday(slots, (weekday + 1) % 7).filter((s) => s.startMin < DAY_START_MIN);
   return [...day, ...night];
 }
 
