@@ -248,9 +248,9 @@ export async function getStudySummary(user: CurrentUser, at = new Date()) {
   const now = localNow(at, user.timezone);
   const holiday = plan.holidays.includes(now.dayKey);
   const weekStart = startOfWeekKey(now.dayKey, user.weekStartsOn);
-  // The study week starts the evening before its first day.
+  // The study week starts at DAY_START_MIN on its first day.
   const since =
-    parseLocalDateTime(`${addDays(weekStart, -1)}T${formatMinute(DAY_START_MIN)}`, user.timezone) ??
+    parseLocalDateTime(`${weekStart}T${formatMinute(DAY_START_MIN)}`, user.timezone) ??
     at;
   const [sessions, slots] = await Promise.all([
     prisma.pomodoroSession.findMany({

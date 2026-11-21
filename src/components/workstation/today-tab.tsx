@@ -214,7 +214,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
               {data.isHoliday ? " · Holiday" : ""}
             </h2>
             <span className="sr-only">
-              Study days start at {formatMinute(DAY_START_MIN)} the evening before.
+              Study days run from {formatMinute(DAY_START_MIN)} to {formatMinute(DAY_START_MIN)} the next morning.
             </span>
             <span className="font-mono text-xs text-fg-muted tabular-nums">
               {formatMinute(now.minute)}
@@ -246,9 +246,9 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                           <Briefcase className="size-3.5 text-fg-muted" aria-hidden />
                         ) : null}
                         {slot.label}
-                        {slot.startMin >= DAY_START_MIN ? (
+                        {slot.startMin < DAY_START_MIN ? (
                           <span className="rounded bg-surface-2 px-1.5 py-px text-[11px] font-normal text-fg-muted">
-                            {WEEKDAY_SHORT[slot.weekday]} evening
+                            {WEEKDAY_SHORT[slot.weekday]} night
                           </span>
                         ) : null}
                       </span>

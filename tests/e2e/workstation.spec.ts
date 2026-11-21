@@ -5,12 +5,12 @@ import { seedQuestions } from "./seed";
 
 /**
  * Today's study day in the browser (the account's timezone comes from the browser at
- * signup). Study days start at 18:00, so an evening belongs to the next date.
+ * signup). Study days start at 03:00, so the small hours belong to the day before.
  */
 async function browserToday(page: Page): Promise<string> {
   return page.evaluate(() => {
     const d = new Date();
-    if (d.getHours() >= 18) d.setDate(d.getDate() + 1);
+    if (d.getHours() < 3) d.setDate(d.getDate() - 1);
     return d.toLocaleDateString("en-CA");
   });
 }
@@ -51,8 +51,8 @@ test.describe("work-station", () => {
       "href",
       /^\/work-station\/book\/[0-9a-f-]+$/,
     );
-    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^0\/(8|16)$/);
-    await expect(page.getByTestId("ws-week-cycles")).toHaveText("0/64");
+    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^0\/(7|15)$/);
+    await expect(page.getByTestId("ws-week-cycles")).toHaveText("0/57");
     await expect(page.getByTestId("ws-buffer")).toHaveText(/^[+-]\d+$/);
 
     // Sections are pages in a sidebar dropdown under Study Station.
@@ -62,10 +62,10 @@ test.describe("work-station", () => {
     await expect(page.getByRole("link", { name: "Routine", exact: true })).toBeHidden();
     await station.click();
 
-    // Routine: 64 cycles a week.
+    // Routine: 57 cycles a week.
     await page.getByRole("link", { name: "Routine", exact: true }).click();
     await expect(page).toHaveURL(/\/work-station\/routine$/);
-    await expect(page.getByTestId("ws-routine-total")).toHaveText("64");
+    await expect(page.getByTestId("ws-routine-total")).toHaveText("57");
     await expect(page.getByTestId("ws-routine-day")).toHaveCount(7);
 
     // Subjects: 9 in order + daily vocabulary; mark a lecture done.
@@ -273,7 +273,7 @@ test.describe("work-station", () => {
     await expect(page.getByTestId("timer-phase")).toHaveText(/Short break/, { timeout: 80_000 });
 
     await page.goto("/work-station");
-    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^1\/(8|16)$/);
+    await expect(page.getByTestId("ws-today-cycles")).toHaveText(/^1\/(7|15)$/);
     // The auto-started break is still running.
     await expect(page.getByRole("link", { name: "Open timer" })).toBeVisible();
     await page.goto("/work-station/subjects");
@@ -284,8 +284,8 @@ test.describe("work-station", () => {
     ).toContainText("1 cycle spent");
 
     await page.goto("/dashboard");
-    await expect(page.getByTestId("study-today")).toHaveText(/^1\/(8|16)$/);
-    await expect(page.getByTestId("study-week")).toHaveText("1/64");
+    await expect(page.getByTestId("study-today")).toHaveText(/^1\/(7|15)$/);
+    await expect(page.getByTestId("study-week")).toHaveText("1/57");
   });
 });
 

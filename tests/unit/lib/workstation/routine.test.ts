@@ -23,9 +23,9 @@ import {
 describe("default routine", () => {
   const routine = defaultRoutine();
 
-  it("gives 8 study cycles on office days, 16 on Friday, 64 a week", () => {
-    expect(cyclesByWeekday(routine)).toEqual([8, 8, 8, 8, 8, 16, 8]);
-    expect(weekCycles(routine)).toBe(64);
+  it("gives 7 study cycles on office days, 15 on Friday, 57 a week", () => {
+    expect(cyclesByWeekday(routine)).toEqual([7, 7, 7, 7, 7, 15, 7]);
+    expect(weekCycles(routine)).toBe(57);
   });
 
   it("puts office 09:00–18:00 on Saturday–Thursday only", () => {
@@ -41,27 +41,29 @@ describe("default routine", () => {
     }
   });
 
-  it("leaves at least 5.5 hours of sleep every night", () => {
+  it("leaves at least 6 hours of sleep every night, 22:50–05:00", () => {
     for (let weekday = 0; weekday < 7; weekday += 1) {
       const today = routine.filter((s) => s.weekday === weekday);
       const tomorrow = routine.filter((s) => s.weekday === (weekday + 1) % 7);
       const bedtime = Math.max(...today.map((s) => s.endMin));
       const wake = Math.min(...tomorrow.map((s) => s.startMin));
-      expect(24 * 60 - bedtime + wake).toBeGreaterThanOrEqual(5.5 * 60);
+      expect(formatMinute(bedtime)).toBe("22:50");
+      expect(formatMinute(wake)).toBe("05:00");
+      expect(24 * 60 - bedtime + wake).toBeGreaterThanOrEqual(6 * 60);
     }
   });
 
-  it("uses the 04:35–08:35 and 18:45–22:45 study windows on office days", () => {
+  it("uses the 05:35–08:35 and 18:40–22:40 study windows on office days", () => {
     const sat = routine.filter((s) => s.weekday === 6 && s.kind === "STUDY");
     expect(sat.map((s) => [formatMinute(s.startMin), formatMinute(s.endMin)])).toEqual([
-      ["04:35", "08:35"],
-      ["18:45", "22:45"],
+      ["05:35", "08:35"],
+      ["18:40", "22:40"],
     ]);
   });
 
   it("counts cycles for a calendar day", () => {
-    expect(cyclesOnDay(routine, "2026-11-20")).toBe(16); // Friday: 8 + 4 + 4
-    expect(cyclesOnDay(routine, "2026-11-21")).toBe(8); // Saturday: 4 + 4
+    expect(cyclesOnDay(routine, "2026-11-20")).toBe(15); // Friday: 7 + 4 + 4
+    expect(cyclesOnDay(routine, "2026-11-21")).toBe(7); // Saturday: 3 + 4
   });
 });
 
@@ -120,40 +122,57 @@ describe("local now", () => {
   });
 });
 
-describe("study days start at 18:00", () => {
+describe("study days follow the calendar from the morning", () => {
   const routine = defaultRoutine();
 
-  it("assigns evening moments to the next date", () => {
-    expect(studyDayOf("2026-11-20", 17 * 60 + 59)).toBe("2026-11-20");
-    expect(studyDayOf("2026-11-20", DAY_START_MIN)).toBe("2026-11-21");
-    expect(studyDayOf("2026-11-20", 23 * 60)).toBe("2026-11-21");
+  it("keeps the evening on its own date; only after midnight counts for the day before", () => {
+    expect(studyDayOf("2026-11-20", 5 * 60)).toBe("2026-11-20");
+    expect(studyDayOf("2026-11-20", 22 * 60)).toBe("2026-11-20");
+    expect(studyDayOf("2026-11-20", 23 * 60 + 59)).toBe("2026-11-20");
+    expect(studyDayOf("2026-11-21", 30)).toBe("2026-11-20");
+    expect(studyDayOf("2026-11-21", DAY_START_MIN)).toBe("2026-11-21");
   });
 
   it("knows the current study day in the user's timezone", () => {
-    // 2026-11-17 13:30Z = 19:30 in Dhaka (UTC+6): Wednesday's study day.
+    // 2026-11-17 13:30Z = Tuesday 19:30 in Dhaka (UTC+6): still Tuesday.
     expect(localNow(new Date("2026-11-17T13:30:00Z"), "Asia/Dhaka")).toEqual({
-      dayKey: "2026-11-18",
-      weekday: 3,
+      dayKey: "2026-11-17",
+      weekday: 2,
       minute: 19 * 60 + 30,
     });
+    // 2026-11-17 18:30Z = Wednesday 00:30 in Dhaka: Tuesday's study day.
+    expect(studyDayKeyOf(new Date("2026-11-17T18:30:00Z"), "Asia/Dhaka")).toBe("2026-11-17");
+    // 2026-11-17 23:30Z = Wednesday 05:30 in Dhaka.
     expect(studyDayKeyOf(new Date("2026-11-17T23:30:00Z"), "Asia/Dhaka")).toBe("2026-11-18");
-    expect(studyDayKeyOf(new Date("2026-11-18T12:30:00Z"), "Asia/Dhaka")).toBe("2026-11-19");
   });
 
-  it("puts the evening before first, then the morning", () => {
+  it("lists the day's own slots, morning to night", () => {
     const sat = studyDaySlots(routine, 6).map((s) => `${s.weekday}:${s.label}`);
     expect(sat).toEqual([
-      "5:Evening study",
       "6:Bath & prep",
       "6:Morning study",
       "6:Commute",
       "6:Office",
+      "6:Commute & rest",
+      "6:Evening study",
+      "6:Get ready for bed",
     ]);
   });
 
-  it("keeps 8 cycles on office days and 16 on Friday, 64 a week", () => {
+  it("adds the next weekday's after-midnight slots to the day", () => {
+    const late: Slot = { weekday: 0, startMin: 30, endMin: 90, kind: "STUDY", label: "Late" };
+    const sat = studyDaySlots([...routine, late], 6);
+    expect(sat.at(-1)?.label).toBe("Late");
+    expect(studyDaySlots([...routine, late], 0).some((s) => s.label === "Late")).toBe(false);
+  });
+
+  it("uses Friday's routine on a holiday", () => {
+    expect(studyCyclesByWeekday(routine, true)).toEqual([15, 15, 15, 15, 15, 15, 15]);
+  });
+
+  it("keeps 7 cycles on office days and 15 on Friday, 57 a week", () => {
     const perDay = studyCyclesByWeekday(routine);
-    expect(perDay).toEqual([8, 8, 8, 8, 8, 16, 8]);
-    expect(perDay.reduce((a, b) => a + b, 0)).toBe(64);
+    expect(perDay).toEqual([7, 7, 7, 7, 7, 15, 7]);
+    expect(perDay.reduce((a, b) => a + b, 0)).toBe(57);
   });
 });

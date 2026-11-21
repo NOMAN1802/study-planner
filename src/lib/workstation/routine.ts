@@ -45,29 +45,30 @@ export const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] a
 const hm = (h: number, m = 0) => h * 60 + m;
 
 const OFFICE_DAY: Omit<Slot, "weekday">[] = [
-  { startMin: hm(4, 15), endMin: hm(4, 35), kind: "PERSONAL", label: "Bath & prep" },
-  { startMin: hm(4, 35), endMin: hm(8, 35), kind: "STUDY", label: "Morning study" },
+  { startMin: hm(5), endMin: hm(5, 35), kind: "PERSONAL", label: "Bath & prep" },
+  { startMin: hm(5, 35), endMin: hm(8, 35), kind: "STUDY", label: "Morning study" },
   { startMin: hm(8, 35), endMin: hm(9), kind: "PERSONAL", label: "Commute" },
   { startMin: hm(9), endMin: hm(18), kind: "OFFICE", label: "Office" },
-  { startMin: hm(18), endMin: hm(18, 45), kind: "PERSONAL", label: "Commute & rest" },
-  { startMin: hm(18, 45), endMin: hm(22, 45), kind: "STUDY", label: "Evening study" },
+  { startMin: hm(18), endMin: hm(18, 40), kind: "PERSONAL", label: "Commute & rest" },
+  { startMin: hm(18, 40), endMin: hm(22, 40), kind: "STUDY", label: "Evening study" },
+  { startMin: hm(22, 40), endMin: hm(22, 50), kind: "PERSONAL", label: "Get ready for bed" },
 ];
 
 const HOLIDAY: Omit<Slot, "weekday">[] = [
-  { startMin: hm(4, 30), endMin: hm(4, 50), kind: "PERSONAL", label: "Bath & prep" },
-  { startMin: hm(4, 50), endMin: hm(12, 50), kind: "STUDY", label: "Morning study" },
-  { startMin: hm(12, 50), endMin: hm(14, 30), kind: "PERSONAL", label: "Jumu'ah & lunch" },
-  { startMin: hm(14, 30), endMin: hm(18, 30), kind: "STUDY", label: "Afternoon study" },
-  { startMin: hm(18, 30), endMin: hm(22, 30), kind: "STUDY", label: "Evening study" },
+  { startMin: hm(5), endMin: hm(5, 20), kind: "PERSONAL", label: "Bath & prep" },
+  { startMin: hm(5, 20), endMin: hm(12, 20), kind: "STUDY", label: "Morning study" },
+  { startMin: hm(12, 20), endMin: hm(14), kind: "PERSONAL", label: "Jumu'ah & lunch" },
+  { startMin: hm(14), endMin: hm(18), kind: "STUDY", label: "Afternoon study" },
+  { startMin: hm(18), endMin: hm(18, 40), kind: "PERSONAL", label: "Rest" },
+  { startMin: hm(18, 40), endMin: hm(22, 40), kind: "STUDY", label: "Evening study" },
+  { startMin: hm(22, 40), endMin: hm(22, 50), kind: "PERSONAL", label: "Get ready for bed" },
 ];
 
 /**
- * Office 09:00–18:00 Saturday–Thursday, Friday off. Every night is at least
- * 5.5 hours: sleep 22:45–04:15 after office days (22:30–04:15 after Friday,
- * 22:45–04:30 before Friday), with 45 min rest after office. A study day is the
- * previous evening (4) plus its own daytime: 4 + 4 = 8 cycles on office days,
- * 4 + 8 + 4 = 16 on Friday (and holidays) — 64 a week. The afternoon slot
- * starts before 18:00, so it stays on its own day.
+ * Office 09:00–18:00 Saturday–Thursday, Friday off. Sleep 22:50–05:00 every
+ * night (6 h 10 min), after 10 minutes getting ready for bed. Office days:
+ * 3 cycles in the morning + 4 in the evening = 7; Friday (and holidays):
+ * 7 + 4 + 4 = 15 — 57 a week.
  */
 export function defaultRoutine(): Slot[] {
   return WEEK_ORDER.flatMap((weekday) =>
@@ -131,15 +132,15 @@ export function cycleMarks(slot: Pick<Slot, "kind" | "startMin" | "endMin">) {
 }
 
 /**
- * Study days begin in the evening, like the Islamic day at Maghrib: from 18:00
- * a study day belongs to the next date. Saturday's study day is Friday 18:00 →
- * Saturday 18:00, so it holds Friday evening's session and Saturday morning's.
+ * Study days follow the calendar, from the morning: a date's study day runs
+ * from 03:00 (before the 05:00 wake-up) to 03:00 the next morning, so a
+ * session that runs past midnight still counts for the day it started.
  */
-export const DAY_START_MIN = 18 * 60;
+export const DAY_START_MIN = 3 * 60;
 
 /** The study day a local wall-clock moment belongs to. */
 export function studyDayOf(calendarDay: string, minute: number): string {
-  return minute >= DAY_START_MIN ? addDays(calendarDay, 1) : calendarDay;
+  return minute < DAY_START_MIN ? addDays(calendarDay, -1) : calendarDay;
 }
 
 export type LocalNow = {
@@ -164,20 +165,22 @@ export function studyDayKeyOf(instant: Date, timezone: string): string {
 }
 
 /**
- * The slots of one study day, in order: the previous weekday's slots from
- * 18:00 (evening), then this weekday's slots that start before 18:00. On a
- * holiday the daytime part follows Friday's (the weekly off day) routine.
+ * The slots of one study day, in order: this weekday's slots from 03:00, then
+ * any slots of the next weekday that start after midnight but before 03:00.
+ * A holiday follows Friday's (the weekly off day) routine.
  */
 export function studyDaySlots<T extends Slot>(
   slots: readonly T[],
   weekday: number,
   holiday = false,
 ): T[] {
-  const eve = slotsForWeekday(slots, (weekday + 6) % 7).filter((s) => s.startMin >= DAY_START_MIN);
   const day = slotsForWeekday(slots, holiday ? FRIDAY : weekday).filter(
+    (s) => s.startMin >= DAY_START_MIN,
+  );
+  const night = slotsForWeekday(slots, (weekday + 1) % 7).filter(
     (s) => s.startMin < DAY_START_MIN,
   );
-  return [...eve, ...day];
+  return [...day, ...night];
 }
 
 /** Study cycles in each study day, indexed by its weekday 0 (Sun) … 6 (Sat). */

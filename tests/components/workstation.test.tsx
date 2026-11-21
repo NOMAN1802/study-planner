@@ -15,10 +15,10 @@ vi.mock("@/actions/workstation", () => ({
 const slots: WsSlot[] = defaultRoutine().map((s, i) => ({ ...s, id: `slot-${i}` }));
 
 describe("RoutineTab", () => {
-  it("shows 64 cycles a week with 8 on office days and 16 on Friday", () => {
+  it("shows 57 cycles a week with 7 on office days and 15 on Friday", () => {
     render(<RoutineTab slots={slots} />);
-    expect(screen.getByTestId("ws-routine-total")).toHaveTextContent("64");
-    expect(screen.getByText("(target 64)")).toBeInTheDocument();
+    expect(screen.getByTestId("ws-routine-total")).toHaveTextContent("57");
+    expect(screen.getByText("(target 57)")).toBeInTheDocument();
     const days = screen.getAllByTestId("ws-routine-day");
     expect(days.map((d) => within(d).getByRole("heading").textContent)).toEqual([
       "Saturday",
@@ -29,18 +29,18 @@ describe("RoutineTab", () => {
       "Thursday",
       "Friday",
     ]);
-    expect(within(days[0]).getByText("8 cycles")).toBeInTheDocument();
-    expect(within(days[6]).getByText("16 cycles")).toBeInTheDocument();
+    expect(within(days[0]).getByText("7 cycles")).toBeInTheDocument();
+    expect(within(days[6]).getByText("15 cycles")).toBeInTheDocument();
     // The office slot: its label and its type.
     expect(within(days[0]).getAllByText("Office")).toHaveLength(2);
   });
 
-  it("warns when the week no longer adds up to 64", () => {
+  it("warns when the week no longer adds up to 57", () => {
     render(
       <RoutineTab slots={slots.filter((s) => !(s.weekday === 5 && s.label === "Evening study"))} />,
     );
-    expect(screen.getByTestId("ws-routine-total")).toHaveTextContent("60");
-    expect(screen.getByText("· target is 64")).toBeInTheDocument();
+    expect(screen.getByTestId("ws-routine-total")).toHaveTextContent("53");
+    expect(screen.getByText("· target is 57")).toBeInTheDocument();
   });
 
   it("opens an add-slot form for a day", () => {

@@ -22,7 +22,7 @@ import {
 } from "@/lib/workstation/routine";
 import type { WsSlot } from "@/lib/workstation/server";
 
-/** The default routine's weekly study cycles (8 a day on office days, 16 on Friday). */
+/** The default routine's weekly study cycles (7 a day on office days, 15 on Friday). */
 const TARGET = weekCycles(defaultRoutine());
 
 export function RoutineTab({ slots }: { slots: WsSlot[] }) {

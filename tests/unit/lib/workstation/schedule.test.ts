@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { BCS_SYLLABUS } from "@/lib/workstation/bcs-syllabus";
-import { cyclesByWeekday, defaultRoutine } from "@/lib/workstation/routine";
 import {
   LECTURE_CYCLES,
   HOLIDAY_LECTURE_CYCLES,
@@ -11,7 +10,8 @@ import {
   type ScheduleInput,
 } from "@/lib/workstation/schedule";
 
-const CAPACITY = cyclesByWeekday(defaultRoutine()); // 8 a day, 16 on Friday
+/** Fixed so these tests do not follow routine changes: 8 a day, 16 on Friday. */
+const CAPACITY = [8, 8, 8, 8, 8, 16, 8];
 
 function subject(id: string, topics: number, extra: Partial<PlanSubject> = {}): PlanSubject {
   return {
