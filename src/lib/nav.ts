@@ -15,6 +15,7 @@ export const STATION_PAGES = [
   { href: "/work-station/routine", label: "Routine" },
   { href: "/work-station/plan", label: "Plan" },
   { href: "/work-station/exams", label: "Exams" },
+  { href: "/work-station/archived", label: "Archived" },
   { href: "/work-station/office", label: "Office" },
 ] as const satisfies readonly NavChild[];
 

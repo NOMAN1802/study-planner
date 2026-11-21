@@ -96,6 +96,13 @@ test.describe("work-station", () => {
       subjectCard(page, "English Literature + Grammar").getByTestId("ws-subject-progress"),
     ).toHaveText("1/30");
 
+    // Archived: the finished lecture, still ticked on Subjects too.
+    await page.getByRole("link", { name: "Archived", exact: true }).click();
+    await expect(page).toHaveURL(/\/work-station\/archived$/);
+    await expect(page.getByTestId("ws-archived-lectures")).toHaveText("1/164");
+    await expect(page.getByTestId("ws-archived-topic")).toHaveCount(1);
+    await expect(page.getByTestId("ws-archived-topic")).toContainText("Lit 01: Literary Terms");
+
     // Plan: lecture count and subject order.
     await page.getByRole("link", { name: "Plan", exact: true }).click();
     await expect(page.getByTestId("ws-lectures-done")).toHaveText("1/164");

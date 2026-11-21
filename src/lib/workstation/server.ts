@@ -25,6 +25,8 @@ export type WsTopic = {
   parts: LecturePart[];
   estCycles: number;
   done: boolean;
+  /** Study day the lecture was marked done, when it is done. */
+  doneDay: string | null;
   spentCycles: number;
   /** Chapters of the lecture book covering this lecture, when there is one. */
   book: string | null;
@@ -161,6 +163,7 @@ export async function getWorkstationData(
       parts: lectureParts(t.parts, t.url),
       estCycles: t.estCycles,
       done: t.doneAt !== null,
+      doneDay: t.doneAt ? studyDayKeyOf(t.doneAt, user.timezone) : null,
       spentCycles: spent.get(t.id) ?? 0,
       book: LECTURE_BOOK_SLICES[t.title]?.chapters ?? null,
     })),
@@ -250,8 +253,7 @@ export async function getStudySummary(user: CurrentUser, at = new Date()) {
   const weekStart = startOfWeekKey(now.dayKey, user.weekStartsOn);
   // The study week starts at DAY_START_MIN on its first day.
   const since =
-    parseLocalDateTime(`${weekStart}T${formatMinute(DAY_START_MIN)}`, user.timezone) ??
-    at;
+    parseLocalDateTime(`${weekStart}T${formatMinute(DAY_START_MIN)}`, user.timezone) ?? at;
   const [sessions, slots] = await Promise.all([
     prisma.pomodoroSession.findMany({
       where: {

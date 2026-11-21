@@ -20,6 +20,7 @@ describe("activeChild", () => {
     expect(label("/work-station")).toBe("Today");
     expect(label("/work-station/plan")).toBe("Plan");
     expect(label("/work-station/subjects")).toBe("Subjects");
+    expect(label("/work-station/archived")).toBe("Archived");
   });
 
   it("puts exam sittings and practice under Exams", () => {
