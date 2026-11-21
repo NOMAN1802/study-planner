@@ -21,7 +21,7 @@ export function OfficeTab({ tasks, slots }: { tasks: TaskRow[]; slots: Slot[] })
           <Briefcase className="size-4" aria-hidden />
           {hours
             ? `Office ${hours}, ${days.map((d) => WEEKDAY_SHORT[d]).join(" ")}`
-            : "No office hours in your routine."}
+            : "No office hours in your routine"}
           {tasks.length > 0 ? ` · ${open} open` : ""}
         </p>
         <Link href="/tasks/new?category=office" className={primaryLink}>

@@ -7,7 +7,7 @@ import type { HabitRow } from "@/lib/habits";
 export function ArchivedList({ habits }: { habits: HabitRow[] }) {
   return (
     <ul
-      className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface"
+      className="divide-y divide-border overflow-hidden rounded-sm border border-border bg-surface"
       aria-label="Archived habits"
     >
       {habits.map((habit) => (
@@ -26,7 +26,7 @@ export function ArchivedList({ habits }: { habits: HabitRow[] }) {
           <form action={setHabitArchived.bind(null, habit.id, false)}>
             <button
               type="submit"
-              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 text-[13px] text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
+              className="inline-flex h-8 items-center gap-2 rounded-sm border border-border bg-surface px-3 text-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
               aria-label={`Restore ${habit.name}`}
             >
               <ArchiveRestore className="size-3.5" aria-hidden />

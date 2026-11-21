@@ -23,12 +23,12 @@ export default function Loading() {
         ))}
       </StatStrip>
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
-        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+        <div className="flex flex-col gap-3 rounded-sm border border-border bg-surface p-4">
           {Array.from({ length: 5 }, (_, i) => (
             <Skeleton key={i} className="h-10 w-full bg-surface-2" />
           ))}
         </div>
-        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+        <div className="flex flex-col gap-3 rounded-sm border border-border bg-surface p-4">
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className="h-6 w-full bg-surface-2" />
           ))}

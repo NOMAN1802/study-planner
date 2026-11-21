@@ -22,10 +22,10 @@ export function SubjectRoutine({
 
   return (
     <details className="group/routine border-t border-border" data-testid="ws-subject-routine">
-      <summary className="flex cursor-pointer list-none flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-4 py-2.5 text-sm [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-4 py-3 text-sm [&::-webkit-details-marker]:hidden">
         <span className="font-medium">
           Day-by-day routine
-          <span className="ml-1.5 text-fg-muted group-open/routine:hidden">— show</span>
+          <span className="ml-2 text-fg-muted group-open/routine:hidden">— show</span>
         </span>
         <span className="font-mono text-xs text-fg-muted tabular-nums">
           {first && lastLearning
@@ -49,7 +49,7 @@ export function SubjectRoutine({
           {learning.length > 0 ? <RoutineList days={learning} color={color} /> : null}
           {revision.length > 0 ? (
             <>
-              <h4 className="mt-4 mb-1.5 text-xs font-medium tracking-wide text-fg-muted uppercase">
+              <h4 className="mt-4 mb-2 text-xs font-medium text-fg-muted">
                 Revision blocks · {plural(revision.length, "day")}
               </h4>
               <RoutineList days={revision} color={color} />
@@ -63,7 +63,7 @@ export function SubjectRoutine({
 
 function RoutineList({ days, color }: { days: SubjectRoutineDay[]; color: string }) {
   return (
-    <ol className="divide-y divide-border overflow-hidden rounded-md border border-border">
+    <ol className="divide-y divide-border overflow-hidden rounded-sm border border-border">
       {days.map((d) => (
         <li
           key={d.day}
@@ -85,7 +85,7 @@ function RoutineList({ days, color }: { days: SubjectRoutineDay[]; color: string
               >
                 <span
                   className={cn(
-                    "mt-1.5 size-1.5 shrink-0 rounded-full",
+                    "mt-2 size-1.5 shrink-0 rounded-full",
                     isExam(item.kind) && "ring-2 ring-mark",
                   )}
                   style={{ backgroundColor: color }}

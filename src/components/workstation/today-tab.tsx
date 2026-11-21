@@ -105,7 +105,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
       </StatStrip>
 
       {data.activeTimer ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-accent/40 bg-accent-soft px-4 py-2.5 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-sm border border-border bg-surface px-4 py-3 text-sm">
           <span className="inline-flex items-center gap-2">
             <Timer className="size-4 text-accent" aria-hidden />A study timer is running.
           </span>
@@ -125,14 +125,14 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         <section
           aria-labelledby="up-next-title"
-          className="enter min-w-0 rounded-lg border border-border bg-surface"
+          className="enter min-w-0 rounded-sm border border-border bg-surface"
         >
-          <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-1.5 sm:px-5">
-            <h2 id="up-next-title" className="font-display text-base font-semibold tracking-tight">
+          <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-2 sm:px-5">
+            <h2 id="up-next-title" className="font-display text-base font-medium tracking-tight">
               {started ? "Up next today" : `First day · ${formatDay(plan.startDay)}`}
             </h2>
             {currentSubject ? (
-              <span className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
+              <span className="inline-flex items-center gap-2 text-xs text-fg-muted">
                 <span
                   className="size-2 rounded-full"
                   style={{ backgroundColor: currentSubject.color }}
@@ -145,7 +145,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
           {items.length === 0 ? (
             <p className="p-4 text-sm text-fg-muted">
               {todayTarget === 0
-                ? "No study slots in today's routine."
+                ? "No study slots in today's routine"
                 : "All of today's cycles are done. Rest well."}
             </p>
           ) : (
@@ -164,7 +164,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                       <TopicDone id={topic.id} title={topic.title} done={topic.done} />
                     ) : (
                       <span
-                        className="mt-1.5 size-2 shrink-0 rounded-full"
+                        className="mt-2 size-2 shrink-0 rounded-full"
                         style={{ backgroundColor: subject?.color ?? "var(--fg-subtle)" }}
                         aria-hidden
                       />
@@ -204,17 +204,18 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
 
         <section
           aria-labelledby="timeline-title"
-          className="enter min-w-0 rounded-lg border border-border bg-surface"
+          className="enter min-w-0 rounded-sm border border-border bg-surface"
           style={{ "--enter-index": 1 } as CSSProperties}
         >
-          <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
-            <h2 id="timeline-title" className="font-display text-base font-semibold tracking-tight">
+          <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-2 sm:px-5">
+            <h2 id="timeline-title" className="font-display text-base font-medium tracking-tight">
               Routine ·{" "}
               {formatDay(now.dayKey, { weekday: "long", day: undefined, month: undefined })}
               {data.isHoliday ? " · Holiday" : ""}
             </h2>
             <span className="sr-only">
-              Study days run from {formatMinute(DAY_START_MIN)} to {formatMinute(DAY_START_MIN)} the next morning.
+              Study days run from {formatMinute(DAY_START_MIN)} to {formatMinute(DAY_START_MIN)} the
+              next morning.
             </span>
             <span className="font-mono text-xs text-fg-muted tabular-nums">
               {formatMinute(now.minute)}
@@ -235,7 +236,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                   <li
                     key={slot.id}
                     className={cn(
-                      "rounded-md border px-3 py-2",
+                      "rounded-sm border px-3 py-2",
                       isNow ? "border-mark bg-mark-soft" : "border-transparent",
                     )}
                     aria-current={isNow ? "time" : undefined}
@@ -247,7 +248,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                         ) : null}
                         {slot.label}
                         {slot.startMin < DAY_START_MIN ? (
-                          <span className="rounded bg-surface-2 px-1.5 py-px text-[11px] font-normal text-fg-muted">
+                          <span className="rounded-sm bg-surface-2 px-1.5 py-px text-[11px] font-normal text-fg-muted">
                             {WEEKDAY_SHORT[slot.weekday]} night
                           </span>
                         ) : null}
@@ -259,10 +260,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                     {slot.kind !== "STUDY" ? (
                       <span className="text-xs text-fg-muted">{KIND_LABEL[slot.kind]}</span>
                     ) : (
-                      <ul
-                        className="mt-1.5 flex flex-col gap-1"
-                        aria-label={`${slot.label} cycles`}
-                      >
+                      <ul className="mt-2 flex flex-col gap-1" aria-label={`${slot.label} cycles`}>
                         {(marksBySlot.get(slot.id) ?? []).map((m) => {
                           const done = m.index < data.doneToday;
                           const label = done ? "Done" : labels[m.index - data.doneToday]?.label;

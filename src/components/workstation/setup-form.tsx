@@ -15,7 +15,7 @@ export function SetupForm({ defaultStart }: { defaultStart: string }) {
       {state.error ? (
         <p
           role="alert"
-          className="rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+          className="rounded-sm border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
         >
           {state.error}
         </p>
@@ -34,7 +34,7 @@ export function SetupForm({ defaultStart }: { defaultStart: string }) {
           id="learningDays"
           label="Learning days"
           error={errors.learningDays}
-          hint="Subjects one by one."
+          hint="Subjects one by one"
         >
           <Input
             id="learningDays"
@@ -51,7 +51,7 @@ export function SetupForm({ defaultStart }: { defaultStart: string }) {
           id="revisionDays"
           label="Revision days"
           error={errors.revisionDays}
-          hint="Whole days per subject."
+          hint="Whole days per subject"
         >
           <Input
             id="revisionDays"

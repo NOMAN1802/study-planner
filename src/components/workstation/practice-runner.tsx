@@ -36,9 +36,9 @@ export function PracticeRunner({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3 shadow-sm">
+      <div className="sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border bg-surface px-4 py-3 shadow-sm">
         <div>
-          <h2 className="font-display text-base font-semibold tracking-tight">Practice</h2>
+          <h2 className="font-display text-base font-medium tracking-tight">Practice</h2>
           <p className="text-xs text-fg-muted">No timer · not saved · checked as you go</p>
         </div>
         <p
@@ -59,12 +59,12 @@ export function PracticeRunner({
           return (
             <li key={q.id}>
               <fieldset
-                className="rounded-lg border border-border bg-surface p-4"
+                className="rounded-sm border border-border bg-surface p-4"
                 data-testid="practice-question"
               >
                 <legend className="sr-only">Question {i + 1}</legend>
                 <p className="mb-3 text-sm font-medium">
-                  <span className="mr-1.5 font-mono text-fg-muted tabular-nums">{i + 1}.</span>
+                  <span className="mr-2 font-mono text-fg-muted tabular-nums">{i + 1}.</span>
                   {q.text}
                 </p>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -79,7 +79,7 @@ export function PracticeRunner({
                         aria-pressed={isMine}
                         onClick={() => setChosen((prev) => ({ ...prev, [q.id]: j }))}
                         className={cn(
-                          "flex items-start gap-2 rounded-md border px-3 py-2 text-left text-sm transition-colors",
+                          "flex items-start gap-2 rounded-sm border px-3 py-2 text-left text-sm transition-colors",
                           !done && "border-border hover:border-border-strong",
                           done && isAnswer && "border-accent bg-accent/10",
                           done && isMine && !isAnswer && "border-danger bg-danger/10",
@@ -104,7 +104,7 @@ export function PracticeRunner({
                 {done ? (
                   <p
                     className={cn(
-                      "mt-2.5 text-xs",
+                      "mt-3 text-xs",
                       mine === q.answer ? "text-accent" : "text-danger",
                     )}
                     data-testid="practice-feedback"
@@ -129,7 +129,7 @@ export function PracticeRunner({
       {finished ? (
         <section
           aria-labelledby="practice-done"
-          className="rounded-lg border border-border bg-surface p-4"
+          className="rounded-sm border border-border bg-surface p-4"
           data-testid="practice-summary"
         >
           <h2 id="practice-done" className="text-sm font-medium">

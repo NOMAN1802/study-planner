@@ -34,7 +34,7 @@ export default async function DashboardPage() {
           action={
             <Link
               href="/habits"
-              className="inline-flex h-9 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong"
+              className="inline-flex h-9 items-center rounded-sm bg-accent px-4 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong"
             >
               Go to habits
             </Link>
@@ -87,19 +87,19 @@ export default async function DashboardPage() {
               { label: "Today", done: study.today, target: study.todayTarget, id: "today" },
               { label: "This week", done: study.week, target: study.weekTarget, id: "week" },
             ].map((row) => (
-              <div key={row.id} className="flex flex-col gap-1.5">
+              <div key={row.id} className="flex flex-col gap-2">
                 <dt className="text-xs text-fg-muted">{row.label} · study cycles</dt>
                 <dd
-                  className="font-mono text-2xl font-semibold tabular-nums"
+                  className="font-mono text-2xl font-medium tabular-nums"
                   data-testid={`study-${row.id}`}
                 >
                   {row.done}/{row.target}
                 </dd>
                 <div className="h-1.5 overflow-hidden rounded-full bg-surface-3" aria-hidden>
                   <div
-                    className="bar-fill h-full rounded-full bg-accent"
+                    className="bar-fill h-full w-full rounded-full bg-accent"
                     style={{
-                      width: `${row.target ? Math.min(100, (row.done / row.target) * 100) : 0}%`,
+                      transform: `scaleX(${row.target ? Math.min(1, row.done / row.target) : 0})`,
                     }}
                   />
                 </div>

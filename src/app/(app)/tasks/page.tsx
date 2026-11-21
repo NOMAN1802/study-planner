@@ -11,7 +11,7 @@ import { parseTaskFilters } from "@/schemas/task";
 export const metadata: Metadata = { title: "Tasks" };
 
 const primaryLink =
-  "inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3.5 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong";
+  "inline-flex h-9 items-center gap-2 rounded-sm bg-accent px-4 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong";
 
 export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
   const filters = parseTaskFilters(await searchParams);

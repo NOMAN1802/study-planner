@@ -44,7 +44,7 @@ export function ExamsTab({ data, choices }: { data: WorkstationData; choices: Ex
     <div className="flex flex-col gap-4">
       <section
         aria-labelledby="take-title"
-        className="enter rounded-lg border border-border bg-surface p-4 sm:p-5"
+        className="enter rounded-sm border border-border bg-surface p-4 sm:p-5"
       >
         <h2 id="take-title" className="mb-4 text-sm font-medium">
           Take an exam
@@ -54,7 +54,7 @@ export function ExamsTab({ data, choices }: { data: WorkstationData; choices: Ex
 
       <section
         aria-labelledby="record-title"
-        className="enter rounded-lg border border-border bg-surface p-4 sm:p-5"
+        className="enter rounded-sm border border-border bg-surface p-4 sm:p-5"
       >
         <h2 id="record-title" className="mb-4 text-sm font-medium">
           Record a result taken elsewhere
@@ -65,21 +65,21 @@ export function ExamsTab({ data, choices }: { data: WorkstationData; choices: Ex
       <div className="grid gap-4 lg:grid-cols-2">
         <section
           aria-labelledby="upcoming-title"
-          className="enter rounded-lg border border-border bg-surface"
+          className="enter rounded-sm border border-border bg-surface"
         >
-          <header className="flex min-h-11 items-center px-4 pt-3 pb-1.5 sm:px-5">
-            <h2 id="upcoming-title" className="font-display text-base font-semibold tracking-tight">
+          <header className="flex min-h-11 items-center px-4 pt-3 pb-2 sm:px-5">
+            <h2 id="upcoming-title" className="font-display text-base font-medium tracking-tight">
               Next 3 weeks
             </h2>
           </header>
           {upcoming.length === 0 ? (
-            <p className="p-4 text-sm text-fg-muted">No exams scheduled in the next 3 weeks.</p>
+            <p className="p-4 text-sm text-fg-muted">No exams scheduled in the next 3 weeks</p>
           ) : (
             <ul className="divide-y divide-border">
               {upcoming.map((u, i) => (
                 <li
                   key={`${u.day}-${i}`}
-                  className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
+                  className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
                 >
                   <span>{u.label}</span>
                   <span className="shrink-0 text-xs text-fg-muted">
@@ -93,10 +93,10 @@ export function ExamsTab({ data, choices }: { data: WorkstationData; choices: Ex
 
         <section
           aria-labelledby="history-title"
-          className="enter rounded-lg border border-border bg-surface"
+          className="enter rounded-sm border border-border bg-surface"
         >
-          <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
-            <h2 id="history-title" className="font-display text-base font-semibold tracking-tight">
+          <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-2 sm:px-5">
+            <h2 id="history-title" className="font-display text-base font-medium tracking-tight">
               Results
             </h2>
             {exams.length > 0 ? (
@@ -118,7 +118,7 @@ export function ExamsTab({ data, choices }: { data: WorkstationData; choices: Ex
                 return (
                   <li
                     key={e.id}
-                    className="flex items-center gap-3 px-4 py-2.5"
+                    className="flex items-center gap-3 px-4 py-3"
                     data-testid="ws-exam"
                   >
                     <div className="min-w-0 flex-1">
@@ -155,7 +155,7 @@ export function ExamsTab({ data, choices }: { data: WorkstationData; choices: Ex
                           ? `${formatScore(e.score)}${e.total !== null ? `/${e.total}` : ""}`
                           : "—"}
                       {pct !== null ? (
-                        <span className="ml-1.5 text-xs text-fg-muted">{pct}%</span>
+                        <span className="ml-2 text-xs text-fg-muted">{pct}%</span>
                       ) : null}
                     </span>
                     <DeleteExam id={e.id} label={`${title} on ${formatDay(e.day)}`} />

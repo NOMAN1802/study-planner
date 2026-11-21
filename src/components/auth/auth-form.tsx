@@ -64,7 +64,7 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
   return (
     <form action={formAction} onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-fg">{text.title}</h1>
+        <h1 className="font-display text-2xl font-medium tracking-tight text-fg">{text.title}</h1>
         <p className="text-sm text-fg-muted">
           {text.switchText}{" "}
           <Link href={text.switchHref} className="font-medium text-accent hover:underline">
@@ -76,7 +76,7 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
       {serverState.error ? (
         <p
           role="alert"
-          className="rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+          className="rounded-sm border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
         >
           {serverState.error}
         </p>
@@ -99,7 +99,7 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
         id="password"
         label="Password"
         error={fieldErrors?.password}
-        hint={mode === "signup" ? "At least 8 characters." : undefined}
+        hint={mode === "signup" ? "At least 8 characters" : undefined}
       >
         <Input
           id="password"

@@ -14,7 +14,7 @@ import { logProgress } from "@/lib/streaks";
 import { cn } from "@/lib/utils";
 
 const iconButton =
-  "inline-flex size-8 items-center justify-center rounded-md text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg disabled:pointer-events-none disabled:opacity-40";
+  "inline-flex size-8 items-center justify-center rounded-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg disabled:pointer-events-none disabled:opacity-40";
 
 type HabitRowProps = {
   habit: HabitRowData;
@@ -60,7 +60,7 @@ export function HabitRow({ habit, isFirst, isLast, onMove }: HabitRowProps) {
       : null;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface">
+    <div className="overflow-hidden rounded-sm border border-border bg-surface">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-3 sm:flex-nowrap sm:px-4">
         <HabitIconTile name={habit.icon} color={habit.color} />
 
@@ -69,7 +69,7 @@ export function HabitRow({ habit, isFirst, isLast, onMove }: HabitRowProps) {
             <h2 className="truncate text-sm font-medium text-fg">{habit.name}</h2>
             <span className="shrink-0 text-xs text-fg-muted">{targetSummary(habit)}</span>
           </div>
-          <div className="mt-1.5 flex items-center gap-2">
+          <div className="mt-2 flex items-center gap-2">
             <div
               className="h-1.5 w-full max-w-48 overflow-hidden rounded-full bg-surface-3"
               role="progressbar"
@@ -125,7 +125,7 @@ export function HabitRow({ habit, isFirst, isLast, onMove }: HabitRowProps) {
             disabled={pending || inactive || (complete && !minutesOnly)}
             aria-label={complete ? `${habit.name} done ${periodLabel}` : `Check in ${habit.name}`}
             className={cn(
-              "inline-flex h-8 min-w-24 items-center justify-center gap-1.5 rounded-md border px-3 text-[13px] font-medium transition-colors duration-150 disabled:cursor-not-allowed",
+              "inline-flex h-8 min-w-24 items-center justify-center gap-2 rounded-sm border px-3 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed",
               complete
                 ? "border-transparent bg-accent text-accent-fg"
                 : "border-border bg-surface text-fg hover:bg-surface-2 disabled:opacity-50",
@@ -134,10 +134,10 @@ export function HabitRow({ habit, isFirst, isLast, onMove }: HabitRowProps) {
             {complete ? (
               <motion.span
                 key="done"
-                initial={{ scale: 0.6, opacity: 0 }}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="inline-flex items-center gap-1.5"
+                className="inline-flex items-center gap-2"
               >
                 <Check className="size-3.5" aria-hidden />
                 Done

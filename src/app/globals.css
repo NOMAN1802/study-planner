@@ -118,9 +118,11 @@ body {
   animation-delay: calc(var(--enter-index, 0) * 40ms);
 }
 
-/* Progress fill: animates when a value changes (topic done, cycle completed). */
+/* Progress fill: scales from the left when a value changes (topic done, cycle
+   completed). Transform, not width, so it never triggers layout. */
 .bar-fill {
-  transition: width 300ms ease-out;
+  transform-origin: left;
+  transition: transform 300ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

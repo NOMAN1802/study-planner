@@ -49,7 +49,7 @@ function FilterSelect({
         name={name}
         defaultValue={value}
         onChange={submit}
-        className="h-8 w-auto min-w-0 text-[13px]"
+        className="h-8 w-auto min-w-0 text-sm"
       >
         {children}
       </Select>
@@ -99,14 +99,14 @@ export function TaskFilters({ filters }: { filters: Filters }) {
         ))}
       </FilterSelect>
       <noscript>
-        <button type="submit" className="h-8 rounded-md border border-border px-3 text-[13px]">
+        <button type="submit" className="h-8 rounded-sm border border-border px-3 text-sm">
           Apply
         </button>
       </noscript>
       {!isDefaultFilters(filters) ? (
         <Link
           href="/tasks"
-          className="inline-flex h-8 items-center px-2 text-[13px] text-fg-muted hover:text-fg"
+          className="inline-flex h-8 items-center px-2 text-sm text-fg-muted hover:text-fg"
         >
           Reset
         </Link>

@@ -85,7 +85,7 @@ export function MonthGrid(props: MonthGridProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface">
+    <div className="overflow-hidden rounded-sm border border-border bg-surface">
       <div className="grid grid-cols-7 border-b border-border">
         {headers.map((h) => (
           <div key={h} className="px-2 py-2 text-center text-xs font-medium text-fg-muted">
@@ -150,7 +150,7 @@ export function MonthGrid(props: MonthGridProps) {
                     onClick={() => props.onSelect(block.id)}
                     onKeyDown={(e) => chipKey(e, block, i)}
                     className={cn(
-                      "flex min-w-0 cursor-grab items-center gap-1 rounded border-l-2 px-1 py-px text-[11px] leading-tight text-fg",
+                      "flex min-w-0 cursor-grab items-center gap-1 rounded-sm border-l-2 px-1 py-px text-[11px] leading-tight text-fg",
                       selectedId === block.id && "ring-2 ring-fg/60",
                       block.done && "opacity-60",
                     )}
@@ -163,7 +163,7 @@ export function MonthGrid(props: MonthGridProps) {
                       <AlertTriangle className="size-3 shrink-0 text-danger" aria-hidden />
                     ) : null}
                     <span
-                      className="hidden shrink-0 font-mono text-[10px] text-fg-muted tabular-nums sm:inline"
+                      className="hidden shrink-0 font-mono text-[11px] text-fg-muted tabular-nums sm:inline"
                       aria-hidden
                     >
                       {time(block.start)}

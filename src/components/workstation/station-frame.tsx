@@ -34,10 +34,8 @@ export function StationFrame({
     <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium tracking-[0.08em] text-fg-muted uppercase">
-            {section}
-          </p>
-          <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-[28px]">
+          <p className="text-sm text-fg-muted">{section}</p>
+          <h2 className="font-display text-2xl font-medium tracking-tight sm:text-[28px]">
             {data.plan.name}
           </h2>
           <p className="mt-0.5 text-sm text-fg-muted">

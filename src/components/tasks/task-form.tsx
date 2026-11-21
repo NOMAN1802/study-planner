@@ -56,7 +56,7 @@ type TaskFormProps = {
 };
 
 const chip =
-  "inline-flex h-9 items-center justify-center rounded-md border border-border bg-surface px-3 text-sm text-fg-muted transition-colors duration-150 hover:border-border-strong has-checked:border-accent has-checked:bg-accent-soft has-checked:text-fg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring";
+  "inline-flex h-9 items-center justify-center rounded-sm border border-border bg-surface px-3 text-sm text-fg-muted transition-colors duration-150 hover:border-border-strong has-checked:border-fg/50 has-checked:bg-surface-2 has-checked:font-medium has-checked:text-fg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring";
 
 export function TaskForm({
   action,
@@ -84,7 +84,7 @@ export function TaskForm({
       {state.error ? (
         <p
           role="alert"
-          className="rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+          className="rounded-sm border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
         >
           {state.error}
         </p>
@@ -104,7 +104,7 @@ export function TaskForm({
 
       {defaults.category === "STUDY" ? null : (
         <Fieldset id="category" legend="Category" error={errors.category}>
-          <div className="grid grid-cols-2 gap-1.5 sm:w-1/2">
+          <div className="grid grid-cols-2 gap-2 sm:w-1/2">
             {TASK_CATEGORIES.map((c) => (
               <label key={c} className={chip}>
                 <input
@@ -122,7 +122,7 @@ export function TaskForm({
       )}
 
       <Fieldset id="priority" legend="Priority" error={errors.priority}>
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {TASK_PRIORITIES.map((p) => (
             <label key={p} className={chip}>
               <input
@@ -172,7 +172,7 @@ export function TaskForm({
           id="targetMinutes"
           label="Target minutes"
           error={errors.targetMinutes}
-          hint="Optional time budget."
+          hint="Optional time budget"
         >
           <Input
             id="targetMinutes"
@@ -192,7 +192,7 @@ export function TaskForm({
           hint={
             habits.length
               ? "Focus time on this task will count toward the habit."
-              : "No active habits yet."
+              : "No active habits yet"
           }
         >
           <Select
@@ -219,7 +219,7 @@ export function TaskForm({
           defaultValue={defaults.note ?? ""}
           maxLength={2000}
           rows={4}
-          placeholder="Details, links, acceptance criteria…"
+          placeholder="Details and links"
           invalid={Boolean(errors.note)}
         />
       </Field>
@@ -230,7 +230,7 @@ export function TaskForm({
         </Button>
         <Link
           href={defaults.category === "OFFICE" ? "/work-station/office" : "/tasks"}
-          className="inline-flex h-9 items-center rounded-md px-4 text-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
+          className="inline-flex h-9 items-center rounded-sm px-4 text-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
         >
           Cancel
         </Link>

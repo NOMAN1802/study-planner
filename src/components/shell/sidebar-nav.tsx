@@ -26,7 +26,7 @@ const icons: Record<NavItem["icon"], typeof LayoutDashboard> = {
 
 const rowClass = (active: boolean) =>
   cn(
-    "relative flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors duration-150",
+    "relative flex h-9 w-full items-center gap-2.5 rounded-sm px-3 text-sm transition-colors duration-150",
     active
       ? "bg-surface-2 font-medium text-fg before:absolute before:inset-y-2 before:-left-3 before:w-[3px] before:rounded-r before:bg-accent"
       : "text-fg-muted hover:bg-surface-2 hover:text-fg",
@@ -123,7 +123,7 @@ function NavGroup({
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-8 items-center rounded-md px-2.5 text-[13px] transition-colors duration-150",
+                  "flex h-8 items-center rounded-sm px-3 text-sm transition-colors duration-150",
                   active
                     ? "bg-surface-2 font-medium text-fg"
                     : "text-fg-muted hover:bg-surface-2 hover:text-fg",

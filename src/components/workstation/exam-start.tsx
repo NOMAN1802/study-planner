@@ -38,7 +38,7 @@ function TopicPicker({
     onChange(next);
   };
   return (
-    <fieldset className="flex flex-col gap-1.5">
+    <fieldset className="flex flex-col gap-2">
       <legend className="mb-1 flex w-full items-center justify-between text-xs text-fg-muted">
         <span>
           {label} · {selected.size} picked
@@ -60,19 +60,17 @@ function TopicPicker({
           </button>
         </span>
       </legend>
-      <div className="max-h-56 overflow-y-auto rounded-md border border-border p-2">
+      <div className="max-h-56 overflow-y-auto rounded-sm border border-border p-2">
         {subjects.map((subject) => (
-          <div key={subject} className="mb-1.5 last:mb-0">
-            <p className="px-1 text-[11px] font-medium tracking-wide text-fg-muted uppercase">
-              {subject}
-            </p>
+          <div key={subject} className="mb-2 last:mb-0">
+            <p className="px-1 text-xs font-medium text-fg-muted">{subject}</p>
             {topics
               .filter((t) => t.subject === subject)
               .map((t) => (
                 <label
                   key={t.id}
                   htmlFor={`${id}-${t.id}`}
-                  className="flex cursor-pointer items-start gap-2 rounded px-1 py-1 text-sm hover:bg-surface-2"
+                  className="flex cursor-pointer items-start gap-2 rounded-sm px-1 py-1 text-sm hover:bg-surface-2"
                 >
                   <input
                     id={`${id}-${t.id}`}
@@ -125,7 +123,7 @@ function TopicExam({ topics }: { topics: TopicChoice[] }) {
       <div
         role="radiogroup"
         aria-label="Exam"
-        className="inline-flex self-start rounded-md border border-border p-0.5"
+        className="inline-flex self-start rounded-sm border border-border p-0.5"
       >
         {(["DAILY", "WEEKLY"] as const).map((k) => (
           <button
@@ -135,7 +133,7 @@ function TopicExam({ topics }: { topics: TopicChoice[] }) {
             aria-checked={kind === k}
             onClick={() => pick(k)}
             className={cn(
-              "inline-flex h-7 items-center rounded px-3 text-[13px] transition-colors",
+              "inline-flex h-7 items-center rounded-sm px-3 text-sm transition-colors",
               kind === k ? "bg-surface-3 font-medium text-fg" : "text-fg-muted hover:text-fg",
             )}
           >
@@ -160,9 +158,9 @@ function TopicExam({ topics }: { topics: TopicChoice[] }) {
       <p className="text-xs text-fg-muted" data-testid="exam-start-summary">
         {asks > 0
           ? `${asks} questions · ${spec.minutes} min · real exam: marked and saved`
-          : "Pick at least one topic."}
+          : "Pick at least one topic"}
       </p>
-      <div className="flex flex-col items-start gap-1.5">
+      <div className="flex flex-col items-start gap-2">
         <Button size="sm" type="submit" loading={pending} disabled={asks === 0}>
           Start {EXAM_LABEL[kind].toLowerCase()}
         </Button>
@@ -199,9 +197,9 @@ function FinalExam({ finals }: { finals: ExamChoices["finals"] }) {
       <p className="text-xs text-fg-muted">
         {final.questions > 0
           ? `${final.questions} questions · ${final.minutes} min · all ${final.lectures} lectures`
-          : "No questions in the bank for this subject yet."}
+          : "No questions in the bank for this subject yet"}
       </p>
-      <div className="flex flex-col items-start gap-1.5">
+      <div className="flex flex-col items-start gap-2">
         <Button size="sm" type="submit" loading={pending} disabled={final.questions === 0}>
           Start subject final
         </Button>
@@ -268,7 +266,7 @@ export function ExamStart({ choices }: { choices: ExamChoices }) {
         </p>
         <Link
           href={`/work-station/exam/${choices.inProgress.id}`}
-          className="inline-flex h-8 items-center rounded-md bg-accent px-3 text-[13px] text-accent-fg hover:bg-accent-strong"
+          className="inline-flex h-8 items-center rounded-sm bg-accent px-3 text-sm text-accent-fg hover:bg-accent-strong"
         >
           Continue exam
         </Link>

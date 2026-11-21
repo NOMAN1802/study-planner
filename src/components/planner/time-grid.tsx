@@ -197,7 +197,7 @@ export function TimeGrid(props: TimeGridProps) {
   const gutterHours = days[0].hours;
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+    <div className="overflow-x-auto rounded-sm border border-border bg-surface">
       <div className={cn(multi ? "min-w-[44rem]" : "min-w-0")}>
         {/* Day headers */}
         <div className="flex border-b border-border">
@@ -211,7 +211,7 @@ export function TimeGrid(props: TimeGridProps) {
                 <Link
                   href={`/planner?view=day&date=${day.key}`}
                   className={cn(
-                    "inline-flex items-center rounded px-1.5 text-xs font-medium transition-colors duration-150 hover:bg-surface-2",
+                    "inline-flex items-center rounded-sm px-1.5 text-xs font-medium transition-colors duration-150 hover:bg-surface-2",
                     day.key === today
                       ? "bg-accent text-accent-fg hover:bg-accent-strong"
                       : "text-fg-muted",
@@ -292,7 +292,7 @@ export function TimeGrid(props: TimeGridProps) {
 
                   {dropHint && dropHint.day === dayIndex ? (
                     <div
-                      className="pointer-events-none absolute inset-x-1 h-0.5 rounded bg-accent"
+                      className="pointer-events-none absolute inset-x-1 h-0.5 rounded-sm bg-accent"
                       style={{ top: dropHint.minutes * PX_PER_MIN }}
                       aria-hidden
                     />
@@ -333,7 +333,7 @@ export function TimeGrid(props: TimeGridProps) {
                         }}
                         onKeyDown={(e) => blockKey(e, block, dayIndex)}
                         className={cn(
-                          "absolute z-10 cursor-grab touch-none overflow-hidden rounded-md border-l-[3px] px-1.5 py-0.5 text-left text-[11px] leading-tight text-fg shadow-sm transition-[box-shadow] duration-150 select-none active:cursor-grabbing",
+                          "absolute z-10 cursor-grab touch-none overflow-hidden rounded-sm border-l-[3px] px-1.5 py-0.5 text-left text-[11px] leading-tight text-fg shadow-sm transition-[box-shadow] duration-150 select-none active:cursor-grabbing",
                           selectedId === block.id && "ring-2 ring-fg/60",
                           conflict && "outline-1 outline-danger outline-dashed",
                           preview?.id === block.id && "z-30 opacity-90 shadow-md",
@@ -363,7 +363,7 @@ export function TimeGrid(props: TimeGridProps) {
                         </div>
                         {tall ? (
                           <div
-                            className="font-mono text-[10px] text-fg-muted tabular-nums"
+                            className="font-mono text-[11px] text-fg-muted tabular-nums"
                             aria-hidden
                           >
                             {time(block.start)}–{time(block.end)}

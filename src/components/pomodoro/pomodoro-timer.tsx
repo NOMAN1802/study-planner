@@ -154,12 +154,12 @@ export function PomodoroTimer({ taskTitle, initial, topicId = null }: PomodoroTi
     <MotionConfig reducedMotion="user">
       <section
         aria-labelledby="timer-heading"
-        className="flex flex-col items-center gap-5 rounded-lg border border-border bg-surface px-4 py-6 sm:py-8"
+        className="flex flex-col items-center gap-5 rounded-sm border border-border bg-surface px-4 py-6 sm:py-8"
       >
         {snap.otherActive ? (
           <p
             role="status"
-            className="w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-fg-muted"
+            className="w-full rounded-sm border border-border bg-surface-2 px-3 py-2 text-sm text-fg-muted"
           >
             A timer is running on{" "}
             <Link
@@ -220,7 +220,7 @@ export function PomodoroTimer({ taskTitle, initial, topicId = null }: PomodoroTi
         </div>
 
         <div
-          className="flex items-center gap-1.5"
+          className="flex items-center gap-2"
           aria-label={`${state.cycleCount % cycles || (state.cycleCount ? cycles : 0)} of ${cycles} focus sessions before a long break`}
           role="img"
         >
@@ -241,7 +241,7 @@ export function PomodoroTimer({ taskTitle, initial, topicId = null }: PomodoroTi
               type="button"
               onClick={() => send("START")}
               disabled={pending || Boolean(snap.otherActive)}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-accent px-5 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Play className="size-4" aria-hidden />
               Start {PHASE_LABEL[phase].toLowerCase()}
@@ -251,7 +251,7 @@ export function PomodoroTimer({ taskTitle, initial, topicId = null }: PomodoroTi
               type="button"
               onClick={() => send("RESUME")}
               disabled={pending}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-accent px-5 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-sm bg-accent px-5 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong disabled:opacity-60"
             >
               <Play className="size-4" aria-hidden />
               Resume
@@ -261,7 +261,7 @@ export function PomodoroTimer({ taskTitle, initial, topicId = null }: PomodoroTi
               type="button"
               onClick={() => send("PAUSE")}
               disabled={pending}
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-surface px-5 text-sm font-medium text-fg transition-colors duration-150 hover:bg-surface-2 disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-sm border border-border bg-surface px-5 text-sm font-medium text-fg transition-colors duration-150 hover:bg-surface-2 disabled:opacity-60"
             >
               <Pause className="size-4" aria-hidden />
               Pause
@@ -272,7 +272,7 @@ export function PomodoroTimer({ taskTitle, initial, topicId = null }: PomodoroTi
               type="button"
               onClick={() => send("SKIP")}
               disabled={pending}
-              className="inline-flex h-10 items-center gap-2 rounded-md px-4 text-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-sm px-4 text-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg disabled:opacity-60"
             >
               <SkipForward className="size-4" aria-hidden />
               Skip
@@ -291,7 +291,7 @@ export function PomodoroTimer({ taskTitle, initial, topicId = null }: PomodoroTi
             type="button"
             aria-pressed={prefs.sound}
             onClick={() => setPrefs({ ...prefs, sound: !prefs.sound })}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 transition-colors duration-150 hover:bg-surface-2 hover:text-fg aria-pressed:text-fg"
+            className="inline-flex h-8 items-center gap-2 rounded-sm px-3 transition-colors duration-150 hover:bg-surface-2 hover:text-fg aria-pressed:text-fg"
           >
             {prefs.sound ? (
               <Volume2 className="size-3.5" aria-hidden />
@@ -312,7 +312,7 @@ export function PomodoroTimer({ taskTitle, initial, topicId = null }: PomodoroTi
                 );
               setPrefs({ ...prefs, notify: granted });
             }}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 transition-colors duration-150 hover:bg-surface-2 hover:text-fg aria-pressed:text-fg"
+            className="inline-flex h-8 items-center gap-2 rounded-sm px-3 transition-colors duration-150 hover:bg-surface-2 hover:text-fg aria-pressed:text-fg"
           >
             {prefs.notify ? (
               <Bell className="size-3.5" aria-hidden />

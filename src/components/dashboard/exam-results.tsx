@@ -27,10 +27,7 @@ export function ExamResults({ stats }: { stats: ExamStats }) {
         <dl className="flex flex-wrap gap-x-6 gap-y-3">
           <div>
             <dt className="text-xs text-fg-muted">Average</dt>
-            <dd
-              className="font-mono text-2xl font-semibold tabular-nums"
-              data-testid="exam-average"
-            >
+            <dd className="font-mono text-2xl font-medium tabular-nums" data-testid="exam-average">
               {stats.averagePct}%
             </dd>
           </div>
@@ -54,7 +51,7 @@ export function ExamResults({ stats }: { stats: ExamStats }) {
           />
         ) : null}
         <div>
-          <h3 className="mb-1.5 text-xs font-medium text-fg-muted">Recent</h3>
+          <h3 className="mb-2 text-xs font-medium text-fg-muted">Recent</h3>
           <ul className="divide-y divide-border" aria-label="Recent exam results">
             {stats.recent.map((r) => (
               <li
@@ -68,7 +65,7 @@ export function ExamResults({ stats }: { stats: ExamStats }) {
                 </span>
                 <span className="shrink-0 font-mono tabular-nums">
                   {formatScore(r.score)}/{r.total}
-                  <span className="ml-1.5 text-xs text-fg-muted">{r.pct}%</span>
+                  <span className="ml-2 text-xs text-fg-muted">{r.pct}%</span>
                 </span>
               </li>
             ))}
@@ -77,7 +74,7 @@ export function ExamResults({ stats }: { stats: ExamStats }) {
       </div>
 
       <div>
-        <h3 className="mb-1.5 text-xs font-medium text-fg-muted">Weak topics</h3>
+        <h3 className="mb-2 text-xs font-medium text-fg-muted">Weak topics</h3>
         {stats.weakTopics.length === 0 ? (
           <p className="text-sm text-fg-muted">
             Shows once a topic has 3 or more questions answered in exams taken in the app.

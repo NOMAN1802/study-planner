@@ -13,7 +13,7 @@ import { currentPeriodLabel } from "@/lib/dates";
 import { logProgress } from "@/lib/streaks";
 import { cn } from "@/lib/utils";
 
-const subheading = "text-xs font-medium tracking-wide text-fg-muted uppercase";
+const subheading = "text-xs font-medium text-fg-muted";
 
 export function TodayPanel({ habits, tasks }: { habits: TodayHabit[]; tasks: TodayTask[] }) {
   return (
@@ -86,10 +86,10 @@ function HabitItem({ habit }: { habit: TodayHabit }) {
   }
 
   const action =
-    "inline-flex h-8 min-w-24 shrink-0 items-center justify-center gap-1.5 rounded-md border px-3 text-[13px] font-medium transition-colors duration-150";
+    "inline-flex h-8 min-w-24 shrink-0 items-center justify-center gap-2 rounded-sm border px-3 text-sm font-medium transition-colors duration-150";
 
   return (
-    <li className="py-2.5" data-testid="today-habit">
+    <li className="py-3" data-testid="today-habit">
       <div className="flex items-center gap-3">
         <HabitIconTile name={habit.icon} color={habit.color} />
         <div className="min-w-0 flex-1">
@@ -140,10 +140,10 @@ function HabitItem({ habit }: { habit: TodayHabit }) {
             {complete ? (
               <motion.span
                 key="done"
-                initial={{ scale: 0.6, opacity: 0 }}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="inline-flex items-center gap-1.5"
+                className="inline-flex items-center gap-2"
               >
                 <Check className="size-3.5" aria-hidden />
                 Done
@@ -183,14 +183,14 @@ function TaskItem({ task }: { task: TodayTask }) {
   }
 
   return (
-    <li className="py-2.5" data-testid="today-task">
+    <li className="py-3" data-testid="today-task">
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
           checked={done}
           onChange={toggle}
           aria-label={done ? `Mark ${task.title} as not done` : `Mark ${task.title} as done`}
-          className="mt-0.5 size-4 shrink-0 cursor-pointer rounded accent-(--accent)"
+          className="mt-0.5 size-4 shrink-0 cursor-pointer rounded-sm accent-(--accent)"
         />
         <div className="min-w-0 flex-1">
           <p
@@ -223,7 +223,7 @@ function TaskItem({ task }: { task: TodayTask }) {
             href={`/tasks/${task.id}/focus`}
             aria-label={`Focus on ${task.title}`}
             title="Focus timer"
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
           >
             <Timer className="size-4" aria-hidden />
           </Link>

@@ -34,7 +34,7 @@ export function YearHeatmap({ heatmap, weekStartsOn }: { heatmap: Heatmap; weekS
       <div className="overflow-x-auto pb-1" dir="rtl">
         <div className="inline-flex gap-2" dir="ltr">
           <div
-            className="grid pt-5 text-[10px] leading-none text-fg-subtle"
+            className="grid pt-5 text-[11px] leading-none text-fg-subtle"
             style={{ gridTemplateRows: `repeat(7, ${CELL}px)`, rowGap: GAP }}
             aria-hidden
           >
@@ -46,7 +46,7 @@ export function YearHeatmap({ heatmap, weekStartsOn }: { heatmap: Heatmap; weekS
           </div>
           <div>
             <div
-              className="grid h-5 text-[10px] leading-none text-fg-subtle"
+              className="grid h-5 text-[11px] leading-none text-fg-subtle"
               style={{ gridTemplateColumns: columns, columnGap: GAP }}
               aria-hidden
             >

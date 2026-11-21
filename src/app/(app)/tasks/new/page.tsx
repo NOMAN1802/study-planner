@@ -13,10 +13,10 @@ export default async function NewTaskPage({ searchParams }: PageProps<"/tasks/ne
   const habits = await getLinkableHabits(user.id);
   return (
     <div className="enter mx-auto w-full max-w-2xl">
-      <h2 className="mb-5 font-display text-xl font-semibold tracking-tight">
+      <h2 className="mb-5 font-display text-xl font-medium tracking-tight">
         {office ? "New office task" : "New task"}
       </h2>
-      <div className="rounded-lg border border-border bg-surface p-4 sm:p-6">
+      <div className="rounded-sm border border-border bg-surface p-4 sm:p-6">
         <TaskForm
           action={createTask}
           habits={habits}

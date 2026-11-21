@@ -13,7 +13,7 @@ export function PriorityBadge({ priority }: { priority: TaskPriority }) {
   const level = { LOW: 1, MEDIUM: 2, HIGH: 3, URGENT: 4 }[priority];
   return (
     <span
-      className={cn("inline-flex items-center gap-1.5 text-xs", priorityStyle[priority])}
+      className={cn("inline-flex items-center gap-2 text-xs", priorityStyle[priority])}
       data-testid="task-priority"
     >
       <span className="inline-flex items-end gap-px" aria-hidden>
@@ -40,7 +40,7 @@ export function StatusBadge({ status }: { status: TaskStatus }) {
   return (
     <span
       className={cn(
-        "inline-flex h-5 items-center rounded border px-1.5 text-[11px] font-medium",
+        "inline-flex h-5 items-center rounded-sm border px-1.5 text-[11px] font-medium",
         statusStyle[status],
       )}
       data-testid="task-status"

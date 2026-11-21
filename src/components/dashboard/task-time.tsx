@@ -36,7 +36,7 @@ export function TaskTime({ rows }: { rows: TaskTimeRow[] }) {
             </span>
           </div>
           <div
-            className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-3"
+            className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-3"
             role="progressbar"
             aria-label={`${row.title}: time spent against target`}
             aria-valuemin={0}

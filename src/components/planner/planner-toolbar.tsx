@@ -42,7 +42,7 @@ export function PlannerToolbar({
   weekStartsOn: WeekStart;
 }) {
   const nav =
-    "inline-flex size-8 items-center justify-center rounded-md border border-border bg-surface text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg";
+    "inline-flex size-8 items-center justify-center rounded-sm border border-border bg-surface text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg";
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-2">
@@ -55,7 +55,7 @@ export function PlannerToolbar({
         </Link>
         <Link
           href={href(view, today)}
-          className="inline-flex h-8 items-center rounded-md border border-border bg-surface px-3 text-[13px] text-fg transition-colors duration-150 hover:bg-surface-2"
+          className="inline-flex h-8 items-center rounded-sm border border-border bg-surface px-3 text-sm text-fg transition-colors duration-150 hover:bg-surface-2"
         >
           Today
         </Link>
@@ -67,7 +67,7 @@ export function PlannerToolbar({
           <ChevronRight className="size-4" aria-hidden />
         </Link>
         <h2
-          className="ml-1 font-display text-lg font-semibold tracking-tight"
+          className="ml-1 font-display text-lg font-medium tracking-tight"
           data-testid="planner-range"
         >
           {rangeLabel(view, date, weekStartsOn)}
@@ -75,7 +75,7 @@ export function PlannerToolbar({
       </div>
       <nav
         aria-label="Planner views"
-        className="inline-flex rounded-md border border-border bg-surface p-0.5"
+        className="inline-flex rounded-sm border border-border bg-surface p-0.5"
       >
         {PLANNER_VIEWS.map((v) => (
           <Link
@@ -83,7 +83,7 @@ export function PlannerToolbar({
             href={href(v, date)}
             aria-current={view === v ? "page" : undefined}
             className={cn(
-              "inline-flex h-7 items-center rounded px-3 text-[13px] capitalize transition-colors duration-150",
+              "inline-flex h-7 items-center rounded-sm px-3 text-sm capitalize transition-colors duration-150",
               view === v ? "bg-surface-3 font-medium text-fg" : "text-fg-muted hover:text-fg",
             )}
           >

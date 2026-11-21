@@ -48,7 +48,7 @@ export default async function PracticePage({ searchParams }: PageProps<"/work-st
         </p>
       </div>
       {questions.length === 0 ? (
-        <p className="rounded-lg border border-border bg-surface p-4 text-sm text-fg-muted">
+        <p className="rounded-sm border border-border bg-surface p-4 text-sm text-fg-muted">
           No questions for the topics picked. Go back and pick topics that have questions.
         </p>
       ) : (

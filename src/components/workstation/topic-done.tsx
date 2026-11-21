@@ -21,7 +21,7 @@ export function TopicDone({ id, title, done }: { id: string; title: string; done
           })
         }
         aria-label={value ? `Mark ${title} as not done` : `Mark ${title} as done`}
-        className="mt-0.5 size-4 shrink-0 cursor-pointer rounded accent-(--accent)"
+        className="mt-0.5 size-4 shrink-0 cursor-pointer rounded-sm accent-(--accent)"
       />
       {error ? (
         <span role="alert" className="text-xs text-danger">

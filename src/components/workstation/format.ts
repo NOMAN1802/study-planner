@@ -33,8 +33,8 @@ export const isExam = (kind: ItemKind) =>
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 export const primaryLink =
-  "inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3.5 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong";
+  "inline-flex h-9 items-center gap-2 rounded-sm bg-accent px-4 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong";
 export const secondaryLink =
-  "inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-[13px] font-medium text-fg transition-colors duration-150 hover:bg-surface-2";
+  "inline-flex h-8 items-center gap-2 rounded-sm border border-border bg-surface px-3 text-sm font-medium text-fg transition-colors duration-150 hover:bg-surface-2";
 export const iconButton =
-  "inline-flex size-8 items-center justify-center rounded-md text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg disabled:opacity-40 disabled:hover:bg-transparent";
+  "inline-flex size-8 items-center justify-center rounded-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg disabled:opacity-40 disabled:hover:bg-transparent";

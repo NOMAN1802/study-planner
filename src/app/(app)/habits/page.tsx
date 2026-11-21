@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = { title: "Habits" };
 
 const primaryLink =
-  "inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3.5 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong";
+  "inline-flex h-9 items-center gap-2 rounded-sm bg-accent px-4 text-sm font-medium text-accent-fg transition-colors duration-150 hover:bg-accent-strong";
 
 export default async function HabitsPage({ searchParams }: PageProps<"/habits">) {
   const { view: viewParam } = await searchParams;
@@ -24,7 +24,7 @@ export default async function HabitsPage({ searchParams }: PageProps<"/habits">)
       <div className="flex items-center justify-between gap-3">
         <nav
           aria-label="Habit views"
-          className="inline-flex rounded-md border border-border bg-surface p-0.5"
+          className="inline-flex rounded-sm border border-border bg-surface p-0.5"
         >
           {(["active", "archived"] as const).map((v) => (
             <Link
@@ -32,7 +32,7 @@ export default async function HabitsPage({ searchParams }: PageProps<"/habits">)
               href={v === "active" ? "/habits" : "/habits?view=archived"}
               aria-current={view === v ? "page" : undefined}
               className={cn(
-                "inline-flex h-7 items-center rounded px-3 text-[13px] capitalize transition-colors duration-150",
+                "inline-flex h-7 items-center rounded-sm px-3 text-sm capitalize transition-colors duration-150",
                 view === v ? "bg-surface-3 font-medium text-fg" : "text-fg-muted hover:text-fg",
               )}
             >

@@ -28,14 +28,14 @@ export function Panel({
       data-testid={`panel-${id}`}
       style={{ "--enter-index": index } as CSSProperties}
       className={cn(
-        "enter flex min-w-0 flex-col rounded-lg border border-border bg-surface",
+        "enter flex min-w-0 flex-col rounded-sm border border-border bg-surface",
         className,
       )}
     >
-      <header className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 pt-3 pb-1.5 sm:px-5">
+      <header className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 pt-3 pb-2 sm:px-5">
         <h2
           id={`${id}-title`}
-          className="font-display text-base font-semibold tracking-tight text-fg"
+          className="font-display text-base font-medium tracking-tight text-fg"
         >
           {title}
         </h2>

@@ -12,7 +12,7 @@ export default async function SettingsPage() {
     <div className="enter mx-auto w-full max-w-2xl">
       <section
         aria-labelledby="prefs-heading"
-        className="rounded-lg border border-border bg-surface p-4 sm:p-6"
+        className="rounded-sm border border-border bg-surface p-4 sm:p-6"
       >
         <h2 id="prefs-heading" className="mb-1 text-base font-medium">
           Preferences

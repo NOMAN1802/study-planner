@@ -33,7 +33,7 @@ export function FocusChart({ series }: { series: Record<FocusRange, FocusSeries>
         <div
           role="group"
           aria-label="Focus range"
-          className="inline-flex rounded-md border border-border bg-surface p-0.5"
+          className="inline-flex rounded-sm border border-border bg-surface p-0.5"
         >
           {FOCUS_RANGES.map((r) => (
             <button
@@ -42,7 +42,7 @@ export function FocusChart({ series }: { series: Record<FocusRange, FocusSeries>
               aria-pressed={range === r}
               onClick={() => setRange(r)}
               className={cn(
-                "inline-flex h-7 items-center rounded px-3 text-[13px] transition-colors duration-150",
+                "inline-flex h-7 items-center rounded-sm px-3 text-sm transition-colors duration-150",
                 range === r ? "bg-surface-3 font-medium text-fg" : "text-fg-muted hover:text-fg",
               )}
             >
@@ -53,7 +53,7 @@ export function FocusChart({ series }: { series: Record<FocusRange, FocusSeries>
       </div>
 
       {current.total === 0 ? (
-        <p className="flex h-28 items-center justify-center rounded-md border border-dashed border-border text-sm text-fg-muted sm:h-48">
+        <p className="flex h-28 items-center justify-center rounded-sm border border-dashed border-border text-sm text-fg-muted sm:h-48">
           No focus sessions {RANGE_NOUN[range]} yet.
         </p>
       ) : (

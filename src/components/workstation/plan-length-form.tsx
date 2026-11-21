@@ -74,7 +74,7 @@ export function PlanLengthForm({
           id="plan-holiday"
           label="Holidays"
           error={errors.holidays}
-          hint="Govt holidays are studied like a Friday: 3 lectures, then revision."
+          hint="Govt holidays are studied like a Friday: 3 lectures, then revision"
         >
           <div className="flex flex-wrap items-center gap-2">
             <Input
@@ -98,17 +98,17 @@ export function PlanLengthForm({
         </Field>
         <input type="hidden" name="holidays" value={holidays.join(",")} />
         {holidays.length > 0 ? (
-          <ul className="flex flex-wrap gap-1.5" aria-label="Holiday list">
+          <ul className="flex flex-wrap gap-2" aria-label="Holiday list">
             {holidays.map((d) => (
               <li
                 key={d}
-                className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-2 py-0.5 pr-0.5 pl-2 text-xs"
+                className="inline-flex items-center gap-1 rounded-sm border border-border bg-surface-2 py-0.5 pr-0.5 pl-2 text-xs"
               >
                 <span className="font-mono tabular-nums">{formatDay(d)}</span>
                 <button
                   type="button"
                   onClick={() => setHolidays((h) => h.filter((x) => x !== d))}
-                  className="inline-flex size-6 items-center justify-center rounded text-fg-muted hover:bg-surface hover:text-fg"
+                  className="inline-flex size-6 items-center justify-center rounded-sm text-fg-muted hover:bg-surface hover:text-fg"
                   aria-label={`Remove holiday ${formatDay(d)}`}
                 >
                   <X className="size-3.5" aria-hidden />
@@ -122,7 +122,7 @@ export function PlanLengthForm({
         Save plan
       </Button>
       <p role="status" className="text-sm text-fg-muted">
-        {state.error ?? (state.ok && !pending ? "Plan saved." : "")}
+        {state.error ?? (state.ok && !pending ? "Plan saved" : "")}
       </p>
     </form>
   );

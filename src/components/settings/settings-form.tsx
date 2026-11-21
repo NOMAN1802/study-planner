@@ -28,7 +28,7 @@ export function SettingsForm({ timezone, weekStartsOn, timezones }: SettingsForm
         id="timezone"
         label="Timezone"
         error={errors.timezone}
-        hint="Days, weeks and months for habits are counted in this timezone."
+        hint="Days, weeks and months for habits are counted in this timezone"
       >
         <Select
           id="timezone"

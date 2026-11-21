@@ -28,8 +28,8 @@ export default async function EditTaskPage({ params }: PageProps<"/tasks/[id]/ed
 
   return (
     <div className="enter mx-auto w-full max-w-2xl">
-      <h2 className="mb-5 font-display text-xl font-semibold tracking-tight">Edit task</h2>
-      <div className="rounded-lg border border-border bg-surface p-4 sm:p-6">
+      <h2 className="mb-5 font-display text-xl font-medium tracking-tight">Edit task</h2>
+      <div className="rounded-sm border border-border bg-surface p-4 sm:p-6">
         <TaskForm
           action={updateTask.bind(null, task.id)}
           habits={habits}

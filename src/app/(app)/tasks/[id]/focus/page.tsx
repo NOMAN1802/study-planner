@@ -58,9 +58,7 @@ export default async function FocusPage({ params, searchParams }: PageProps<"/ta
             <ArrowLeft className="size-3.5" aria-hidden />
             {back.label}
           </Link>
-          <h2 className="truncate font-display text-xl font-semibold tracking-tight">
-            {task.title}
-          </h2>
+          <h2 className="truncate font-display text-xl font-medium tracking-tight">{task.title}</h2>
           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fg-muted">
             <PriorityBadge priority={task.priority as TaskPriority} />
             <span
@@ -72,7 +70,7 @@ export default async function FocusPage({ params, searchParams }: PageProps<"/ta
               {task.targetMinutes ? `/${task.targetMinutes}` : ""} min focused
             </span>
             {task.habit ? (
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-2">
                 <span
                   className="size-2 rounded-full"
                   style={{ backgroundColor: task.habit.color }}
@@ -102,7 +100,7 @@ export default async function FocusPage({ params, searchParams }: PageProps<"/ta
         <div className="flex flex-col gap-4">
           <section
             aria-labelledby="settings-heading"
-            className="rounded-lg border border-border bg-surface p-4"
+            className="rounded-sm border border-border bg-surface p-4"
           >
             <h3 id="settings-heading" className="mb-3 text-sm font-medium">
               Timer settings
@@ -114,7 +112,7 @@ export default async function FocusPage({ params, searchParams }: PageProps<"/ta
           </section>
           <section
             aria-labelledby="history-heading"
-            className="rounded-lg border border-border bg-surface p-4"
+            className="rounded-sm border border-border bg-surface p-4"
           >
             <h3 id="history-heading" className="mb-2 text-sm font-medium">
               Recent sessions

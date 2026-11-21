@@ -48,7 +48,7 @@ export function PomodoroSettingsForm({ action, settings }: Props) {
           type="checkbox"
           name="autoStartNext"
           defaultChecked={settings.autoStartNext}
-          className="size-4 rounded accent-(--accent)"
+          className="size-4 rounded-sm accent-(--accent)"
         />
         Start the next phase automatically
       </label>

@@ -48,7 +48,7 @@ export function HabitIcon({ name, className }: { name: string; className?: strin
 export function HabitIconTile({ name, color }: { name: string; color: string }) {
   return (
     <span
-      className="inline-flex size-8 shrink-0 items-center justify-center rounded-md"
+      className="inline-flex size-8 shrink-0 items-center justify-center rounded-sm"
       style={{ backgroundColor: `${color}1f`, color }}
     >
       <HabitIcon name={name} />

@@ -12,15 +12,15 @@ type FieldsetProps = {
 export function Fieldset({ id, legend, error, hint, children }: FieldsetProps) {
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
-    <fieldset className="flex flex-col gap-1.5" aria-describedby={describedBy}>
-      <legend className="mb-1.5 text-[13px] font-medium text-fg">{legend}</legend>
+    <fieldset className="flex flex-col gap-2" aria-describedby={describedBy}>
+      <legend className="mb-2 text-sm font-medium text-fg">{legend}</legend>
       {children}
       {error ? (
-        <p id={`${id}-error`} role="alert" className="text-[13px] text-danger">
+        <p id={`${id}-error`} role="alert" className="text-xs text-danger">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-[13px] text-fg-muted">
+        <p id={`${id}-hint`} className="text-xs text-fg-muted">
           {hint}
         </p>
       ) : null}

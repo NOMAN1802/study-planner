@@ -9,7 +9,7 @@ export default function AppError({ error, retry }: { error: unknown; retry: () =
     <div className="enter mx-auto w-full max-w-page">
       <div
         role="alert"
-        className="flex flex-col items-start gap-3 rounded-lg border border-danger/30 bg-danger-soft p-6"
+        className="flex flex-col items-start gap-3 rounded-sm border border-danger/30 bg-danger-soft p-6"
       >
         <div>
           <h2 className="text-base font-medium text-fg">Something went wrong</h2>

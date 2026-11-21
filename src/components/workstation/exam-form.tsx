@@ -62,7 +62,7 @@ export function ExamForm({
           id="exam-subject"
           label="Subject"
           error={errors.subjectId}
-          hint="Needed for a subject final."
+          hint="Needed for a subject final"
         >
           <Select
             id="exam-subject"
@@ -102,7 +102,7 @@ export function ExamForm({
           />
         </Field>
         <Field id="exam-note" label="Note" error={errors.note}>
-          <Input id="exam-note" name="note" maxLength={500} placeholder="Weak areas, source…" />
+          <Input id="exam-note" name="note" maxLength={500} placeholder="Weak areas, source" />
         </Field>
       </div>
       <div className="flex items-center gap-3">

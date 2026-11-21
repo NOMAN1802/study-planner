@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-const panel = "rounded-lg border border-border bg-surface";
+const panel = "rounded-sm border border-border bg-surface";
 
 function PanelSkeleton({ className, rows = 3 }: { className?: string; rows?: number }) {
   return (
@@ -11,7 +11,7 @@ function PanelSkeleton({ className, rows = 3 }: { className?: string; rows?: num
       <div className="flex flex-col gap-4 p-4">
         {Array.from({ length: rows }, (_, i) => (
           <div key={i} className="flex items-center gap-3">
-            <Skeleton className="size-8 rounded-md" />
+            <Skeleton className="size-8 rounded-sm" />
             <div className="flex flex-1 flex-col gap-2">
               <Skeleton className="h-3 w-2/5" />
               <Skeleton className="h-1.5 w-3/5 rounded-full bg-surface-2" />

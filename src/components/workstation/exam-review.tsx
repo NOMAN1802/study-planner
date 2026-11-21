@@ -16,9 +16,9 @@ export function ExamReview({ sheet, title }: { sheet: ExamSheet; title: string }
     <div className="flex flex-col gap-4">
       <section
         aria-labelledby="result-title"
-        className="rounded-lg border border-border bg-surface p-4 sm:p-5"
+        className="rounded-sm border border-border bg-surface p-4 sm:p-5"
       >
-        <h2 id="result-title" className="font-display text-base font-semibold tracking-tight">
+        <h2 id="result-title" className="font-display text-base font-medium tracking-tight">
           {title} · result
         </h2>
         <p className="mt-2 font-mono text-3xl tabular-nums" data-testid="exam-result-score">
@@ -30,17 +30,17 @@ export function ExamReview({ sheet, title }: { sheet: ExamSheet; title: string }
           <Bar value={pct} max={100} />
         </div>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <dt className="text-fg-muted">Correct</dt>
             <dd className="font-mono tabular-nums" data-testid="exam-result-correct">
               {marking.correct}
             </dd>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <dt className="text-fg-muted">Wrong (−0.5 each)</dt>
             <dd className="font-mono tabular-nums">{marking.wrong}</dd>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <dt className="text-fg-muted">Unanswered</dt>
             <dd className="font-mono tabular-nums">{marking.unanswered}</dd>
           </div>
@@ -54,7 +54,7 @@ export function ExamReview({ sheet, title }: { sheet: ExamSheet; title: string }
           return (
             <li
               key={q.id}
-              className="rounded-lg border border-border bg-surface p-4"
+              className="rounded-sm border border-border bg-surface p-4"
               data-testid="exam-review-question"
             >
               <p className="mb-3 flex items-start gap-2 text-sm font-medium">
@@ -78,11 +78,11 @@ export function ExamReview({ sheet, title }: { sheet: ExamSheet; title: string }
                   )}
                 </span>
                 <span>
-                  <span className="mr-1.5 font-mono text-fg-muted tabular-nums">{i + 1}.</span>
+                  <span className="mr-2 font-mono text-fg-muted tabular-nums">{i + 1}.</span>
                   {q.text}
                 </span>
               </p>
-              <ul className="grid gap-1.5 sm:grid-cols-2">
+              <ul className="grid gap-2 sm:grid-cols-2">
                 {q.options.map((option, j) => {
                   const isAnswer = j === q.answer;
                   const isMine = j === mine;
@@ -90,7 +90,7 @@ export function ExamReview({ sheet, title }: { sheet: ExamSheet; title: string }
                     <li
                       key={j}
                       className={cn(
-                        "rounded-md border px-3 py-1.5 text-sm",
+                        "rounded-sm border px-3 py-1.5 text-sm",
                         isAnswer
                           ? "border-accent bg-accent/10"
                           : isMine
@@ -107,7 +107,7 @@ export function ExamReview({ sheet, title }: { sheet: ExamSheet; title: string }
                 })}
               </ul>
               {q.explanation || q.source ? (
-                <p className="mt-2.5 text-xs text-fg-muted">
+                <p className="mt-3 text-xs text-fg-muted">
                   {q.source ? <span className="mr-2 font-medium">[{q.source}]</span> : null}
                   {q.explanation}
                 </p>

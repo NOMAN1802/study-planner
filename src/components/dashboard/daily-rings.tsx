@@ -36,7 +36,7 @@ export function DailyRings({ ring, habits, taskRing }: DailyRingsProps) {
           {habits.map((h) => (
             <li
               key={h.id}
-              className="flex min-w-0 flex-col items-center gap-1.5"
+              className="flex min-w-0 flex-col items-center gap-2"
               data-testid="ring-habit"
             >
               <ProgressRing

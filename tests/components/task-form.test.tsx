@@ -85,7 +85,7 @@ describe("TaskForm", () => {
   it("disables habit linking when there are no habits", () => {
     render(<TaskForm action={mockAction()} habits={[]} timezone="UTC" submitLabel="Create task" />);
     expect(screen.getByLabelText("Linked habit")).toBeDisabled();
-    expect(screen.getByText("No active habits yet.")).toBeInTheDocument();
+    expect(screen.getByText("No active habits yet")).toBeInTheDocument();
   });
 
   it("pre-fills values when editing and shows server errors", async () => {

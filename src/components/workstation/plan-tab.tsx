@@ -1,3 +1,4 @@
+import { TriangleAlert } from "lucide-react";
 import { formatDay, isExam, plural } from "@/components/workstation/format";
 import { PlanLengthForm } from "@/components/workstation/plan-length-form";
 import { ResetPlan } from "@/components/workstation/reset-plan";
@@ -93,22 +94,25 @@ export function PlanTab({
       {late ? (
         <p
           role="status"
-          className="rounded-lg border border-warning/40 px-4 py-2.5 text-sm text-warning"
+          className="flex items-start gap-2 rounded-sm border border-border bg-surface px-4 py-3 text-sm text-fg"
         >
-          At {LECTURE_CYCLES / 2} lectures a day ({HOLIDAY_LECTURE_CYCLES / 2} on Fridays and
-          holidays) the remaining lectures run {plural(-schedule.bufferDays, "day")} past the
-          learning phase. Add learning days, lower lecture estimates, or catch up on your off day.
+          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
+          <span>
+            At {LECTURE_CYCLES / 2} lectures a day ({HOLIDAY_LECTURE_CYCLES / 2} on Fridays and
+            holidays) the remaining lectures run {plural(-schedule.bufferDays, "day")} past the
+            learning phase. Add learning days, lower lecture estimates, or catch up on your off day.
+          </span>
         </p>
       ) : null}
 
       <section
         aria-labelledby="subjects-plan-title"
-        className="enter rounded-lg border border-border bg-surface"
+        className="enter rounded-sm border border-border bg-surface"
       >
-        <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
+        <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-2 sm:px-5">
           <h2
             id="subjects-plan-title"
-            className="font-display text-base font-semibold tracking-tight"
+            className="font-display text-base font-medium tracking-tight"
           >
             Subjects in order
           </h2>
@@ -121,7 +125,7 @@ export function PlanTab({
             return (
               <li
                 key={p.subjectId}
-                className="grid gap-x-4 gap-y-1.5 px-4 py-3 sm:grid-cols-[1.5rem_1fr_9rem_11rem] sm:items-center"
+                className="grid gap-x-4 gap-y-2 px-4 py-3 sm:grid-cols-[1.5rem_1fr_9rem_11rem] sm:items-center"
                 data-testid="ws-plan-subject"
               >
                 <span className="font-mono text-xs text-fg-muted tabular-nums">{i + 1}</span>
@@ -133,18 +137,16 @@ export function PlanTab({
                   />
                   <span className="truncate">{s.name}</span>
                   {p.status === "current" ? (
-                    <span className="rounded bg-mark-soft px-1.5 text-[11px] leading-5 font-medium text-mark">
-                      Current
-                    </span>
+                    <span className="text-xs font-medium text-mark">Current</span>
                   ) : p.status === "done" ? (
-                    <span className="rounded border border-border px-1.5 text-[11px] leading-5 text-fg-muted">
+                    <span className="rounded-sm border border-border px-1.5 text-[11px] leading-5 text-fg-muted">
                       Done
                     </span>
                   ) : null}
                 </p>
                 <div className="flex items-center gap-2">
                   <Bar value={p.doneTopics} max={p.totalTopics} color={s.color} />
-                  <span className="shrink-0 font-mono text-xs text-fg-muted tabular-nums">
+                  <span className="w-10 shrink-0 text-right font-mono text-xs text-fg-muted tabular-nums">
                     {p.doneTopics}/{p.totalTopics}
                   </span>
                 </div>
@@ -174,19 +176,19 @@ export function PlanTab({
 
       <section
         aria-labelledby="calendar-title"
-        className="enter rounded-lg border border-border bg-surface"
+        className="enter rounded-sm border border-border bg-surface"
       >
-        <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-1.5 sm:px-5">
-          <h2 id="calendar-title" className="font-display text-base font-semibold tracking-tight">
+        <header className="flex min-h-11 flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-2 sm:px-5">
+          <h2 id="calendar-title" className="font-display text-base font-medium tracking-tight">
             {plan.learningDays + plan.revisionDays}-day roadmap
           </h2>
           <span className="flex flex-wrap items-center gap-3 text-xs text-fg-muted">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-2.5 rounded-sm border-2 border-fg" aria-hidden />
+            <span className="inline-flex items-center gap-2">
+              <span className="size-2.5 rounded-sm border border-fg" aria-hidden />
               Exam day
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-2.5 rounded-sm bg-surface-3" aria-hidden />
+            <span className="inline-flex items-center gap-2">
+              <span className="size-2.5 rounded-sm bg-surface-2" aria-hidden />
               Revision
             </span>
           </span>
@@ -237,26 +239,26 @@ export function PlanTab({
                           aria-label={label}
                           title={label}
                           className={cn(
-                            "flex h-9 flex-col justify-between rounded px-1 py-0.5",
-                            exam && "outline-2 -outline-offset-2 outline-fg",
+                            "relative flex h-9 flex-col justify-between rounded-sm px-1 py-0.5",
+                            exam && "outline-1 -outline-offset-1 outline-fg",
                             d === now.dayKey &&
                               "ring-2 ring-mark ring-offset-1 ring-offset-surface",
-                            past ? "bg-surface-2" : !subject && "bg-surface-3",
+                            past ? "bg-surface" : "bg-surface-2",
                             d > schedule.planEnd && "opacity-60",
                           )}
-                          style={
-                            !past && subject
-                              ? {
-                                  backgroundColor: `color-mix(in srgb, ${subject.color} 28%, var(--surface))`,
-                                }
-                              : undefined
-                          }
                         >
-                          <span className="font-mono text-[10px] text-fg tabular-nums">
+                          {!past && subject ? (
+                            <span
+                              className="absolute inset-x-1 bottom-1 h-0.5 rounded-full"
+                              style={{ backgroundColor: subject.color }}
+                              aria-hidden
+                            />
+                          ) : null}
+                          <span className="font-mono text-[11px] text-fg tabular-nums">
                             {Number(d.slice(8))}
                           </span>
                           {past && done > 0 ? (
-                            <span className="self-end font-mono text-[10px] text-fg tabular-nums">
+                            <span className="self-end font-mono text-[11px] text-fg tabular-nums">
                               {done}
                             </span>
                           ) : null}
@@ -271,15 +273,28 @@ export function PlanTab({
         </div>
       </section>
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <PlanLengthForm
-          startDay={plan.startDay}
-          learningDays={plan.learningDays}
-          revisionDays={plan.revisionDays}
-          holidays={plan.holidays}
-        />
-        <ResetPlan />
-      </div>
+      <section
+        aria-labelledby="plan-settings-title"
+        className="enter rounded-sm border border-border bg-surface"
+      >
+        <header className="flex min-h-11 items-center px-4 pt-3 pb-2 sm:px-5">
+          <h2
+            id="plan-settings-title"
+            className="font-display text-base font-medium tracking-tight"
+          >
+            Plan length and holidays
+          </h2>
+        </header>
+        <div className="flex flex-wrap items-end justify-between gap-4 px-4 pb-4 sm:px-5 sm:pb-5">
+          <PlanLengthForm
+            startDay={plan.startDay}
+            learningDays={plan.learningDays}
+            revisionDays={plan.revisionDays}
+            holidays={plan.holidays}
+          />
+          <ResetPlan />
+        </div>
+      </section>
     </div>
   );
 }

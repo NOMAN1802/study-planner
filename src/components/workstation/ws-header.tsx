@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 /** One ruled strip of figures (2 columns on phones, 4 from lg). */
 export function StatStrip({ children }: { children: ReactNode }) {
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-border bg-border lg:grid-cols-4">
       {children}
     </div>
   );
@@ -25,13 +25,11 @@ export function Stat({
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-1 bg-surface px-4 py-3 sm:px-5 sm:py-4">
-      <span className="text-[11px] font-medium tracking-[0.08em] text-fg-muted uppercase">
-        {label}
-      </span>
+      <span className="text-xs text-fg-muted">{label}</span>
       <span
         data-testid={testId}
         className={cn(
-          "font-mono text-xl font-semibold tabular-nums sm:text-2xl",
+          "font-mono text-xl font-medium tabular-nums sm:text-2xl",
           tone === "warning" && "text-warning",
           tone === "accent" && "text-accent",
         )}
@@ -49,8 +47,8 @@ export function Bar({ value, max, color }: { value: number; max: number; color?:
   return (
     <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-3" aria-hidden>
       <div
-        className="bar-fill h-full rounded-full bg-accent"
-        style={{ width: `${pct}%`, backgroundColor: color }}
+        className="bar-fill h-full w-full rounded-full bg-accent"
+        style={{ transform: `scaleX(${pct / 100})`, backgroundColor: color }}
       />
     </div>
   );

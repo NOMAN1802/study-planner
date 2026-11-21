@@ -56,7 +56,7 @@ export function SubjectsTab({
           return (
             <li
               key={s.id}
-              className="rounded-lg border border-border bg-surface"
+              className="rounded-sm border border-border bg-surface"
               data-testid="ws-subject"
             >
               <details open={p?.status === "current"}>
@@ -73,7 +73,7 @@ export function SubjectsTab({
                     <span className="mt-1 flex items-center gap-2">
                       <Bar value={done} max={s.topics.length} color={s.color} />
                       <span
-                        className="shrink-0 font-mono text-xs text-fg-muted tabular-nums"
+                        className="w-10 shrink-0 text-right font-mono text-xs text-fg-muted tabular-nums"
                         data-testid="ws-subject-progress"
                       >
                         {done}/{s.topics.length}
@@ -152,7 +152,7 @@ function TopicRow({
 }) {
   const [, start] = useTransition();
   return (
-    <li className="flex flex-wrap items-start gap-x-3 gap-y-2 px-4 py-2.5" data-testid="ws-topic">
+    <li className="flex flex-wrap items-start gap-x-3 gap-y-2 px-4 py-3" data-testid="ws-topic">
       <TopicDone id={topic.id} title={topic.title} done={topic.done} />
       <div className="min-w-0 flex-1">
         <p className={topic.done ? "text-sm text-fg-subtle line-through" : "text-sm text-fg"}>
@@ -167,7 +167,7 @@ function TopicRow({
           ) : null}
         </p>
       </div>
-      <label className="flex items-center gap-1.5 text-xs text-fg-muted">
+      <label className="flex items-center gap-2 text-xs text-fg-muted">
         <span className="sr-only">Cycles planned for {topic.title}</span>
         <select
           defaultValue={topic.estCycles}
@@ -178,7 +178,7 @@ function TopicRow({
               onError(r.error ?? null);
             });
           }}
-          className="h-8 rounded-md border border-border bg-surface px-1.5 text-xs text-fg"
+          className="h-8 rounded-sm border border-border bg-surface px-1.5 text-xs text-fg"
         >
           {(ESTIMATES.includes(topic.estCycles) ? ESTIMATES : [...ESTIMATES, topic.estCycles]).map(
             (n) => (

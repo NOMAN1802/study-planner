@@ -34,9 +34,9 @@ export function RoutineTab({ slots }: { slots: WsSlot[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border bg-surface px-4 py-3">
         <p className="text-sm">
-          <span className="font-mono font-semibold tabular-nums" data-testid="ws-routine-total">
+          <span className="font-mono font-medium tabular-nums" data-testid="ws-routine-total">
             {total}
           </span>{" "}
           study cycles a week{" "}
@@ -86,13 +86,13 @@ export function RoutineTab({ slots }: { slots: WsSlot[] }) {
             <section
               key={weekday}
               aria-labelledby={`day-${weekday}`}
-              className="rounded-lg border border-border bg-surface"
+              className="rounded-sm border border-border bg-surface"
               data-testid="ws-routine-day"
             >
-              <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
+              <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-2 sm:px-5">
                 <h2
                   id={`day-${weekday}`}
-                  className="font-display text-base font-semibold tracking-tight"
+                  className="font-display text-base font-medium tracking-tight"
                 >
                   {WEEKDAY_NAME[weekday]}
                 </h2>

@@ -108,9 +108,9 @@ export function ExamRunner({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3 shadow-sm">
+      <div className="sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border bg-surface px-4 py-3 shadow-sm">
         <div className="min-w-0">
-          <h2 className="font-display text-base font-semibold tracking-tight">{title}</h2>
+          <h2 className="font-display text-base font-medium tracking-tight">{title}</h2>
           <p className="text-xs text-fg-muted" data-testid="exam-progress">
             {answered}/{questions.length} answered · +1 correct, −0.5 wrong, 0 blank
           </p>
@@ -121,7 +121,7 @@ export function ExamRunner({
             aria-label="Time left"
             data-testid="exam-timer"
             className={cn(
-              "inline-flex items-center gap-1.5 font-mono text-lg tabular-nums",
+              "inline-flex items-center gap-2 font-mono text-lg tabular-nums",
               left < 60_000 ? "text-danger" : left < 5 * 60_000 ? "text-warning" : "text-fg",
             )}
           >
@@ -157,7 +157,7 @@ export function ExamRunner({
       {error ? (
         <p
           role="alert"
-          className="rounded-lg border border-danger/40 px-4 py-2.5 text-sm text-danger"
+          className="rounded-sm border border-danger/40 px-4 py-3 text-sm text-danger"
         >
           {error}
         </p>
@@ -167,13 +167,13 @@ export function ExamRunner({
         {questions.map((q, i) => (
           <li key={q.id}>
             <fieldset
-              className="rounded-lg border border-border bg-surface p-4"
+              className="rounded-sm border border-border bg-surface p-4"
               data-testid="exam-question"
               disabled={pending || (timeUp && !error)}
             >
               <legend className="sr-only">Question {i + 1}</legend>
               <p className="mb-3 text-sm font-medium">
-                <span className="mr-1.5 font-mono text-fg-muted tabular-nums">{i + 1}.</span>
+                <span className="mr-2 font-mono text-fg-muted tabular-nums">{i + 1}.</span>
                 {q.text}
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -183,7 +183,7 @@ export function ExamRunner({
                     <label
                       key={j}
                       className={cn(
-                        "flex cursor-pointer items-start gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors",
+                        "flex cursor-pointer items-start gap-2.5 rounded-sm border px-3 py-2 text-sm transition-colors",
                         checked
                           ? "border-accent bg-accent/10"
                           : "border-border hover:border-border-strong",

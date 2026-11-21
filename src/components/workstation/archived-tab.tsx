@@ -4,7 +4,7 @@ import { CheckCircle2 } from "lucide-react";
 import { formatDay, plural } from "@/components/workstation/format";
 import { LectureLinks } from "@/components/workstation/lecture-links";
 import { TopicDone } from "@/components/workstation/topic-done";
-import { Bar } from "@/components/workstation/ws-header";
+import { Bar, Stat, StatStrip } from "@/components/workstation/ws-header";
 import { formatScore } from "@/lib/workstation/exam";
 import type { SubjectProjection } from "@/lib/workstation/schedule";
 import type { WsExam, WsSubject, WsTopic } from "@/lib/workstation/server";
@@ -50,7 +50,7 @@ export function ArchivedTab({
 
   return (
     <div className="flex flex-col gap-4">
-      <dl className="enter grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <StatStrip>
         <Stat
           label="Lectures done"
           value={`${lecturesDone}/${totalLectures}`}
@@ -63,11 +63,11 @@ export function ArchivedTab({
           testId="ws-archived-subjects"
         />
         <Stat label="Exams taken" value={String(past.length)} testId="ws-archived-exams" />
-      </dl>
+      </StatStrip>
 
       <Section id="archived-subjects" title="Finished subjects" count={finished.length}>
         {finished.length === 0 ? (
-          <Empty>A subject lands here once all its lectures are done and its final is taken.</Empty>
+          <Empty>A subject lands here once all its lectures are done and its final is taken</Empty>
         ) : (
           <ul className="divide-y divide-border">
             {finished.map((s) => {
@@ -76,7 +76,7 @@ export function ArchivedTab({
               return (
                 <li
                   key={s.id}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm"
+                  className="flex items-center gap-3 px-4 py-3 text-sm"
                   data-testid="ws-archived-subject"
                 >
                   <CheckCircle2
@@ -145,7 +145,7 @@ export function ArchivedTab({
 
       <Section id="archived-exams" title="Past exams" count={past.length}>
         {past.length === 0 ? (
-          <Empty>No exams taken yet.</Empty>
+          <Empty>No exams taken yet</Empty>
         ) : (
           <ul className="divide-y divide-border" aria-label="Past exams">
             {past.map((e) => {
@@ -157,7 +157,7 @@ export function ArchivedTab({
               return (
                 <li
                   key={e.id}
-                  className="flex items-center gap-3 px-4 py-2.5"
+                  className="flex items-center gap-3 px-4 py-3"
                   data-testid="ws-archived-exam"
                 >
                   <div className="min-w-0 flex-1">
@@ -185,7 +185,7 @@ export function ArchivedTab({
                       ? `${formatScore(e.score)}${e.total !== null ? `/${e.total}` : ""}`
                       : "—"}
                     {pct !== null ? (
-                      <span className="ml-1.5 text-xs text-fg-muted">{pct}%</span>
+                      <span className="ml-2 text-xs text-fg-muted">{pct}%</span>
                     ) : null}
                   </span>
                 </li>
@@ -194,17 +194,6 @@ export function ArchivedTab({
           </ul>
         )}
       </Section>
-    </div>
-  );
-}
-
-function Stat({ label, value, testId }: { label: string; value: string; testId: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-surface px-4 py-3">
-      <dt className="text-xs text-fg-muted">{label}</dt>
-      <dd className="mt-0.5 font-mono text-lg font-semibold tabular-nums" data-testid={testId}>
-        {value}
-      </dd>
     </div>
   );
 }
@@ -221,9 +210,9 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section aria-labelledby={id} className="enter rounded-lg border border-border bg-surface">
-      <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-1.5 sm:px-5">
-        <h2 id={id} className="font-display text-base font-semibold tracking-tight">
+    <section aria-labelledby={id} className="enter rounded-sm border border-border bg-surface">
+      <header className="flex min-h-11 items-center justify-between px-4 pt-3 pb-2 sm:px-5">
+        <h2 id={id} className="font-display text-base font-medium tracking-tight">
           {title}
         </h2>
         {count > 0 ? <span className="text-xs text-fg-muted">{count}</span> : null}

@@ -43,7 +43,7 @@ export function TaskList({ tasks }: { tasks: TaskRow[] }) {
         </p>
       ) : null}
       <ul
-        className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface"
+        className="divide-y divide-border overflow-hidden rounded-sm border border-border bg-surface"
         aria-label="Tasks"
       >
         <AnimatePresence initial={false}>
@@ -74,7 +74,7 @@ export function TaskList({ tasks }: { tasks: TaskRow[] }) {
 }
 
 const iconButton =
-  "inline-flex size-8 items-center justify-center rounded-md text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg";
+  "inline-flex size-8 items-center justify-center rounded-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg";
 
 function TaskItem({
   task,
@@ -96,7 +96,7 @@ function TaskItem({
         checked={done}
         onChange={onToggle}
         aria-label={done ? `Mark ${task.title} as not done` : `Mark ${task.title} as done`}
-        className="mt-0.5 size-4 shrink-0 cursor-pointer rounded accent-(--accent)"
+        className="mt-0.5 size-4 shrink-0 cursor-pointer rounded-sm accent-(--accent)"
       />
 
       <div className="min-w-0 flex-1">
@@ -111,7 +111,7 @@ function TaskItem({
           </h2>
           <StatusBadge status={task.status} />
           {task.category === "OFFICE" ? (
-            <span className="rounded border border-border px-1.5 text-[11px] leading-5 text-fg-muted">
+            <span className="rounded-sm border border-border px-1.5 text-[11px] leading-5 text-fg-muted">
               Office
             </span>
           ) : null}
@@ -119,7 +119,7 @@ function TaskItem({
         {task.note ? (
           <p className="mt-0.5 line-clamp-1 text-xs text-fg-muted">{task.note}</p>
         ) : null}
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fg-muted">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fg-muted">
           <PriorityBadge priority={task.priority} />
           {task.dueLabel ? (
             <span
@@ -147,7 +147,7 @@ function TaskItem({
             </span>
           ) : null}
           {task.habit ? (
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-2">
               <span
                 className="size-2 rounded-full"
                 style={{ backgroundColor: task.habit.color }}
@@ -165,14 +165,14 @@ function TaskItem({
             <button
               type="button"
               onClick={onDelete}
-              className="inline-flex h-8 items-center rounded-md bg-danger px-2.5 text-[13px] font-medium text-danger-fg hover:opacity-90"
+              className="inline-flex h-8 items-center rounded-sm bg-danger px-3 text-sm font-medium text-danger-fg hover:opacity-90"
             >
               Delete
             </button>
             <button
               type="button"
               onClick={() => setConfirming(false)}
-              className="inline-flex h-8 items-center rounded-md px-2.5 text-[13px] text-fg-muted hover:bg-surface-2"
+              className="inline-flex h-8 items-center rounded-sm px-3 text-sm text-fg-muted hover:bg-surface-2"
             >
               Keep
             </button>

@@ -137,7 +137,7 @@ export function PlannerBoard({
   return (
     <div className="grid gap-4 lg:grid-cols-[15rem_1fr]">
       <aside className="flex flex-col gap-3 lg:order-none" aria-label="Schedule items">
-        <section className="rounded-lg border border-border bg-surface">
+        <section className="rounded-sm border border-border bg-surface">
           <h3 className="border-b border-border px-3 py-2 text-xs font-medium text-fg-muted">
             Drag onto the planner, or pick one and choose a slot
           </h3>
@@ -169,7 +169,7 @@ export function PlannerBoard({
 
         {selected ? (
           <section
-            className="rounded-lg border border-border bg-surface p-3"
+            className="rounded-sm border border-border bg-surface p-3"
             aria-labelledby="block-details"
             data-testid="block-details"
           >
@@ -179,7 +179,7 @@ export function PlannerBoard({
               </h3>
               <button
                 type="button"
-                className="inline-flex size-6 items-center justify-center rounded text-fg-muted hover:bg-surface-2"
+                className="inline-flex size-6 items-center justify-center rounded-sm text-fg-muted hover:bg-surface-2"
                 aria-label="Close details"
                 onClick={() => setSelectedId(null)}
               >
@@ -212,7 +212,7 @@ export function PlannerBoard({
               <button
                 type="button"
                 onClick={() => remove(selected.id)}
-                className="ml-auto inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs text-danger hover:bg-danger-soft"
+                className="ml-auto inline-flex h-7 items-center gap-1 rounded-sm px-2 text-xs text-danger hover:bg-danger-soft"
               >
                 <Trash2 className="size-3.5" aria-hidden />
                 Delete block
@@ -226,7 +226,7 @@ export function PlannerBoard({
         {armed ? (
           <div
             role="status"
-            className="flex items-center gap-2 rounded-md border border-accent/40 bg-accent-soft px-3 py-2 text-sm text-fg"
+            className="flex items-center gap-2 rounded-sm border border-border bg-surface px-3 py-2 text-sm text-fg"
           >
             <CalendarPlus className="size-4 text-accent" aria-hidden />
             <span className="min-w-0 flex-1">
@@ -245,7 +245,7 @@ export function PlannerBoard({
         {error ? (
           <p
             role="alert"
-            className="rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+            className="rounded-sm border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
           >
             {error}
           </p>
@@ -304,9 +304,7 @@ function PaletteSection({
 }) {
   return (
     <div className="px-1.5 py-1.5">
-      <h4 className="px-1.5 pb-1 text-[11px] font-medium tracking-wide text-fg-subtle uppercase">
-        {title}
-      </h4>
+      <h4 className="px-1.5 pb-1 text-xs font-medium text-fg-subtle">{title}</h4>
       {items.length === 0 ? (
         <p className="px-1.5 pb-1 text-xs text-fg-muted">None yet. {empty}</p>
       ) : (
@@ -323,7 +321,7 @@ function PaletteSection({
                 }}
                 data-testid="palette-item"
                 className={cn(
-                  "group flex cursor-grab items-center gap-1.5 rounded-md px-1.5 py-1 transition-colors duration-150 hover:bg-surface-2 active:cursor-grabbing",
+                  "group flex cursor-grab items-center gap-2 rounded-sm px-1.5 py-1 transition-colors duration-150 hover:bg-surface-2 active:cursor-grabbing",
                   isArmed && "bg-accent-soft",
                 )}
               >
@@ -334,7 +332,7 @@ function PaletteSection({
                   aria-hidden
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] text-fg">{item.title}</span>
+                  <span className="block truncate text-sm text-fg">{item.title}</span>
                   {item.detail ? (
                     <span className="block truncate text-[11px] text-fg-subtle">{item.detail}</span>
                   ) : null}
@@ -344,7 +342,7 @@ function PaletteSection({
                   aria-pressed={isArmed}
                   title="Pick a slot"
                   onClick={() => onArm(isArmed ? null : item)}
-                  className="inline-flex h-6 shrink-0 items-center rounded px-1.5 font-mono text-[11px] text-fg-muted tabular-nums ring-accent hover:bg-surface-3 hover:text-fg aria-pressed:bg-accent aria-pressed:text-accent-fg"
+                  className="inline-flex h-6 shrink-0 items-center rounded-sm px-1.5 font-mono text-[11px] text-fg-muted tabular-nums ring-accent hover:bg-surface-3 hover:text-fg aria-pressed:bg-accent aria-pressed:text-accent-fg"
                 >
                   <span className="sr-only">Schedule {item.title}, </span>
                   {item.defaultMinutes}m

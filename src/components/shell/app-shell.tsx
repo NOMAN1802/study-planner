@@ -51,7 +51,7 @@ export function AppShell({ email, userMenu, children }: AppShellProps) {
     <div className="flex min-h-full flex-1">
       <a
         href="#main"
-        className="sr-only rounded-md border border-border-strong bg-surface px-3 py-2 text-sm font-medium text-fg focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
+        className="sr-only rounded-sm border border-border-strong bg-surface px-3 py-2 text-sm font-medium text-fg focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
       >
         Skip to content
       </a>
@@ -72,17 +72,17 @@ export function AppShell({ email, userMenu, children }: AppShellProps) {
           <span className="flex items-center gap-2.5">
             <span
               aria-hidden
-              className="grid size-7 place-items-center rounded-md bg-fg font-display text-[15px] font-semibold text-bg"
+              className="grid size-7 place-items-center rounded-sm bg-fg font-display text-[15px] font-medium text-bg"
             >
               H
             </span>
-            <span className="font-display text-[17px] font-semibold tracking-tight">
+            <span className="font-display text-[17px] font-medium tracking-tight">
               Habit Tracker
             </span>
           </span>
           <button
             type="button"
-            className="inline-flex size-8 items-center justify-center rounded-md text-fg-muted hover:bg-surface-2 md:hidden"
+            className="inline-flex size-8 items-center justify-center rounded-sm text-fg-muted hover:bg-surface-2 md:hidden"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
           >
@@ -113,7 +113,7 @@ export function AppShell({ email, userMenu, children }: AppShellProps) {
           <button
             ref={menuButtonRef}
             type="button"
-            className="inline-flex size-8 items-center justify-center rounded-md border border-border bg-surface text-fg-muted hover:bg-surface-2 md:hidden"
+            className="inline-flex size-8 items-center justify-center rounded-sm border border-border bg-surface text-fg-muted hover:bg-surface-2 md:hidden"
             aria-label="Open menu"
             aria-controls="app-sidebar"
             aria-expanded={open}
@@ -121,7 +121,7 @@ export function AppShell({ email, userMenu, children }: AppShellProps) {
           >
             <Menu className="size-4" aria-hidden />
           </button>
-          <h1 className="font-display text-xl font-semibold tracking-tight">{title}</h1>
+          <h1 className="font-display text-xl font-medium tracking-tight">{title}</h1>
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
             {userMenu}

@@ -57,7 +57,7 @@ const HOURS = Array.from({ length: 24 }, (_, h) => h);
 const hourLabel = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
 const chip =
-  "inline-flex items-center justify-center rounded-md border border-border bg-surface text-fg-muted transition-colors duration-150 hover:border-border-strong has-checked:border-accent has-checked:bg-accent-soft has-checked:text-fg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring";
+  "inline-flex items-center justify-center rounded-sm border border-border bg-surface text-fg-muted transition-colors duration-150 hover:border-border-strong has-checked:border-fg/50 has-checked:bg-surface-2 has-checked:font-medium has-checked:text-fg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring";
 
 export function HabitForm({ action, defaults = EMPTY, submitLabel }: HabitFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
@@ -80,7 +80,7 @@ export function HabitForm({ action, defaults = EMPTY, submitLabel }: HabitFormPr
       {state.error ? (
         <p
           role="alert"
-          className="rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+          className="rounded-sm border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
         >
           {state.error}
         </p>
@@ -99,7 +99,7 @@ export function HabitForm({ action, defaults = EMPTY, submitLabel }: HabitFormPr
       </Field>
 
       <Fieldset id="frequency" legend="Frequency" error={errors.frequency}>
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {FREQUENCIES.map((f) => (
             <label key={f.value} className={cn(chip, "h-9 px-3 text-sm")}>
               <input
@@ -164,7 +164,7 @@ export function HabitForm({ action, defaults = EMPTY, submitLabel }: HabitFormPr
           id="targetMinutes"
           label="Target minutes per period"
           error={errors.targetMinutes}
-          hint="Optional."
+          hint="Optional"
         >
           <Input
             id="targetMinutes"
@@ -196,7 +196,7 @@ export function HabitForm({ action, defaults = EMPTY, submitLabel }: HabitFormPr
           {HABIT_COLORS.map((c) => (
             <label
               key={c.value}
-              className="relative inline-flex size-8 items-center justify-center rounded-md border border-border has-checked:border-fg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
+              className="relative inline-flex size-8 items-center justify-center rounded-sm border border-border has-checked:border-fg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
             >
               <input
                 type="radio"
@@ -217,7 +217,7 @@ export function HabitForm({ action, defaults = EMPTY, submitLabel }: HabitFormPr
       </Fieldset>
 
       <Fieldset id="icon" legend="Icon" error={errors.icon}>
-        <div className="grid grid-cols-8 gap-1.5 sm:flex sm:flex-wrap">
+        <div className="grid grid-cols-8 gap-2 sm:flex sm:flex-wrap">
           {HABIT_ICON_NAMES.map((name) => {
             const Icon = HABIT_ICONS[name];
             return (
@@ -243,7 +243,7 @@ export function HabitForm({ action, defaults = EMPTY, submitLabel }: HabitFormPr
         </Button>
         <Link
           href="/habits"
-          className="inline-flex h-9 items-center rounded-md px-4 text-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
+          className="inline-flex h-9 items-center rounded-sm px-4 text-sm text-fg-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg"
         >
           Cancel
         </Link>
