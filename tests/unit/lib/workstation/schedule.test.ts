@@ -103,6 +103,21 @@ describe("buildSchedule", () => {
     expect(kinds(s, "2026-11-27").some((k) => k.startsWith("weekly"))).toBe(false);
   });
 
+  it("counts lectures ticked done today against today's two lectures", () => {
+    // Lecture 1 was ticked today without the timer: only one more lecture today.
+    const base = input({ subjects: [subject("eng", 10)] });
+    base.subjects[0].topics[0].done = true;
+    const s = buildSchedule({ ...base, lectureCyclesDoneToday: 2 });
+    expect(s.days[0].items.filter((i) => i.kind === "topic").map((i) => i.topicId)).toEqual([
+      "eng-2",
+    ]);
+    // Tomorrow is back to two.
+    expect(s.days[1].items.filter((i) => i.kind === "topic")).toHaveLength(2);
+    // Timed cycles and ticked lectures are the same work, not counted twice.
+    const timed = buildSchedule({ ...base, doneToday: 2, lectureCyclesDoneToday: 2 });
+    expect(timed.days[0].items.filter((i) => i.kind === "topic")).toHaveLength(1);
+  });
+
   it("removes cycles already done today and topics already done", () => {
     const base = input({ subjects: [subject("vocab", 1, { isDaily: true }), subject("eng", 10)] });
     base.subjects[1].topics[0].done = true;

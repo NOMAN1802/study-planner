@@ -72,6 +72,12 @@ export type ScheduleInput = {
   today: string;
   /** Study cycles already completed today (any subject). */
   doneToday: number;
+  /**
+   * Estimated cycles of the lectures ticked done today. They use up today's
+   * lecture allowance even when studied without the timer, so ticking a
+   * lecture never makes room for an extra one.
+   */
+  lectureCyclesDoneToday?: number;
   /** A cycle on the daily subject was already completed today. */
   dailyDoneToday: boolean;
   /** Word days (non-Friday days with a vocabulary cycle) already done, today included. */
@@ -283,7 +289,11 @@ export function buildSchedule(input: ScheduleInput): Schedule {
     // Lectures are capped per day; a subject's revision + final get a day of their own.
     const lectureCap = weekday === FRIDAY || holiday ? HOLIDAY_LECTURE_CYCLES : LECTURE_CYCLES;
     const doneLectures = isToday
-      ? Math.max(0, input.doneToday - (input.dailyDoneToday && daily ? DAILY_CYCLES : 0))
+      ? Math.max(
+          input.doneToday - (input.dailyDoneToday && daily ? DAILY_CYCLES : 0),
+          input.lectureCyclesDoneToday ?? 0,
+          0,
+        )
       : 0;
     let lectureLeft = Math.max(0, lectureCap - doneLectures);
     let lecturedOn: string | undefined;

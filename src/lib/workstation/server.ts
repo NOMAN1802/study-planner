@@ -212,6 +212,11 @@ export async function getWorkstationData(
     })),
     today: now.dayKey,
     doneToday,
+    lectureCyclesDoneToday: subjects
+      .filter((s) => !s.isDaily)
+      .flatMap((s) => s.topics)
+      .filter((t) => t.doneDay === now.dayKey)
+      .reduce((n, t) => n + t.estCycles, 0),
     dailyDoneToday,
     vocabDaysDone: wordDays.size,
     weeklyExamDays: finished.filter((e) => e.kind === "WEEKLY").map((e) => e.day),
