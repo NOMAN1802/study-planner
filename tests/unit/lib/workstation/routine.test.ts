@@ -41,23 +41,23 @@ describe("default routine", () => {
     }
   });
 
-  it("leaves at least 6 hours of sleep every night, 22:50–05:00", () => {
+  it("leaves 6 hours of sleep every night, 23:00–05:00", () => {
     for (let weekday = 0; weekday < 7; weekday += 1) {
       const today = routine.filter((s) => s.weekday === weekday);
       const tomorrow = routine.filter((s) => s.weekday === (weekday + 1) % 7);
       const bedtime = Math.max(...today.map((s) => s.endMin));
       const wake = Math.min(...tomorrow.map((s) => s.startMin));
-      expect(formatMinute(bedtime)).toBe("22:50");
+      expect(formatMinute(bedtime)).toBe("23:00");
       expect(formatMinute(wake)).toBe("05:00");
       expect(24 * 60 - bedtime + wake).toBeGreaterThanOrEqual(6 * 60);
     }
   });
 
-  it("uses the 05:35–08:35 and 18:40–22:40 study windows on office days", () => {
+  it("uses the 05:30–08:30 and 18:50–22:50 study windows on office days", () => {
     const sat = routine.filter((s) => s.weekday === 6 && s.kind === "STUDY");
     expect(sat.map((s) => [formatMinute(s.startMin), formatMinute(s.endMin)])).toEqual([
-      ["05:35", "08:35"],
-      ["18:40", "22:40"],
+      ["05:30", "08:30"],
+      ["18:50", "22:50"],
     ]);
   });
 

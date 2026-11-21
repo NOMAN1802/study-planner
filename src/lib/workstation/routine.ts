@@ -45,28 +45,28 @@ export const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] a
 const hm = (h: number, m = 0) => h * 60 + m;
 
 const OFFICE_DAY: Omit<Slot, "weekday">[] = [
-  { startMin: hm(5), endMin: hm(5, 35), kind: "PERSONAL", label: "Bath & prep" },
-  { startMin: hm(5, 35), endMin: hm(8, 35), kind: "STUDY", label: "Morning study" },
-  { startMin: hm(8, 35), endMin: hm(9), kind: "PERSONAL", label: "Commute" },
+  { startMin: hm(5), endMin: hm(5, 30), kind: "PERSONAL", label: "Bath & prep" },
+  { startMin: hm(5, 30), endMin: hm(8, 30), kind: "STUDY", label: "Morning study" },
+  { startMin: hm(8, 30), endMin: hm(9), kind: "PERSONAL", label: "Commute" },
   { startMin: hm(9), endMin: hm(18), kind: "OFFICE", label: "Office" },
-  { startMin: hm(18), endMin: hm(18, 40), kind: "PERSONAL", label: "Commute & rest" },
-  { startMin: hm(18, 40), endMin: hm(22, 40), kind: "STUDY", label: "Evening study" },
-  { startMin: hm(22, 40), endMin: hm(22, 50), kind: "PERSONAL", label: "Get ready for bed" },
+  { startMin: hm(18), endMin: hm(18, 50), kind: "PERSONAL", label: "Commute & rest" },
+  { startMin: hm(18, 50), endMin: hm(22, 50), kind: "STUDY", label: "Evening study" },
+  { startMin: hm(22, 50), endMin: hm(23), kind: "PERSONAL", label: "Get ready for bed" },
 ];
 
 const HOLIDAY: Omit<Slot, "weekday">[] = [
-  { startMin: hm(5), endMin: hm(5, 20), kind: "PERSONAL", label: "Bath & prep" },
-  { startMin: hm(5, 20), endMin: hm(12, 20), kind: "STUDY", label: "Morning study" },
-  { startMin: hm(12, 20), endMin: hm(14), kind: "PERSONAL", label: "Jumu'ah & lunch" },
+  { startMin: hm(5), endMin: hm(5, 30), kind: "PERSONAL", label: "Bath & prep" },
+  { startMin: hm(5, 30), endMin: hm(12, 30), kind: "STUDY", label: "Morning study" },
+  { startMin: hm(12, 30), endMin: hm(14), kind: "PERSONAL", label: "Jumu'ah & lunch" },
   { startMin: hm(14), endMin: hm(18), kind: "STUDY", label: "Afternoon study" },
-  { startMin: hm(18), endMin: hm(18, 40), kind: "PERSONAL", label: "Rest" },
-  { startMin: hm(18, 40), endMin: hm(22, 40), kind: "STUDY", label: "Evening study" },
-  { startMin: hm(22, 40), endMin: hm(22, 50), kind: "PERSONAL", label: "Get ready for bed" },
+  { startMin: hm(18), endMin: hm(18, 50), kind: "PERSONAL", label: "Rest" },
+  { startMin: hm(18, 50), endMin: hm(22, 50), kind: "STUDY", label: "Evening study" },
+  { startMin: hm(22, 50), endMin: hm(23), kind: "PERSONAL", label: "Get ready for bed" },
 ];
 
 /**
- * Office 09:00–18:00 Saturday–Thursday, Friday off. Sleep 22:50–05:00 every
- * night (6 h 10 min), after 10 minutes getting ready for bed. Office days:
+ * Office 09:00–18:00 Saturday–Thursday, Friday off. Sleep 23:00–05:00 every
+ * night (6 hours), after 10 minutes getting ready for bed. Office days:
  * 3 cycles in the morning + 4 in the evening = 7; Friday (and holidays):
  * 7 + 4 + 4 = 15 — 57 a week.
  */
