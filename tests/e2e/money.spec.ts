@@ -200,6 +200,33 @@ test.describe("money", () => {
     }
   });
 
+  test("an opening balance set from Income moves the balance but is not income", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await signUp(page);
+    await page.goto("/money");
+    const add = page.getByRole("form", { name: "Add money entry" });
+    await add.getByRole("button", { name: "Income" }).click();
+    await add.getByLabel("Category").selectOption({ label: "Opening balance" });
+    await expect(add.getByText(/isn't counted as income/)).toBeVisible();
+    await expect(add.getByLabel("Date")).toHaveCount(0);
+    await add.getByLabel("Amount").fill("1,500.25");
+    await add.getByLabel("Account").selectOption({ label: "bKash" });
+    await submit(page, add.getByRole("button", { name: "Set opening balance" }));
+
+    await page.reload();
+    await expect(page.getByTestId("balance-bKash")).toHaveText("৳1,500.25");
+    await expect(page.getByTestId("balance-total")).toHaveText("৳1,500.25");
+    await expect(page.getByTestId("stat-income")).toHaveText("৳0");
+    // No entry was created: it's the account's starting balance.
+    await expect(
+      page.getByText("Nothing yet. Add your first income or expense above."),
+    ).toBeVisible();
+    await page.goto("/money/settings");
+    await expect(page.getByText("started with ৳1,500.25")).toBeVisible();
+  });
+
   test("money pages fit a phone screen", async ({ page }) => {
     test.setTimeout(120_000);
     await page.setViewportSize({ width: 375, height: 812 });

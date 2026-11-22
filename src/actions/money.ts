@@ -427,6 +427,27 @@ export async function saveAccount(input: AccountInput): Promise<MoneyResult> {
   return {};
 }
 
+/**
+ * Sets the money an account already held before tracking started (its
+ * opening balance). Not an entry, so it never counts as income.
+ */
+export async function setOpeningBalance(input: {
+  accountId: string;
+  amount: string;
+}): Promise<MoneyResult> {
+  const user = await requireUser();
+  const raw = String(input.amount ?? "").trim();
+  const openingMinor = isZero(raw) ? 0 : parseAmount(raw);
+  const account = await ownedAccount(user.id, input.accountId);
+  const fieldErrors: Record<string, string> = {};
+  if (openingMinor === null) fieldErrors.amount = "Enter the balance, e.g. 1500.50.";
+  if (!account) fieldErrors.accountId = "Pick an account.";
+  if (Object.keys(fieldErrors).length || !account || openingMinor === null) return { fieldErrors };
+  await prisma.moneyAccount.update({ where: { id: account.id }, data: { openingMinor } });
+  revalidate();
+  return {};
+}
+
 export async function setAccountArchived(id: string, archived: boolean): Promise<MoneyResult> {
   const user = await requireUser();
   if (!isId(id)) return { error: "Account not found." };

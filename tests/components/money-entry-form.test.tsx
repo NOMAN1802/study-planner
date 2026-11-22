@@ -20,7 +20,10 @@ vi.mock("@/actions/money", () => ({
   setAccountArchived: vi.fn(),
   setCategoryArchived: vi.fn(),
   setGoalArchived: vi.fn(),
+  setOpeningBalance: (input: unknown) => setOpeningBalance(input),
 }));
+
+const setOpeningBalance = vi.fn<(input: unknown) => Promise<object>>(async () => ({}));
 
 const accounts: MoneyAccount[] = [
   { id: "cash", name: "Cash", kind: "CASH", openingMinor: 0, archived: false },
@@ -79,6 +82,22 @@ describe("EntryForm", () => {
     expect(screen.getByLabelText("To account")).toHaveValue("bkash");
     await user.click(screen.getByRole("button", { name: "Income" }));
     expect(screen.getByLabelText("Category")).toHaveValue("salary");
+  });
+
+  it("sets an opening balance from the income categories, without counting it as income", async () => {
+    const user = userEvent.setup();
+    render(<EntryForm accounts={accounts} categories={categories} today="2026-11-22" />);
+    // Not offered for expenses.
+    expect(screen.queryByRole("option", { name: "Opening balance" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Income" }));
+    await user.selectOptions(screen.getByLabelText("Category"), "Opening balance");
+    expect(screen.getByText(/isn't counted as income/)).toBeInTheDocument();
+    expect(screen.queryByLabelText("Date")).toBeNull();
+    await user.type(screen.getByLabelText("Amount"), "1500");
+    await user.selectOptions(screen.getByLabelText("Account"), "bkash");
+    await user.click(screen.getByRole("button", { name: "Set opening balance" }));
+    expect(setOpeningBalance).toHaveBeenCalledWith({ accountId: "bkash", amount: "1500" });
+    expect(saveEntry).not.toHaveBeenCalledWith(expect.objectContaining({ amount: "1500" }));
   });
 
   it("shows the field errors the server returns", async () => {

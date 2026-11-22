@@ -15,6 +15,7 @@ import {
   setAccountArchived,
   setCategoryArchived,
   setGoalArchived,
+  setOpeningBalance,
   type MoneyResult,
 } from "@/actions/money";
 import { Button } from "@/components/ui/button";
@@ -160,6 +161,7 @@ function AccountOptions({ accounts }: { accounts: readonly MoneyAccount[] }) {
 // Income / expense / transfer
 
 type EntryKindChoice = "EXPENSE" | "INCOME" | "TRANSFER";
+const OPENING = "__opening__";
 
 /** Quick add (and edit) for an income, expense or transfer. */
 export function EntryForm({
@@ -180,8 +182,11 @@ export function EntryForm({
     entry && (entry.kind === "INCOME" || entry.kind === "TRANSFER") ? entry.kind : "EXPENSE",
   );
   const [formKey, setFormKey] = useState(0);
+  // "Opening balance" in the income categories sets an account's starting money.
+  const [opening, setOpening] = useState(false);
   const { pending, result, run, clear } = useMoneyAction();
   const fe = result.fieldErrors ?? {};
+  const isOpening = opening && kind === "INCOME" && !entry;
   // Active accounts, plus archived ones an edited entry already uses.
   const usable = accounts.filter(
     (a) => !a.archived || a.id === entry?.accountId || a.id === entry?.toAccountId,
@@ -193,6 +198,16 @@ export function EntryForm({
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
+    if (isOpening) {
+      run(
+        () => setOpeningBalance({ accountId: str(f, "accountId"), amount: str(f, "amount") }),
+        () => {
+          setOpening(false);
+          setFormKey((k) => k + 1);
+        },
+      );
+      return;
+    }
     run(
       () =>
         saveEntry({
@@ -214,11 +229,13 @@ export function EntryForm({
 
   const label = entry
     ? "Save changes"
-    : kind === "EXPENSE"
-      ? "Add expense"
-      : kind === "INCOME"
-        ? "Add income"
-        : "Add transfer";
+    : isOpening
+      ? "Set opening balance"
+      : kind === "EXPENSE"
+        ? "Add expense"
+        : kind === "INCOME"
+          ? "Add income"
+          : "Add transfer";
 
   return (
     <form
@@ -233,6 +250,7 @@ export function EntryForm({
         value={kind}
         onChange={(k) => {
           setKind(k);
+          setOpening(false);
           clear();
         }}
         options={[
@@ -251,26 +269,48 @@ export function EntryForm({
           />
         </Field>
         {kind === "TRANSFER" ? null : (
-          <Field id={`${id}-category`} label="Category" error={fe.categoryId}>
+          <Field
+            id={`${id}-category`}
+            label="Category"
+            error={fe.categoryId}
+            hint={
+              isOpening
+                ? "Sets the money this account already holds. It isn't counted as income."
+                : undefined
+            }
+          >
             <Select
               id={`${id}-category`}
               name="categoryId"
               key={kind}
               defaultValue={entry?.categoryId ?? cats[0]?.id}
               invalid={Boolean(fe.categoryId)}
+              onChange={(e) => {
+                setOpening(e.target.value === OPENING);
+                clear();
+              }}
             >
               {cats.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
+              {kind === "INCOME" && !entry ? (
+                <option value={OPENING}>Opening balance</option>
+              ) : null}
             </Select>
           </Field>
         )}
         <Field
           id={`${id}-account`}
           label={
-            kind === "TRANSFER" ? "From account" : kind === "INCOME" ? "Into account" : "Paid from"
+            isOpening
+              ? "Account"
+              : kind === "TRANSFER"
+                ? "From account"
+                : kind === "INCOME"
+                  ? "Into account"
+                  : "Paid from"
           }
           error={fe.accountId}
         >
@@ -295,26 +335,30 @@ export function EntryForm({
             </Select>
           </Field>
         ) : null}
-        <Field id={`${id}-day`} label="Date" error={fe.day}>
-          <Input
-            id={`${id}-day`}
-            name="day"
-            type="date"
-            max={today}
-            defaultValue={entry?.day ?? today}
-            invalid={Boolean(fe.day)}
-            required
-          />
-        </Field>
-        <Field id={`${id}-note`} label="Note (optional)" error={fe.note}>
-          <Input
-            id={`${id}-note`}
-            name="note"
-            maxLength={200}
-            defaultValue={entry?.note ?? ""}
-            placeholder={kind === "EXPENSE" ? "e.g. lunch with Rafi" : undefined}
-          />
-        </Field>
+        {isOpening ? null : (
+          <>
+            <Field id={`${id}-day`} label="Date" error={fe.day}>
+              <Input
+                id={`${id}-day`}
+                name="day"
+                type="date"
+                max={today}
+                defaultValue={entry?.day ?? today}
+                invalid={Boolean(fe.day)}
+                required
+              />
+            </Field>
+            <Field id={`${id}-note`} label="Note (optional)" error={fe.note}>
+              <Input
+                id={`${id}-note`}
+                name="note"
+                maxLength={200}
+                defaultValue={entry?.note ?? ""}
+                placeholder={kind === "EXPENSE" ? "e.g. lunch with Rafi" : undefined}
+              />
+            </Field>
+          </>
+        )}
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" loading={pending}>
