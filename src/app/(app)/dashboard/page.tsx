@@ -20,6 +20,13 @@ import { HabitWeek } from "@/components/dashboard/habit-week";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
+/** The at-a-glance row fills the width whatever the number of figures. */
+const GLANCE_COLS: Record<number, string> = {
+  2: "lg:grid-cols-2",
+  3: "lg:grid-cols-3",
+  4: "lg:grid-cols-4",
+};
+
 export default async function DashboardPage() {
   const user = await requireUser();
   const now = new Date();
@@ -100,8 +107,69 @@ export default async function DashboardPage() {
   const habitsLeft = data.habits.filter((h) => !h.complete).length;
   const tasksLeft = data.tasks.filter((t) => !t.done).length;
 
+  const summary = [
+    habitWeek
+      ? {
+          id: "habits",
+          label: "Daily habits",
+          value: `${habitWeek.done}/${habitWeek.total}`,
+          hint: `${habitWeek.today.pct ?? 0}% day score`,
+        }
+      : {
+          id: "habits",
+          label: "Daily habits",
+          value: `${data.dailyRing.done}/${data.dailyRing.total}`,
+          hint: "done today",
+        },
+    study
+      ? {
+          id: "study",
+          label: "Study today",
+          value: `${study.today}/${study.todayTarget} h`,
+          hint: `${study.week}/${study.weekTarget} h this week`,
+        }
+      : null,
+    {
+      id: "tasks",
+      label: "Tasks due",
+      value: `${tasksLeft} left`,
+      hint: data.taskRing.total
+        ? `${data.taskRing.done} of ${data.taskRing.total} done today`
+        : "Nothing due today",
+    },
+    money
+      ? {
+          id: "money",
+          label: "Net this month",
+          value: formatMoney(money.month.net, { sign: true }),
+          hint: `${formatMoney(money.month.income)} in · ${formatMoney(money.month.expense)} out`,
+        }
+      : null,
+  ].filter((s) => s !== null);
+
   return (
     <div className="mx-auto grid w-full max-w-page gap-4 lg:grid-cols-5 2xl:grid-cols-12">
+      <dl
+        className={`enter grid grid-cols-2 gap-3 lg:col-span-5 2xl:col-span-12 ${GLANCE_COLS[summary.length] ?? "lg:grid-cols-4"}`}
+        aria-label="Today at a glance"
+      >
+        {summary.map((s) => (
+          <div
+            key={s.id}
+            className="flex flex-col gap-1 rounded-sm border border-border bg-surface px-4 py-3"
+          >
+            <dt className="text-xs text-fg-muted">{s.label}</dt>
+            <dd
+              className="font-mono text-xl font-medium text-fg tabular-nums"
+              data-testid={`glance-${s.id}`}
+            >
+              {s.value}
+            </dd>
+            <dd className="truncate text-xs text-fg-muted">{s.hint}</dd>
+          </div>
+        ))}
+      </dl>
+
       <Panel
         id="today"
         index={0}

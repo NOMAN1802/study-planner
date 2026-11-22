@@ -47,6 +47,8 @@ export type TodayHabit = {
   current: { count: number; minutes: number };
   complete: boolean;
   progress: number;
+  /** Ticked on the Daily checklist only (prayers, or automatic like study). */
+  dailyOnly: boolean;
 };
 
 export type TodayTask = {

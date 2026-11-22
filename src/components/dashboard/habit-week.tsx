@@ -34,7 +34,7 @@ export function HabitWeek({
       <ol className="grid grid-cols-7 gap-2" aria-label="Last 7 days">
         {week.days.map((d) => (
           <li key={d.day} className="flex flex-col items-center gap-1">
-            <span className="flex h-16 w-full items-end overflow-hidden rounded-sm bg-surface-2">
+            <span className="flex h-16 w-full max-w-8 items-end overflow-hidden rounded-sm bg-surface-2/60">
               <span
                 className="block w-full rounded-sm bg-accent"
                 style={{ height: `${d.pct ?? 0}%` }}

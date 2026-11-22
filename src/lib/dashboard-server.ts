@@ -63,6 +63,7 @@ function toTodayHabit(h: HabitRow): TodayHabit {
     current: { count: h.current.count, minutes: h.current.minutes },
     complete: h.complete,
     progress: h.progress,
+    dailyOnly: h.dailyOnly,
   };
 }
 

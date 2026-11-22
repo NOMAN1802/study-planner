@@ -1,7 +1,6 @@
 "use client";
 
-import { CalendarClock, Check, Plus, Timer } from "lucide-react";
-import { motion, MotionConfig } from "motion/react";
+import { ArrowUpRight, CalendarClock, Check, Plus, Timer } from "lucide-react";
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
 import { checkIn } from "@/actions/habits";
@@ -14,51 +13,71 @@ import { logProgress } from "@/lib/streaks";
 import { cn } from "@/lib/utils";
 
 const subheading = "text-xs font-medium text-fg-muted";
+const action =
+  "inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-sm px-3 text-sm transition-colors duration-150";
 
+/**
+ * Today's habits as a compact checklist (two columns on wide screens when
+ * there are no tasks beside them) and the tasks due. With nothing due, tasks
+ * shrink to one line under the habits.
+ */
 export function TodayPanel({ habits, tasks }: { habits: TodayHabit[]; tasks: TodayTask[] }) {
-  return (
-    <MotionConfig reducedMotion="user">
-      <div className="grid gap-6 lg:grid-cols-2">
+  const twoColumns = tasks.length === 0 && habits.length > 4;
+  const habitList =
+    habits.length === 0 ? (
+      <p className="mt-2 text-sm text-fg-muted">
+        No habits to check in right now.{" "}
+        <Link href="/habits/new" className="text-fg underline underline-offset-2">
+          Add a habit
+        </Link>
+      </p>
+    ) : (
+      <ul
+        className={cn("mt-1 grid gap-x-8", twoColumns && "xl:grid-cols-2")}
+        aria-label="Habits due"
+      >
+        {habits.map((habit) => (
+          <HabitItem key={habit.id} habit={habit} twoColumns={twoColumns} />
+        ))}
+      </ul>
+    );
+
+  if (tasks.length === 0) {
+    return (
+      <div className="flex flex-col gap-4">
         <div className="min-w-0">
           <h3 className={subheading}>Habits</h3>
-          {habits.length === 0 ? (
-            <p className="mt-2 text-sm text-fg-muted">
-              No habits to check in right now.{" "}
-              <Link href="/habits/new" className="text-fg underline underline-offset-2">
-                Add a habit
-              </Link>
-            </p>
-          ) : (
-            <ul className="mt-1 divide-y divide-border" aria-label="Habits due">
-              {habits.map((habit) => (
-                <HabitItem key={habit.id} habit={habit} />
-              ))}
-            </ul>
-          )}
+          {habitList}
         </div>
-        <div className="min-w-0">
-          <h3 className={subheading}>Tasks</h3>
-          {tasks.length === 0 ? (
-            <p className="mt-2 text-sm text-fg-muted">
-              Nothing due today.{" "}
-              <Link href="/tasks" className="text-fg underline underline-offset-2">
-                See all tasks
-              </Link>
-            </p>
-          ) : (
-            <ul className="mt-1 divide-y divide-border" aria-label="Tasks due">
-              {tasks.map((task) => (
-                <TaskItem key={task.id} task={task} />
-              ))}
-            </ul>
-          )}
-        </div>
+        <p className="border-t border-border pt-3 text-sm text-fg-muted">
+          <span className="font-medium text-fg">Tasks</span> · Nothing due today.{" "}
+          <Link href="/tasks" className="text-fg underline underline-offset-2">
+            See all tasks
+          </Link>
+        </p>
       </div>
-    </MotionConfig>
+    );
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-8">
+      <div className="min-w-0">
+        <h3 className={subheading}>Habits</h3>
+        {habitList}
+      </div>
+      <div className="min-w-0">
+        <h3 className={subheading}>Tasks</h3>
+        <ul className="mt-1" aria-label="Tasks due">
+          {tasks.map((task) => (
+            <TaskItem key={task.id} task={task} />
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
-function HabitItem({ habit }: { habit: TodayHabit }) {
+function HabitItem({ habit, twoColumns }: { habit: TodayHabit; twoColumns: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [current, bump] = useOptimistic(habit.current, (cur, delta: number) => ({
@@ -66,8 +85,7 @@ function HabitItem({ habit }: { habit: TodayHabit }) {
     count: cur.count + delta,
   }));
 
-  const progress = logProgress(current, habit);
-  const complete = progress >= 1;
+  const complete = logProgress(current, habit) >= 1;
   const minutesOnly = !habit.targetCount && Boolean(habit.targetMinutes);
   const periodLabel = currentPeriodLabel(habit.frequency);
   const countLabel = habit.targetCount
@@ -85,80 +103,89 @@ function HabitItem({ habit }: { habit: TodayHabit }) {
     });
   }
 
-  const action =
-    "inline-flex h-8 min-w-24 shrink-0 items-center justify-center gap-2 rounded-sm border px-3 text-sm font-medium transition-colors duration-150";
+  let control;
+  if (complete) {
+    // Done is a quiet state, not a button that shouts.
+    control = (
+      <button
+        type="button"
+        disabled
+        aria-label={`${habit.name} done ${periodLabel}`}
+        className={cn(action, "cursor-default text-accent")}
+      >
+        <Check className="size-4" aria-hidden />
+        Done
+      </button>
+    );
+  } else if (habit.dailyOnly) {
+    control = (
+      <Link
+        href="/habits/daily"
+        aria-label={`Tick ${habit.name} on Daily`}
+        className={cn(action, "text-fg-muted hover:bg-surface-2 hover:text-fg")}
+      >
+        Daily
+        <ArrowUpRight className="size-3.5" aria-hidden />
+      </Link>
+    );
+  } else if (minutesOnly) {
+    control = (
+      <Link
+        href="/habits"
+        aria-label={`Log time for ${habit.name}`}
+        className={cn(action, "border border-border text-fg hover:bg-surface-2")}
+      >
+        Log time
+      </Link>
+    );
+  } else {
+    control = (
+      <button
+        type="button"
+        onClick={handleCheckIn}
+        disabled={pending}
+        aria-label={`Check in ${habit.name}`}
+        className={cn(
+          action,
+          "border border-border text-fg hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50",
+        )}
+      >
+        <Plus className="size-3.5" aria-hidden />
+        Check in
+      </button>
+    );
+  }
 
   return (
-    <li className="py-3" data-testid="today-habit">
-      <div className="flex items-center gap-3">
+    <li
+      className={cn(
+        "border-t border-border first:border-t-0",
+        twoColumns && "xl:[&:nth-child(2)]:border-t-0",
+      )}
+      data-testid="today-habit"
+    >
+      <div className="flex min-h-12 items-center gap-3 py-2">
         <HabitIconTile name={habit.icon} color={habit.color} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-fg">{habit.name}</p>
-          <div className="mt-1 flex items-center gap-2">
-            <div className="h-1 w-full max-w-32 overflow-hidden rounded-full bg-surface-3">
-              <motion.div
-                className="h-full origin-left rounded-full"
-                style={{ backgroundColor: habit.color }}
-                initial={false}
-                animate={{ scaleX: progress }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-              />
-            </div>
-            <span className="shrink-0 text-xs text-fg-muted">
-              {countLabel ? (
-                <span className="font-mono tabular-nums" data-testid="today-habit-count">
-                  {countLabel}
-                </span>
-              ) : (
-                periodLabel
-              )}
-            </span>
-          </div>
-        </div>
-        {minutesOnly && !complete ? (
-          <Link
-            href="/habits"
-            aria-label={`Log time for ${habit.name}`}
-            className={cn(action, "border-border bg-surface text-fg hover:bg-surface-2")}
+        <p
+          className={cn(
+            "min-w-0 flex-1 truncate text-sm",
+            complete ? "text-fg-muted" : "font-medium text-fg",
+          )}
+        >
+          {habit.name}
+        </p>
+        {countLabel ? (
+          <span
+            className="shrink-0 font-mono text-xs text-fg-muted tabular-nums"
+            data-testid="today-habit-count"
           >
-            Log time
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={handleCheckIn}
-            disabled={pending || complete}
-            aria-label={complete ? `${habit.name} done ${periodLabel}` : `Check in ${habit.name}`}
-            className={cn(
-              action,
-              "disabled:cursor-not-allowed",
-              complete
-                ? "border-transparent bg-accent text-accent-fg"
-                : "border-border bg-surface text-fg hover:bg-surface-2 disabled:opacity-50",
-            )}
-          >
-            {complete ? (
-              <motion.span
-                key="done"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="inline-flex items-center gap-2"
-              >
-                <Check className="size-3.5" aria-hidden />
-                Done
-              </motion.span>
-            ) : (
-              <>
-                <Plus className="size-3.5" aria-hidden />
-                Check in
-              </>
-            )}
-          </button>
-        )}
+            {countLabel}
+          </span>
+        ) : null}
+        {control}
       </div>
       {error ? (
-        <p role="alert" className="mt-1 text-xs text-danger">
+        <p role="alert" className="pb-2 text-xs text-danger">
           {error}
         </p>
       ) : null}
@@ -183,7 +210,7 @@ function TaskItem({ task }: { task: TodayTask }) {
   }
 
   return (
-    <li className="py-3" data-testid="today-task">
+    <li className="border-t border-border py-2.5 first:border-t-0" data-testid="today-task">
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
