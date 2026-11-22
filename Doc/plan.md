@@ -239,6 +239,35 @@ Questions come from the user's topic-wise question-bank PDFs in `Doc/study-resou
 
 ---
 
+## Phase 12 — Daily habit set, checklist and KPIs
+
+Reference: `Doc/habbit.png` (bullet-journal month: one row per date, one column per habit marked ✗, a daily score line down the side, a one-line note per day). Habits keep calendar days in the profile timezone. The new set sits alongside the existing habits (nothing archived).
+
+| # | Habit | Ticked by |
+|---|---|---|
+| 1 | Prayer | 5 named checkboxes: Fajr, Dhuhr, Asr, Maghrib, Isha; done at 5/5, each prayer = 1/5 of the habit in the score |
+| 2 | Exercise 5 min | checkbox |
+| 3 | Bath before Fajr | checkbox |
+| 4 | No sugar | checkbox (ticked = kept) |
+| 5 | Screen time under 2 hours | checkbox (ticked = kept) |
+| 6 | No junk food | checkbox (ticked = kept) |
+| 7 | Learn a new technology | checkbox + optional one-line note of what was learned |
+| 8 | Read Quran 10 min | checkbox |
+| 9 | Sleep 11 pm – 5 am | checkbox (bed before 23:00, up at 05:00) |
+| 10 | Study at least 7 hours | automatic, read-only: done when the Study Station counts ≥ 7 study hours (cycles) for that date; shows "5 / 7 h" |
+
+- [x] Data: reuse `Habit` (DAILY) + `HabitLog`; prayer records which of the 5 were ticked (not just a count); a habit can be marked as auto-tracked from the Study Station; one note per day (`HabitDayNote`). One-click "Add my daily set" creates the 10 habits once (skips any already there); also a seed script
+- [x] Daily checklist (`/habits/daily`): date with ‹ › and a picker (past days can be filled in, future days can't), one large checkbox per habit (prayer expands to its 5), "7 / 10 done" with a progress bar, "Perfect day" when all are done, the day's note
+- [x] Tracker grid (`/habits/tracker`): the notebook page — rows are dates, columns are habits, tappable ✗ cells (prayer shows 3/5, study is read-only), a score % column and the score line; a month by default, follows the range filter
+- [x] Report (`/habits/report`): range filter Daily · Weekly · Monthly · Yearly · Custom (from–to), kept in the URL; weeks start on the Settings day. KPI cards: completion % (done ÷ possible), perfect days, average daily score, current and best streak (overall and per habit), best and weakest habit, all-5-prayers %, study-hours days met. Charts: daily score trend, completion % per habit, day-of-week pattern, year heatmap. Per-habit table: done / possible, %, current and best streak
+- [x] Rules: daily score = sum of habit values (prayer in fifths) ÷ number of habits; "possible" leaves out future days and days before a habit was added; archived habits keep their history
+- [x] Dashboard card: today's habit score and the 7-day trend
+- [x] Tests: unit (score, KPIs, streaks, range resolution incl. custom ranges and week start, study auto-tick), component (checklist, prayer boxes, range filter), e2e (add the set, tick a day and back-fill a past one, report numbers match, phone and desktop sizes; axe in light and dark)
+
+**Gate:** all checks green on a production build, then deploy.
+
+---
+
 ## Out of scope for v1
 
 Social features, team sharing, native mobile app, AI suggestions, calendar sync.
@@ -257,3 +286,4 @@ Social features, team sharing, native mobile app, AI suggestions, calendar sync.
 | 2026-11-16 | 8 | Ship: `pnpm gate:prod` builds and runs every test against `next start` (port 3100, never reusing a dev server); demo seed `pnpm db:seed <email> [--reset]` fills one existing account (5 habits with ~2 months of history, 6 tasks with focus sessions, 8 planner blocks) from a deterministic, unit-tested generator and refuses to overwrite data without `--reset`; README (setup, env vars, scripts, tests, demo data); Vercel notes in `Doc/deploy.md` (env vars, production-only `prisma migrate deploy` in the build command, Supabase settings, rollback caveat) — written from the code, not yet run on Vercel. Fixed: database pool and e2e seed had no connection timeout, so one connection that never opened hung pages and a test run indefinitely; both now fail after 10–15s. | build ✓ lint ✓ typecheck ✓ unit/component 174/174 ✓ e2e 27/27 ✓ against the production build |
 | 2026-11-16 | 9 | Work-Station: weekly routine (office Sat–Thu 09:00–18:00, Friday off; 7/14 study cycles, 56 a week; editable, overlap-checked); BCS syllabus transcribed from `Doc/study-resource` (9 subjects, 164 lectures + daily vocabulary) seeded per user with one 50/10 pomodoro task per subject; pure rolling schedule in `lib/workstation/schedule.ts` (70 learning + 20 revision days, Friday weekly revision + exam, subject final, mock every 2nd revision day, buffer/overflow and projected dates); tabs Today / Plan (90-day roadmap) / Subjects / Exams / Office / Routine; timer sessions record the lecture; `Task.category` (GENERAL/OFFICE/STUDY) with study tasks hidden from Tasks; dashboard study card. Migration `workstation` (additive). | build ✓ lint ✓ typecheck ✓ unit/component 209/209 ✓ e2e 30/30 ✓ against the production build |
 | 2026-11-21 | 11 | Study without a timer: Today items ticked by hand (lectures via done, vocabulary/revision via `StudyCheck`, exams via a recorded result), "Study session complete" once all are ticked; start-cycle buttons removed. Lecture cap now counts lectures (2 office days, 3 Fridays/holidays) instead of cycles — part-studied lectures had let 3 onto an office day. `E2E_PORT` overrides the e2e port. | lint ✓ typecheck ✓ unit 272/272 ✓ e2e 31/31 ✓ against the production build |
+| 2026-11-22 | 12 | Daily habit set: one click adds Prayer (Fajr, Dhuhr, Asr, Maghrib, Isha as 5 boxes), Exercise 5 min, Bath before Fajr, No sugar, Screen time under 2 hours, No junk food, Learn a new technology (with a "what did you learn" note), Read Quran 10 min, Sleep 11 pm – 5 am and Study at least 7 hours (automatic from Study Station hours). `Habit.preset` / `Habit.parts`, `HabitLog.parts`, `HabitDayNote` (migration `daily_habits`). Pages: Daily checklist (back-fill past days, progress, Perfect day, day note), Tracker grid (notebook page: dates × habits, tap ✗, score column + line), Report (Daily / Weekly / Monthly / Yearly / Custom in the URL; completion, average score, perfect days, streaks, all-5-prayers, study days, best / weakest habit, score trend, by-habit table, by-weekday, year calendar, notes); Habits menu gets All habits / Daily / Tracker / Report; dashboard "Daily habits" card. Prayer and study are ticked on Daily only (the old check-in refuses them). Fixed: screen-reader labels inside scrollable tables widened the page on phones. | lint ✓ typecheck ✓ unit/component 296/296 ✓ e2e 34/34 ✓ against the production build |

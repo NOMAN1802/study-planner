@@ -336,11 +336,15 @@ function countCyclesByDay(input: {
   return out;
 }
 
-/** Today's and this week's study cycles, for the dashboard card. */
-export async function getStudySummary(user: CurrentUser, at = new Date()) {
-  const now = localNow(at, user.timezone);
-  const weekStart = startOfWeekKey(now.dayKey, user.weekStartsOn);
-  const weekEnd = addDays(weekStart, 6);
+/**
+ * Study cycles (hours) done per study day from `fromDay` to `toDay`, or null
+ * without a study plan. Shared by the dashboard card and the daily study habit.
+ */
+export async function getStudyCyclesByDay(
+  user: Pick<CurrentUser, "id" | "timezone">,
+  fromDay: string,
+  toDay: string,
+): Promise<{ byDay: Record<string, number>; holidays: string[] } | null> {
   const plan = await prisma.studyPlan.findUnique({
     where: { userId: user.id },
     select: {
@@ -356,34 +360,30 @@ export async function getStudySummary(user: CurrentUser, at = new Date()) {
         },
       },
       checks: {
-        where: { day: { gte: weekStart, lte: weekEnd } },
+        where: { day: { gte: fromDay, lte: toDay } },
         select: { day: true, cycles: true },
       },
       exams: {
-        where: { day: { gte: weekStart, lte: weekEnd } },
+        where: { day: { gte: fromDay, lte: toDay } },
         select: { day: true, kind: true, startedAt: true, submittedAt: true },
       },
     },
   });
   if (!plan) return null;
-  const holiday = plan.holidays.includes(now.dayKey);
-  // The study week starts at DAY_START_MIN on its first day.
+  // A study day starts at DAY_START_MIN on its own date.
   const since =
-    parseLocalDateTime(`${weekStart}T${formatMinute(DAY_START_MIN)}`, user.timezone) ?? at;
-  const [sessions, slots] = await Promise.all([
-    prisma.pomodoroSession.findMany({
-      where: {
-        userId: user.id,
-        taskId: { in: plan.subjects.map((s) => s.taskId) },
-        type: "FOCUS",
-        completed: true,
-        startedAt: { gte: since },
-      },
-      select: { startedAt: true, topicId: true },
-    }),
-    getRoutineSlots(user.id),
-  ]);
-  const byDay = countCyclesByDay({
+    parseLocalDateTime(`${fromDay}T${formatMinute(DAY_START_MIN)}`, user.timezone) ?? new Date(0);
+  const sessions = await prisma.pomodoroSession.findMany({
+    where: {
+      userId: user.id,
+      taskId: { in: plan.subjects.map((s) => s.taskId) },
+      type: "FOCUS",
+      completed: true,
+      startedAt: { gte: since },
+    },
+    select: { startedAt: true, topicId: true },
+  });
+  const all = countCyclesByDay({
     timezone: user.timezone,
     sessions,
     lectures: plan.subjects
@@ -397,6 +397,22 @@ export async function getStudySummary(user: CurrentUser, at = new Date()) {
     checks: plan.checks,
     exams: plan.exams.filter((e) => !(e.startedAt !== null && e.submittedAt === null)),
   });
+  const byDay = Object.fromEntries(Object.entries(all).filter(([d]) => d >= fromDay && d <= toDay));
+  return { byDay, holidays: plan.holidays };
+}
+
+/** Today's and this week's study cycles, for the dashboard card. */
+export async function getStudySummary(user: CurrentUser, at = new Date()) {
+  const now = localNow(at, user.timezone);
+  const weekStart = startOfWeekKey(now.dayKey, user.weekStartsOn);
+  const weekEnd = addDays(weekStart, 6);
+  const [study, slots] = await Promise.all([
+    getStudyCyclesByDay(user, weekStart, weekEnd),
+    getRoutineSlots(user.id),
+  ]);
+  if (!study) return null;
+  const byDay = study.byDay;
+  const holiday = study.holidays.includes(now.dayKey);
   const capacity = studyCyclesByWeekday(slots);
   const todayCapacity = studyCyclesByWeekday(slots, holiday);
   const week = Object.entries(byDay)

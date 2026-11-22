@@ -14,6 +14,7 @@ import {
   Music,
   PenLine,
   Pill,
+  Smartphone,
   Sun,
   type LucideIcon,
 } from "lucide-react";
@@ -37,6 +38,7 @@ export const HABIT_ICONS: Record<HabitIconName, LucideIcon> = {
   heart: Heart,
   sun: Sun,
   pill: Pill,
+  smartphone: Smartphone,
 };
 
 export function HabitIcon({ name, className }: { name: string; className?: string }) {

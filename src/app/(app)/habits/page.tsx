@@ -1,10 +1,12 @@
 import { Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AddSetButton } from "@/components/daily-habits/add-set-button";
 import { ArchivedList } from "@/components/habits/archived-list";
 import { HabitList } from "@/components/habits/habit-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireUser } from "@/lib/auth";
+import { hasDailySet } from "@/lib/daily-habits-server";
 import { getHabitRows, type HabitView } from "@/lib/habits";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +19,7 @@ export default async function HabitsPage({ searchParams }: PageProps<"/habits">)
   const { view: viewParam } = await searchParams;
   const view: HabitView = viewParam === "archived" ? "archived" : "active";
   const user = await requireUser();
-  const habits = await getHabitRows(user, view);
+  const [habits, hasSet] = await Promise.all([getHabitRows(user, view), hasDailySet(user.id)]);
 
   return (
     <div className="enter mx-auto flex w-full max-w-page flex-col gap-4">
@@ -45,6 +47,17 @@ export default async function HabitsPage({ searchParams }: PageProps<"/habits">)
           New habit
         </Link>
       </div>
+
+      {view === "active" && !hasSet ? (
+        <div className="flex flex-col gap-2 rounded-sm border border-dashed border-border-strong bg-surface p-4">
+          <p className="text-sm text-fg-muted">
+            Daily set: Prayer (Fajr, Dhuhr, Asr, Maghrib, Isha), Exercise 5 min, Bath before Fajr,
+            No sugar, Screen time under 2 hours, No junk food, Learn a new technology, Read Quran 10
+            min, Sleep 11 pm – 5 am, Study at least 7 hours.
+          </p>
+          <AddSetButton variant="secondary" />
+        </div>
+      ) : null}
 
       {habits.length === 0 ? (
         view === "active" ? (

@@ -28,6 +28,17 @@ describe("activeChild", () => {
     expect(label("/work-station/practice")).toBe("Exams");
   });
 
+  it("lists the habit pages, with new and edit pages under All habits", () => {
+    const habits = NAV_ITEMS.find((i) => i.href === "/habits")!;
+    const at = (path: string) => activeChild(habits, path)?.label;
+    expect(at("/habits")).toBe("All habits");
+    expect(at("/habits/daily")).toBe("Daily");
+    expect(at("/habits/tracker")).toBe("Tracker");
+    expect(at("/habits/report")).toBe("Report");
+    expect(at("/habits/new")).toBe("All habits");
+    expect(at("/habits/0b6c8f5e-1c2d-4e5f-8a9b-0c1d2e3f4a5b/edit")).toBe("All habits");
+  });
+
   it("has no children for plain items", () => {
     expect(activeChild(NAV_ITEMS[0], "/dashboard")).toBeUndefined();
   });

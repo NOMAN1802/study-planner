@@ -6,6 +6,7 @@ import {
   type Frequency,
   type PeriodContext,
 } from "@/lib/dates";
+import { presetOf } from "@/lib/daily-habits";
 import { prisma } from "@/lib/prisma";
 import { computeStreaks, isLogComplete, logProgress, type StreakStats } from "@/lib/streaks";
 
@@ -22,6 +23,8 @@ export type HabitRow = {
   targetMinutes: number | null;
   activeHours: number[];
   archived: boolean;
+  /** Ticked on the Daily checklist only (named parts such as prayers, or tracked automatically). */
+  dailyOnly: boolean;
   /** Log for the period containing "now". */
   current: { count: number; minutes: number; note: string | null };
   currentPeriodStart: string;
@@ -83,6 +86,7 @@ export async function getHabitRows(
       targetMinutes: habit.targetMinutes,
       activeHours: habit.activeHours,
       archived: habit.archivedAt !== null,
+      dailyOnly: habit.parts.length > 0 || Boolean(presetOf(habit.preset)?.auto),
       current,
       currentPeriodStart: currentStart.toISOString(),
       activeNow: isActivePeriod(currentStart, ctx, habit.activeHours),

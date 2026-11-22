@@ -79,6 +79,7 @@ model Profile {
   studyPlan        StudyPlan?
   routineSlots     RoutineSlot[]
   questions        Question[]
+  habitDayNotes    HabitDayNote[]
 }
 
 model Habit {
@@ -95,6 +96,10 @@ model Habit {
   activeHours   Int[]     @default([])
   sortOrder     Int       @default(0)
   archivedAt    DateTime?
+  /// Built-in daily set: a stable key ("prayer", "study", …). Null for the user's own habits.
+  preset        String?
+  /// Named sub-checks ticked one by one (prayer: the five prayers). Empty = a single tick.
+  parts         String[]  @default([])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -103,6 +108,7 @@ model Habit {
   tasks      Task[]
   timeBlocks TimeBlock[]
 
+  @@unique([userId, preset])
   @@index([userId, archivedAt, sortOrder])
 }
 
@@ -115,6 +121,8 @@ model HabitLog {
   count       Int      @default(0)
   minutes     Int      @default(0)
   note        String?
+  /// Indexes into Habit.parts that are ticked (count = how many).
+  parts       Int[]    @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -123,6 +131,20 @@ model HabitLog {
 
   @@unique([habitId, periodStart])
   @@index([userId, periodStart])
+}
+
+/// One short note per calendar day (local date `YYYY-MM-DD`), as in a habit journal.
+model HabitDayNote {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  day       String
+  note      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
 }
 
 model Task {

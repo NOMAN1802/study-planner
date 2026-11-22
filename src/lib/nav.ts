@@ -19,10 +19,18 @@ export const STATION_PAGES = [
   { href: "/work-station/office", label: "Office" },
 ] as const satisfies readonly NavChild[];
 
+/** Habits' pages: the list, the daily checklist, the month grid and the report. */
+export const HABIT_PAGES = [
+  { href: "/habits", label: "All habits" },
+  { href: "/habits/daily", label: "Daily" },
+  { href: "/habits/tracker", label: "Tracker" },
+  { href: "/habits/report", label: "Report" },
+] as const satisfies readonly NavChild[];
+
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/work-station", label: "Study Station", icon: "workstation", children: STATION_PAGES },
-  { href: "/habits", label: "Habits", icon: "habits" },
+  { href: "/habits", label: "Habits", icon: "habits", children: HABIT_PAGES },
   { href: "/tasks", label: "Tasks", icon: "tasks" },
   { href: "/planner", label: "Planner", icon: "planner" },
   { href: "/settings", label: "Settings", icon: "settings" },
@@ -35,10 +43,12 @@ function matches(pathname: string, href: string) {
 /**
  * The child page `pathname` belongs to: the longest matching href, where a
  * child sharing its parent's href (Today) only matches exactly. Exam sittings
- * and practice belong to Exams.
+ * and practice belong to Exams; new and edit habit pages belong to All habits.
  */
 export function activeChild(item: NavItem, pathname: string): NavChild | undefined {
   if (!item.children) return undefined;
+  if (item.href === "/habits" && /^\/habits\/(new|[0-9a-f-]{36})(\/|$)/.test(pathname))
+    return item.children[0];
   if (item.href === "/work-station" && /^\/work-station\/(exam|practice)(\/|$)/.test(pathname))
     return item.children.find((c) => c.href === "/work-station/exams");
   return item.children

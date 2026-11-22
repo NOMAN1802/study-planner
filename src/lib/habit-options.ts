@@ -30,6 +30,7 @@ export const HABIT_ICON_NAMES = [
   "heart",
   "sun",
   "pill",
+  "smartphone",
 ] as const;
 
 export type HabitIconName = (typeof HABIT_ICON_NAMES)[number];

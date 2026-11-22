@@ -141,9 +141,9 @@ test.describe("keyboard only", () => {
     await expect(nav).toBeHidden();
 
     await page.keyboard.press("Enter");
-    await tabTo(page, nav.getByRole("link", { name: "Habits" }));
+    await tabTo(page, nav.getByRole("link", { name: "Tasks" }));
     await page.keyboard.press("Enter");
-    await expect(page).toHaveURL(/\/habits$/);
+    await expect(page).toHaveURL(/\/tasks$/);
     await expect(nav).toBeHidden();
   });
 });

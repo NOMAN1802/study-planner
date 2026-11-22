@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { periodStart, type Frequency } from "@/lib/dates";
+import { presetOf } from "@/lib/daily-habits";
 import { periodContext } from "@/lib/habits";
 import { prisma } from "@/lib/prisma";
 import {
@@ -21,6 +22,13 @@ const idSchema = z.uuid();
 function revalidateHabits() {
   revalidatePath("/habits");
   revalidatePath("/dashboard");
+}
+
+const DAILY_ONLY = "Tick this habit on the Daily checklist.";
+
+/** Prayers (named parts) and automatic habits are ticked on the Daily checklist only. */
+function dailyOnly(habit: { parts: string[]; preset: string | null }) {
+  return habit.parts.length > 0 || Boolean(presetOf(habit.preset)?.auto);
 }
 
 /** Loads a habit only if it belongs to the user. */
@@ -137,6 +145,7 @@ export async function checkIn(habitId: string): Promise<{ error?: string }> {
   const user = await requireUser();
   const habit = await ownedHabit(user.id, habitId);
   if (!habit || habit.archivedAt) return { error: "Habit not found." };
+  if (dailyOnly(habit)) return { error: DAILY_ONLY };
 
   const start = periodStart(new Date(), periodContext(user, habit.frequency as Frequency));
   await prisma.habitLog.upsert({
@@ -173,6 +182,7 @@ export async function saveCheckIn(
 
   const habit = await ownedHabit(user.id, parsed.data.habitId);
   if (!habit || habit.archivedAt) return { error: "Habit not found." };
+  if (dailyOnly(habit)) return { error: DAILY_ONLY };
 
   const start = periodStart(new Date(), periodContext(user, habit.frequency as Frequency));
   const where = { habitId_periodStart: { habitId: habit.id, periodStart: start } };

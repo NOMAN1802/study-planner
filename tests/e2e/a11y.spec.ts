@@ -23,6 +23,9 @@ async function appRoutes(page: Page): Promise<{ name: string; url: string }[]> {
     { name: "habits-archived", url: "/habits?view=archived" },
     { name: "habit-new", url: "/habits/new" },
     { name: "habit-edit", url: habitEdit },
+    { name: "habits-daily", url: "/habits/daily" },
+    { name: "habits-tracker", url: "/habits/tracker" },
+    { name: "habits-report", url: "/habits/report" },
     { name: "tasks", url: "/tasks" },
     { name: "tasks-no-match", url: "/tasks?status=DONE&priority=URGENT" },
     { name: "task-new", url: "/tasks/new" },
@@ -154,7 +157,7 @@ test.describe("accessibility", () => {
     expect(seconds(enter)).toBeLessThanOrEqual(0.001);
     const hover = await page
       .getByRole("navigation", { name: "Primary" })
-      .getByRole("link", { name: "Habits" })
+      .getByRole("link", { name: "Tasks" })
       .evaluate((el) => getComputedStyle(el).transitionDuration);
     expect(seconds(hover)).toBeLessThanOrEqual(0.001);
 

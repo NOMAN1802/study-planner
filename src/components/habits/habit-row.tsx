@@ -1,6 +1,16 @@
 "use client";
 
-import { Archive, ArrowDown, ArrowUp, Check, Flame, NotebookPen, Pencil, Plus } from "lucide-react";
+import {
+  Archive,
+  ArrowDown,
+  ArrowUp,
+  Check,
+  Flame,
+  ListChecks,
+  NotebookPen,
+  Pencil,
+  Plus,
+} from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
@@ -119,48 +129,62 @@ export function HabitRow({ habit, isFirst, isLast, onMove }: HabitRowProps) {
         </dl>
 
         <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            onClick={handleCheckIn}
-            disabled={pending || inactive || (complete && !minutesOnly)}
-            aria-label={complete ? `${habit.name} done ${periodLabel}` : `Check in ${habit.name}`}
-            className={cn(
-              "inline-flex h-8 min-w-24 items-center justify-center gap-2 rounded-sm border px-3 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed",
-              complete
-                ? "border-transparent bg-accent text-accent-fg"
-                : "border-border bg-surface text-fg hover:bg-surface-2 disabled:opacity-50",
-            )}
-          >
-            {complete ? (
-              <motion.span
-                key="done"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="inline-flex items-center gap-2"
+          {habit.dailyOnly ? (
+            <Link
+              href="/habits/daily"
+              className="inline-flex h-8 min-w-24 items-center justify-center gap-2 rounded-sm border border-border bg-surface px-3 text-sm font-medium text-fg transition-colors duration-150 hover:bg-surface-2"
+            >
+              <ListChecks className="size-3.5" aria-hidden />
+              Tick on Daily
+            </Link>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleCheckIn}
+                disabled={pending || inactive || (complete && !minutesOnly)}
+                aria-label={
+                  complete ? `${habit.name} done ${periodLabel}` : `Check in ${habit.name}`
+                }
+                className={cn(
+                  "inline-flex h-8 min-w-24 items-center justify-center gap-2 rounded-sm border px-3 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed",
+                  complete
+                    ? "border-transparent bg-accent text-accent-fg"
+                    : "border-border bg-surface text-fg hover:bg-surface-2 disabled:opacity-50",
+                )}
               >
-                <Check className="size-3.5" aria-hidden />
-                Done
-              </motion.span>
-            ) : inactive ? (
-              "Off hours"
-            ) : (
-              <>
-                <Plus className="size-3.5" aria-hidden />
-                {minutesOnly ? "Log time" : "Check in"}
-              </>
-            )}
-          </button>
-          <button
-            type="button"
-            className={iconButton}
-            aria-label={`Log details for ${habit.name}`}
-            aria-expanded={logOpen}
-            title="Log count, minutes and note"
-            onClick={() => setLogOpen((v) => !v)}
-          >
-            <NotebookPen className="size-4" aria-hidden />
-          </button>
+                {complete ? (
+                  <motion.span
+                    key="done"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <Check className="size-3.5" aria-hidden />
+                    Done
+                  </motion.span>
+                ) : inactive ? (
+                  "Off hours"
+                ) : (
+                  <>
+                    <Plus className="size-3.5" aria-hidden />
+                    {minutesOnly ? "Log time" : "Check in"}
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                className={iconButton}
+                aria-label={`Log details for ${habit.name}`}
+                aria-expanded={logOpen}
+                title="Log count, minutes and note"
+                onClick={() => setLogOpen((v) => !v)}
+              >
+                <NotebookPen className="size-4" aria-hidden />
+              </button>
+            </>
+          )}
           <Link
             href={`/habits/${habit.id}/edit`}
             className={iconButton}
