@@ -80,6 +80,11 @@ model Profile {
   routineSlots     RoutineSlot[]
   questions        Question[]
   habitDayNotes    HabitDayNote[]
+  moneyAccounts    MoneyAccount[]
+  moneyCategories  MoneyCategory[]
+  moneyEntries     MoneyEntry[]
+  debts            Debt[]
+  savingsGoals     SavingsGoal[]
 }
 
 model Habit {
@@ -250,7 +255,7 @@ model StudyPlan {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user     Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
   subjects Subject[]
   exams    StudyExam[]
   checks   StudyCheck[]
@@ -337,23 +342,23 @@ model RoutineSlot {
 }
 
 model StudyExam {
-  id        String   @id @default(uuid()) @db.Uuid
-  planId    String   @db.Uuid
-  kind      ExamKind
-  subjectId String?  @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  planId      String    @db.Uuid
+  kind        ExamKind
+  subjectId   String?   @db.Uuid
   /// `YYYY-MM-DD` in the user's timezone.
-  day       String
-  score     Float?
-  total     Float?
-  note      String?
+  day         String
+  score       Float?
+  total       Float?
+  note        String?
   /// Taken in the app: `[{ id, chosen }]` (question ids in the order shown, chosen
   /// option 0–3 or null). Null for results recorded by hand.
   questions   Json?
   startedAt   DateTime?
   durationSec Int?
   submittedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   plan    StudyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
   subject Subject?  @relation(fields: [subjectId], references: [id], onDelete: SetNull)
@@ -383,4 +388,138 @@ model Question {
   owner Profile? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([subject, lecture])
+}
+
+enum MoneyAccountKind {
+  CASH
+  MOBILE
+  BANK
+  OTHER
+}
+
+enum MoneyCategoryKind {
+  INCOME
+  EXPENSE
+}
+
+/// How an entry moves money (see lib/money.ts for the effect of each on balances).
+enum MoneyEntryKind {
+  INCOME
+  EXPENSE
+  TRANSFER
+  BORROW
+  LEND
+  REPAY
+  SAVE
+  WITHDRAW
+}
+
+enum DebtDirection {
+  BORROWED
+  LENT
+}
+
+model MoneyAccount {
+  id           String           @id @default(uuid()) @db.Uuid
+  userId       String           @db.Uuid
+  name         String
+  kind         MoneyAccountKind @default(CASH)
+  /// Balance before the first entry, in poisha.
+  openingMinor Int              @default(0)
+  sortOrder    Int              @default(0)
+  archivedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  user      Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries   MoneyEntry[] @relation("EntryAccount")
+  transfers MoneyEntry[] @relation("EntryToAccount")
+
+  @@index([userId])
+}
+
+model MoneyCategory {
+  id          String            @id @default(uuid()) @db.Uuid
+  userId      String            @db.Uuid
+  name        String
+  kind        MoneyCategoryKind
+  icon        String            @default("circle")
+  color       String            @default("#475569")
+  /// Monthly limit for an expense category, in poisha. Null = no budget.
+  budgetMinor Int?
+  sortOrder   Int               @default(0)
+  archivedAt  DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user    Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries MoneyEntry[]
+
+  @@index([userId, kind])
+}
+
+model MoneyEntry {
+  id          String         @id @default(uuid()) @db.Uuid
+  userId      String         @db.Uuid
+  kind        MoneyEntryKind
+  /// Always positive, in poisha; the kind decides the direction.
+  amountMinor Int
+  /// Local calendar day `YYYY-MM-DD`.
+  day         String
+  accountId   String         @db.Uuid
+  toAccountId String?        @db.Uuid
+  categoryId  String?        @db.Uuid
+  debtId      String?        @db.Uuid
+  goalId      String?        @db.Uuid
+  note        String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user      Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account   MoneyAccount   @relation("EntryAccount", fields: [accountId], references: [id], onDelete: NoAction)
+  toAccount MoneyAccount?  @relation("EntryToAccount", fields: [toAccountId], references: [id], onDelete: NoAction)
+  category  MoneyCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  debt      Debt?          @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  goal      SavingsGoal?   @relation(fields: [goalId], references: [id], onDelete: NoAction)
+
+  @@index([userId, day])
+  @@index([debtId])
+  @@index([goalId])
+}
+
+model Debt {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @db.Uuid
+  person      String
+  direction   DebtDirection
+  /// Amount borrowed or lent, in poisha.
+  amountMinor Int
+  day         String
+  dueDay      String?
+  note        String?
+  settledAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user    Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries MoneyEntry[]
+
+  @@index([userId])
+}
+
+model SavingsGoal {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @db.Uuid
+  name        String
+  /// Target, in poisha.
+  targetMinor Int
+  targetDay   String?
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user    Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries MoneyEntry[]
+
+  @@index([userId])
 }

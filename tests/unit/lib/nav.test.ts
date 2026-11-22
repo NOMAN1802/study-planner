@@ -39,6 +39,16 @@ describe("activeChild", () => {
     expect(at("/habits/0b6c8f5e-1c2d-4e5f-8a9b-0c1d2e3f4a5b/edit")).toBe("All habits");
   });
 
+  it("lists the money pages, Overview only on the root", () => {
+    const money = NAV_ITEMS.find((i) => i.href === "/money")!;
+    const at = (path: string) => activeChild(money, path)?.label;
+    expect(at("/money")).toBe("Overview");
+    expect(at("/money/transactions")).toBe("Transactions");
+    expect(at("/money/debts")).toBe("Borrow & Lend");
+    expect(at("/money/settings")).toBe("Accounts & budgets");
+    expect(pageTitle("/money/report")).toBe("Money");
+  });
+
   it("has no children for plain items", () => {
     expect(activeChild(NAV_ITEMS[0], "/dashboard")).toBeUndefined();
   });

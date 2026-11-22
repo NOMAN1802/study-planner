@@ -1,9 +1,9 @@
 export type NavChild = { href: string; label: string };
 
 export type NavItem = {
-  href: "/dashboard" | "/work-station" | "/habits" | "/tasks" | "/planner" | "/settings";
+  href: "/dashboard" | "/work-station" | "/habits" | "/money" | "/tasks" | "/planner" | "/settings";
   label: string;
-  icon: "dashboard" | "workstation" | "habits" | "tasks" | "planner" | "settings";
+  icon: "dashboard" | "workstation" | "habits" | "money" | "tasks" | "planner" | "settings";
   /** Sub-pages, shown as a dropdown under the item. */
   children?: readonly NavChild[];
 };
@@ -27,10 +27,21 @@ export const HABIT_PAGES = [
   { href: "/habits/report", label: "Report" },
 ] as const satisfies readonly NavChild[];
 
+/** Money's pages. */
+export const MONEY_PAGES = [
+  { href: "/money", label: "Overview" },
+  { href: "/money/transactions", label: "Transactions" },
+  { href: "/money/debts", label: "Borrow & Lend" },
+  { href: "/money/savings", label: "Savings" },
+  { href: "/money/report", label: "Report" },
+  { href: "/money/settings", label: "Accounts & budgets" },
+] as const satisfies readonly NavChild[];
+
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/work-station", label: "Study Station", icon: "workstation", children: STATION_PAGES },
   { href: "/habits", label: "Habits", icon: "habits", children: HABIT_PAGES },
+  { href: "/money", label: "Money", icon: "money", children: MONEY_PAGES },
   { href: "/tasks", label: "Tasks", icon: "tasks" },
   { href: "/planner", label: "Planner", icon: "planner" },
   { href: "/settings", label: "Settings", icon: "settings" },

@@ -11,6 +11,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { requireUser } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard-server";
 import { getHabitWeek } from "@/lib/daily-habits-server";
+import { formatMoney } from "@/lib/money";
+import { getMoneySummary } from "@/lib/money-server";
 import { getExamStats } from "@/lib/workstation/exam-server";
 import { getStudySummary } from "@/lib/workstation/server";
 import { ExamResults } from "@/components/dashboard/exam-results";
@@ -21,12 +23,53 @@ export const metadata: Metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const user = await requireUser();
   const now = new Date();
-  const [data, study, exams, habitWeek] = await Promise.all([
+  const [data, study, exams, habitWeek, money] = await Promise.all([
     getDashboardData(user, now),
     getStudySummary(user, now),
     getExamStats(user),
     getHabitWeek(user),
+    getMoneySummary(user),
   ]);
+
+  const moneyPanel = money ? (
+    <Panel
+      id="money"
+      index={1}
+      title="Money this month"
+      aside={
+        <Link href="/money" className="font-medium text-accent hover:underline">
+          Open Money
+        </Link>
+      }
+      className="lg:col-span-5 2xl:col-span-12"
+    >
+      <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-5">
+        {[
+          { id: "income", label: "Income", value: formatMoney(money.month.income) },
+          { id: "expense", label: "Expense", value: formatMoney(money.month.expense) },
+          { id: "net", label: "Net", value: formatMoney(money.month.net, { sign: true }) },
+          { id: "owe", label: "You owe", value: formatMoney(money.debts.owe) },
+          { id: "owed", label: "Owed to you", value: formatMoney(money.debts.owed) },
+        ].map((row) => (
+          <div key={row.id} className="flex flex-col gap-1">
+            <dt className="text-xs text-fg-muted">{row.label}</dt>
+            <dd
+              className="font-mono text-lg font-medium tabular-nums"
+              data-testid={`money-${row.id}`}
+            >
+              {row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {money.budgetAlerts ? (
+        <p className="mt-3 text-xs font-medium text-warning">
+          {money.budgetAlerts} {money.budgetAlerts === 1 ? "budget" : "budgets"} near or over the
+          limit
+        </p>
+      ) : null}
+    </Panel>
+  ) : null;
 
   if (data.empty) {
     return (
@@ -43,6 +86,7 @@ export default async function DashboardPage() {
             </Link>
           }
         />
+        {moneyPanel}
       </div>
     );
   }
@@ -127,6 +171,8 @@ export default async function DashboardPage() {
           <HabitWeek week={habitWeek} />
         </Panel>
       ) : null}
+
+      {moneyPanel}
 
       {exams ? (
         <Panel

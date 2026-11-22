@@ -8,6 +8,7 @@ import {
   ListChecks,
   Repeat,
   Settings,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,6 +20,7 @@ const icons: Record<NavItem["icon"], typeof LayoutDashboard> = {
   dashboard: LayoutDashboard,
   workstation: GraduationCap,
   habits: Repeat,
+  money: Wallet,
   tasks: ListChecks,
   planner: CalendarDays,
   settings: Settings,
