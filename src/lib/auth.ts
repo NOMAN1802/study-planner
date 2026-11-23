@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import type { WeekStart } from "@/lib/dates";
 import { ensureProfile } from "@/lib/profile";
+import { readClaims } from "@/lib/supabase/claims";
 import { createClient } from "@/lib/supabase/server";
 
 export type CurrentUser = {
@@ -17,9 +18,9 @@ export type CurrentUser = {
  */
 export const requireUser = cache(async (): Promise<CurrentUser> => {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
+  const { claims, error } = await readClaims(supabase);
   if (!claims || typeof claims.sub !== "string") {
+    if (error) console.warn("[auth] requireUser found no user", `${error.name}: ${error.message}`);
     redirect("/login");
   }
   const profile = await ensureProfile({
