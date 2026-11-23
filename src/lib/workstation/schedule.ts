@@ -449,3 +449,12 @@ export function subjectRoutine(days: readonly PlanDay[], subjectId: string): Sub
   }
   return out;
 }
+
+/** Day each lecture is planned to be finished on: the last plan day it appears on. */
+export function topicFinishDays(days: readonly PlanDay[]): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const d of days) {
+    for (const i of d.items) if (i.kind === "topic" && i.topicId) out.set(i.topicId, d.day);
+  }
+  return out;
+}

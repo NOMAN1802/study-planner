@@ -7,15 +7,26 @@ import {
   slicePages,
 } from "@/lib/workstation/lecture-books";
 
-/** Pages in the English Grammar & Literature lecture book. */
-const ENGLISH_BOOK_PAGES = 276;
-
 describe("lecture books", () => {
   const english = BCS_SYLLABUS.find((s) => s.name === "English Literature + Grammar")!;
 
   it("covers every English lecture", () => {
     const missing = english.topics.filter((t) => !LECTURE_BOOK_SLICES[t.title]);
     expect(missing.map((t) => t.title)).toEqual([]);
+  });
+
+  it("covers every Bangla lecture except the question-solving sessions", () => {
+    const bangla = BCS_SYLLABUS.find((s) => s.name === "Bangla Literature + Grammar")!;
+    const missing = bangla.topics.filter((t) => !LECTURE_BOOK_SLICES[t.title]).map((t) => t.title);
+    expect(missing).toHaveLength(3);
+    expect(missing.every((t) => t.includes("প্রশ্ন সলভ সেশন"))).toBe(true);
+  });
+
+  it("covers every Math + Mental Ability lecture", () => {
+    const math = BCS_SYLLABUS.find((s) => s.name === "Math + Mental Ability")!;
+    expect(math.topics.filter((t) => !LECTURE_BOOK_SLICES[t.title]).map((t) => t.title)).toEqual(
+      [],
+    );
   });
 
   it("only names lectures that exist", () => {
@@ -28,7 +39,7 @@ describe("lecture books", () => {
       const pages = slicePages(slice.pages);
       expect(pages.length, title).toBeGreaterThan(0);
       expect(Math.min(...pages), title).toBeGreaterThanOrEqual(1);
-      expect(Math.max(...pages), title).toBeLessThanOrEqual(ENGLISH_BOOK_PAGES);
+      expect(Math.max(...pages), title).toBeLessThanOrEqual(slice.book.pages);
     }
   });
 
@@ -36,6 +47,7 @@ describe("lecture books", () => {
     const paths = Object.keys(LECTURE_BOOK_SLICES).map(lectureBookPath);
     expect(new Set(paths).size).toBe(paths.length);
     expect(lectureBookPath("Grammar 8: Tense")).toBe("english/grammar-8-tense.pdf");
+    expect(lectureBookPath("ব্যাকরণ ০৫: সন্ধি")).toBe("bangla/byakoron-05.pdf");
     expect(lectureBookPath("No such lecture")).toBeNull();
   });
 

@@ -46,7 +46,7 @@ describe("activeChild", () => {
     expect(at("/money/transactions")).toBe("Transactions");
     expect(at("/money/debts")).toBe("Borrow & Lend");
     expect(at("/money/settings")).toBe("Accounts & budgets");
-    expect(pageTitle("/money/report")).toBe("Money");
+    expect(pageTitle("/money/report")).toBe("Finance");
   });
 
   it("has no children for plain items", () => {

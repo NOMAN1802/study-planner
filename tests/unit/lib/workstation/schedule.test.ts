@@ -6,6 +6,7 @@ import {
   buildSchedule,
   cycleLabels,
   subjectRoutine,
+  topicFinishDays,
   type PlanSubject,
   type ScheduleInput,
 } from "@/lib/workstation/schedule";
@@ -372,5 +373,36 @@ describe("subjectRoutine", () => {
 
   it("is empty for an unknown subject", () => {
     expect(subjectRoutine(buildSchedule(input()).days, "nope")).toEqual([]);
+  });
+});
+
+describe("topicFinishDays", () => {
+  it("maps each lecture to the last day it is planned on", () => {
+    const days = [
+      {
+        day: "2026-11-23",
+        phase: "learning",
+        index: 1,
+        capacity: 8,
+        items: [
+          { kind: "topic", cycles: 2, label: "A", subjectId: "s", topicId: "a" },
+          { kind: "topic", cycles: 1, label: "B", subjectId: "s", topicId: "b" },
+        ],
+      },
+      {
+        day: "2026-11-24",
+        phase: "learning",
+        index: 2,
+        capacity: 8,
+        items: [
+          { kind: "topic", cycles: 1, label: "B", subjectId: "s", topicId: "b" },
+          { kind: "daily", cycles: 1, label: "V", subjectId: "d" },
+        ],
+      },
+    ] as const;
+    const m = topicFinishDays(days as never);
+    expect(m.get("a")).toBe("2026-11-23");
+    expect(m.get("b")).toBe("2026-11-24");
+    expect(m.size).toBe(2);
   });
 });

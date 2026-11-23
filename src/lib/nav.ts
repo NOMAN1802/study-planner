@@ -41,7 +41,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/work-station", label: "Study Station", icon: "workstation", children: STATION_PAGES },
   { href: "/habits", label: "Habits", icon: "habits", children: HABIT_PAGES },
-  { href: "/money", label: "Money", icon: "money", children: MONEY_PAGES },
+  { href: "/money", label: "Finance", icon: "money", children: MONEY_PAGES },
   { href: "/tasks", label: "Tasks", icon: "tasks" },
   { href: "/planner", label: "Planner", icon: "planner" },
   { href: "/settings", label: "Settings", icon: "settings" },

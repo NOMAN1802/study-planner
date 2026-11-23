@@ -7,7 +7,7 @@ import { requireUser } from "@/lib/auth";
 import { formatMoney } from "@/lib/money";
 import { getMoneyOverview } from "@/lib/money-server";
 
-export const metadata: Metadata = { title: "Money" };
+export const metadata: Metadata = { title: "Finance" };
 
 const link = "font-medium text-accent hover:underline";
 

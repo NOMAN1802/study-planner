@@ -3,13 +3,18 @@
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useState, useTransition } from "react";
 import { moveSubject, setTopicEstimate } from "@/actions/workstation";
-import { iconButton, plural } from "@/components/workstation/format";
+import { formatDay, iconButton, plural } from "@/components/workstation/format";
 import { LectureLinks } from "@/components/workstation/lecture-links";
 import { SubjectRoutine } from "@/components/workstation/subject-routine";
 import { TopicDone } from "@/components/workstation/topic-done";
 import { Bar } from "@/components/workstation/ws-header";
 import type { WsSubject, WsTopic } from "@/lib/workstation/server";
-import { subjectRoutine, type PlanDay, type SubjectProjection } from "@/lib/workstation/schedule";
+import {
+  subjectRoutine,
+  topicFinishDays,
+  type PlanDay,
+  type SubjectProjection,
+} from "@/lib/workstation/schedule";
 
 const ESTIMATES = [1, 2, 3, 4, 5, 6];
 
@@ -27,6 +32,7 @@ export function SubjectsTab({
   const study = subjects.filter((s) => !s.isDaily);
   const daily = subjects.filter((s) => s.isDaily);
   const projection = new Map(projections.map((p) => [p.subjectId, p]));
+  const finish = topicFinishDays(days);
 
   function run(action: () => Promise<{ error?: string }>) {
     setError(null);
@@ -127,7 +133,12 @@ export function SubjectsTab({
                     aria-label={`${s.name} lectures`}
                   >
                     {s.topics.map((t) => (
-                      <TopicRow key={t.id} topic={t} onError={setError} />
+                      <TopicRow
+                        key={t.id}
+                        topic={t}
+                        finishDay={finish.get(t.id) ?? null}
+                        onError={setError}
+                      />
                     ))}
                   </ul>
                 </div>
@@ -140,7 +151,15 @@ export function SubjectsTab({
   );
 }
 
-function TopicRow({ topic, onError }: { topic: WsTopic; onError: (e: string | null) => void }) {
+function TopicRow({
+  topic,
+  finishDay,
+  onError,
+}: {
+  topic: WsTopic;
+  finishDay: string | null;
+  onError: (e: string | null) => void;
+}) {
   const [, start] = useTransition();
   return (
     <li className="flex flex-wrap items-start gap-x-3 gap-y-2 px-4 py-3" data-testid="ws-topic">
@@ -151,6 +170,11 @@ function TopicRow({ topic, onError }: { topic: WsTopic; onError: (e: string | nu
         </p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-fg-muted">
           <LectureLinks parts={topic.parts} topicId={topic.id} book={topic.book} />
+          {topic.done && topic.doneDay ? (
+            <span data-testid="ws-topic-date">Done {formatDay(topic.doneDay)}</span>
+          ) : finishDay ? (
+            <span data-testid="ws-topic-date">Finish by {formatDay(finishDay)}</span>
+          ) : null}
           {topic.spentCycles > 0 ? (
             <span className="font-mono tabular-nums">
               {plural(topic.spentCycles, "cycle")} spent
