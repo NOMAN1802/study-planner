@@ -42,19 +42,24 @@ export default async function DashboardPage() {
     <Panel
       id="money"
       index={1}
-      title="Money this month"
+      title="Finance"
       aside={
         <Link href="/money" className="font-medium text-accent hover:underline">
-          Open Money
+          Open Finance
         </Link>
       }
       className="lg:col-span-5 2xl:col-span-12"
     >
-      <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-5">
+      <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3 lg:grid-cols-6">
         {[
-          { id: "income", label: "Income", value: formatMoney(money.month.income) },
-          { id: "expense", label: "Expense", value: formatMoney(money.month.expense) },
-          { id: "net", label: "Net", value: formatMoney(money.month.net, { sign: true }) },
+          { id: "balance", label: "Balance now", value: formatMoney(money.balance) },
+          { id: "income", label: "Income this month", value: formatMoney(money.month.income) },
+          { id: "expense", label: "Spent this month", value: formatMoney(money.month.expense) },
+          {
+            id: "net",
+            label: "Net this month",
+            value: formatMoney(money.month.net, { sign: true }),
+          },
           { id: "owe", label: "You owe", value: formatMoney(money.debts.owe) },
           { id: "owed", label: "Owed to you", value: formatMoney(money.debts.owed) },
         ].map((row) => (
@@ -140,9 +145,9 @@ export default async function DashboardPage() {
     money
       ? {
           id: "money",
-          label: "Net this month",
-          value: formatMoney(money.month.net, { sign: true }),
-          hint: `${formatMoney(money.month.income)} in · ${formatMoney(money.month.expense)} out`,
+          label: "Balance",
+          value: formatMoney(money.balance),
+          hint: `This month: ${formatMoney(money.month.income)} in · ${formatMoney(money.month.expense)} out`,
         }
       : null,
   ].filter((s) => s !== null);

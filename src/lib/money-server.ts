@@ -338,12 +338,18 @@ export async function getMoneyReport(user: CurrentUser, range: DayRange) {
 
 /** This month at a glance, for the dashboard (null before any money entry). */
 export async function getMoneySummary(user: CurrentUser) {
-  const count = await prisma.moneyEntry.count({ where: { userId: user.id } });
-  if (count === 0) return null;
+  const [entryCount, fundedAccounts] = await Promise.all([
+    prisma.moneyEntry.count({ where: { userId: user.id } }),
+    prisma.moneyAccount.count({ where: { userId: user.id, openingMinor: { not: 0 } } }),
+  ]);
+  if (entryCount === 0 && fundedAccounts === 0) return null;
   const today = moneyToday(user);
   const month = today.slice(0, 7);
   const all = await loadAll(user.id);
+  const balances = accountBalances(all.accounts, all.entries, all.directions);
   return {
+    /** Money held now: every account's opening balance plus all entries, as on the Finance page. */
+    balance: all.accounts.reduce((n, a) => n + (balances.get(a.id) ?? 0), 0),
     month: totals(all.entries, all.directions, `${month}-01`, monthEnd(month)),
     debts: debtTotals(all.debts, all.entries, today),
     budgetAlerts: budgetUse(

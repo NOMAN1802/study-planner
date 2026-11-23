@@ -175,6 +175,9 @@ test.describe("money", () => {
     await page.goto("/dashboard");
     await expect(page.getByTestId("money-income")).toHaveText("৳20,000");
     await expect(page.getByTestId("money-net")).toHaveText("+৳19,400");
+    // Balance counts the starting balances too, matching the Finance page total
+    // (19,549.50 before the Food expense went from 450.50 to 600).
+    await expect(page.getByTestId("money-balance")).toHaveText("৳19,400");
     await expect(page.getByTestId("money-owe")).toHaveText("৳3,000");
 
     // ---- Accessibility in both themes ----
