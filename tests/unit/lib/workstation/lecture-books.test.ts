@@ -29,6 +29,12 @@ describe("lecture books", () => {
     );
   });
 
+  it("covers every International Affairs lecture", () => {
+    const ia = BCS_SYLLABUS.find((s) => s.name === "International Affairs")!;
+    expect(ia.topics.filter((t) => !LECTURE_BOOK_SLICES[t.title]).map((t) => t.title)).toEqual([]);
+    expect(lectureBookPath("০৬: এশিয়া-০১")).toBe("international/antorjatik-06.pdf");
+  });
+
   it("only names lectures that exist", () => {
     const titles = new Set(BCS_SYLLABUS.flatMap((s) => s.topics.map((t) => t.title)));
     expect(Object.keys(LECTURE_BOOK_SLICES).filter((t) => !titles.has(t))).toEqual([]);

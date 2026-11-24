@@ -229,6 +229,63 @@ const MATH_SLICES: Record<string, BookSlice> = {
   "মানসিক দক্ষতা ০৭: ভাষাগত যৌক্তিক বিচার": manoshik("07", "141-145", "ভাষাগত যৌক্তিক বিচার"),
 };
 
+/** PDF page = printed page + 4 throughout (contents on PDF 4). */
+const INTERNATIONAL: LectureBook = {
+  file: "লেকচার বুক - আন্তর্জাতিক বিষয়াবলী.pdf",
+  folder: "international",
+  name: "আন্তর্জাতিক বিষয়াবলি",
+  pages: 182,
+};
+
+const antorjatik = (n: string, pages: string, chapters: string) =>
+  slice(INTERNATIONAL, pages, chapters, `antorjatik-${n}`);
+
+/**
+ * International Affairs lecture book. Chapters that run over several lectures
+ * are split in book order: বৈশ্বিক ইতিহাস by era, জাতিসংঘ in halves, এশিয়া by
+ * region (South Asia; China, East and South-East Asia; Middle East), আন্তর্জাতিক
+ * নিরাপত্তা in halves and বৈশ্বিক সংগঠন ও জোট in thirds. Each split shares its
+ * boundary page, since chapters and topics start mid-page.
+ */
+const INTERNATIONAL_SLICES: Record<string, BookSlice> = {
+  "০১: আন্তর্জাতিক বিষয়াবলি প্রস্তুতি, বিশ্ব রাজনীতি ও অর্থনীতির মৌলিক ধারণা": antorjatik(
+    "01",
+    "2-11,104-114",
+    "বিগত বিসিএস প্রশ্ন অ্যানালাইসিস, চলমান সংঘাত ও সংকট, রাজধানী, মুদ্রা, ভাষা, পার্লামেন্ট ও অন্যান্য",
+  ),
+  "০২: বৈশ্বিক ইতিহাস-০১": antorjatik("02", "11-18", "বৈশ্বিক ইতিহাস: প্রাচীন সভ্যতা"),
+  "০৩: বৈশ্বিক ইতিহাস-০২": antorjatik(
+    "03",
+    "18-28",
+    "বৈশ্বিক ইতিহাস: মধ্যযুগ, রেনেসাঁ, শিল্প বিপ্লব, আমেরিকান ও ফরাসি বিপ্লব",
+  ),
+  "০৪: বৈশ্বিক ইতিহাস-০৩ এবং জাতিসংঘ-০১": antorjatik(
+    "04",
+    "28-50",
+    "বৈশ্বিক ইতিহাস: বিশ্বযুদ্ধ ও পরবর্তী; জাতিসংঘ (প্রথম অংশ)",
+  ),
+  "০৫: জাতিসংঘ-০২": antorjatik("05", "50-59", "জাতিসংঘ (দ্বিতীয় অংশ)"),
+  "০৬: এশিয়া-০১": antorjatik("06", "59-68", "এশিয়া: দক্ষিণ এশিয়া"),
+  "০৭: এশিয়া-০২": antorjatik("07", "68-79", "এশিয়া: মিয়ানমার, চীন, পূর্ব ও দক্ষিণ-পূর্ব এশিয়া"),
+  "০৮: এশিয়া-০৩": antorjatik("08", "79-92", "এশিয়া: মধ্যপ্রাচ্য; ইউরোপ"),
+  "০৯: আমেরিকা, আফ্রিকা ও ওশেনিয়া": antorjatik("09", "92-104", "আমেরিকা, আফ্রিকা, ওশেনিয়া মহাদেশ"),
+  "১০: পরিবেশ": antorjatik("10", "114-127", "আন্তর্জাতিক পরিবেশগত ইস্যু ও কূটনীতি"),
+  "১১: আন্তরাষ্ট্রীয় ক্ষমতা সম্পর্ক ও কূটনীতি": antorjatik(
+    "11",
+    "140-158",
+    "আন্তরাষ্ট্রীয় ক্ষমতা সম্পর্ক ও কূটনীতি",
+  ),
+  "১২: আন্তর্জাতিক নিরাপত্তা-০১": antorjatik("12", "127-134", "আন্তর্জাতিক নিরাপত্তা (প্রথম অংশ)"),
+  "১৩: আন্তর্জাতিক নিরাপত্তা-০২": antorjatik("13", "134-140", "আন্তর্জাতিক নিরাপত্তা (দ্বিতীয় অংশ)"),
+  "14: International Organization-1": antorjatik("14", "158-166", "বৈশ্বিক সংগঠন ও জোট (প্রথম অংশ)"),
+  "15: International Organization-2": antorjatik(
+    "15",
+    "166-174",
+    "বৈশ্বিক সংগঠন ও জোট (দ্বিতীয় অংশ)",
+  ),
+  "16: International Organization-3": antorjatik("16", "174-182", "বৈশ্বিক সংগঠন ও জোট (তৃতীয় অংশ)"),
+};
+
 /** By lecture title, as in BCS_SYLLABUS. */
 export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   "Lit 01: Literary Terms": slice(ENGLISH, "171-179", "Figure of Speech and Literary Terms"),
@@ -307,6 +364,7 @@ export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   ),
   ...BANGLA_SLICES,
   ...MATH_SLICES,
+  ...INTERNATIONAL_SLICES,
 };
 
 /** The lecture's file name in the bucket: its title, lower-cased, as a slug. */
