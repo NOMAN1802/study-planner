@@ -9,6 +9,7 @@
  * split by chapter, not by lecture, so a lecture spread over several videos
  * of one chapter (e.g. Preposition-1 and -2) gets the whole chapter.
  */
+import { VOCABULARY_LECTURES } from "@/lib/workstation/bcs-syllabus";
 
 export type LectureBook = {
   /** Source PDF in Doc/study-resource. */
@@ -298,15 +299,11 @@ export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   "Grammar 19: One Word Substitute": slice(ENGLISH, "161-171", "One-Word Substitution"),
   // The book has no vocabulary chapter; One-Word Substitution is the closest
   // (BCS synonym/antonym questions, word meanings, word roots).
-  "Vocabulary Marathon-1": slice(
-    ENGLISH,
-    "161-171",
-    "One-Word Substitution (synonyms, antonyms, word roots)",
-  ),
-  "Vocabulary Marathon-2": slice(
-    ENGLISH,
-    "161-171",
-    "One-Word Substitution (synonyms, antonyms, word roots)",
+  ...Object.fromEntries(
+    VOCABULARY_LECTURES.map((t) => [
+      t.title,
+      slice(ENGLISH, "161-171", "One-Word Substitution (synonyms, antonyms, word roots)"),
+    ]),
   ),
   ...BANGLA_SLICES,
   ...MATH_SLICES,

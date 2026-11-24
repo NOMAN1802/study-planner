@@ -19,6 +19,19 @@ const lecture = (title: string, ...parts: LecturePart[]): SyllabusTopic => ({ ti
 /** A lecture that is exactly one video. */
 const video = (id: string, title: string): SyllabusTopic => lecture(title, p(id, title));
 
+/** English vocabulary: one reference lecture per video part (Part 3 is not in the series). */
+export const VOCABULARY_LECTURES: readonly SyllabusTopic[] = [
+  video("7EP3Cj57e40", "Vocabulary 01: Part 1"),
+  video("hvpk_oIWbJ4", "Vocabulary 02: Part 2"),
+  video("BZKtfHocHG8", "Vocabulary 03: Part 4"),
+  video("VqSA1hiRntI", "Vocabulary 04: Part 5"),
+  video("pdN5s923iyU", "Vocabulary 05: Part 6"),
+  video("bwQqFtvv6Nc", "Vocabulary 06: Part 7"),
+  video("F2yLe0oakwg", "Vocabulary 07: Part 8"),
+  lecture("Vocabulary 08: Part 9", p("w3FhXmMPjhE", "Vocabulary Parts 9–10 (Part 9)")),
+  lecture("Vocabulary 09: Part 10", p("w3FhXmMPjhE", "Vocabulary Parts 9–10 (Part 10)")),
+];
+
 /**
  * The revision phase, in order: whole days given to one subject (or two
  * sharing a day). Subjects are named as in BCS_SYLLABUS. Math gets 2 days:
@@ -277,20 +290,9 @@ export const BCS_SYLLABUS: readonly SyllabusSubject[] = [
     isDaily: true,
     resourceFile: "English Vocabulary.pdf",
     topics: [
-      lecture(
-        "Vocabulary Marathon-1",
-        p("7EP3Cj57e40", "Vocabulary 1.1 (Part-1)"),
-        p("hvpk_oIWbJ4", "Vocabulary 1.2 (Part-2)"),
-        p("BZKtfHocHG8", "Vocabulary 1.4 (Part-4)"),
-        p("VqSA1hiRntI", "Vocabulary 1.5 (Part-5)"),
-      ),
-      lecture(
-        "Vocabulary Marathon-2",
-        p("pdN5s923iyU", "Vocabulary 1.6 (Part-6)"),
-        p("bwQqFtvv6Nc", "Vocabulary 1.7 (Part-7)"),
-        p("F2yLe0oakwg", "Vocabulary 1.8 (Part-8)"),
-        p("w3FhXmMPjhE", "Vocabulary 1.9 (Parts 9–10)"),
-      ),
+      // 9 reference lectures, each behind ~8 word days (VOCAB_DAYS_PER_LECTURE).
+      // The Parts 9–10 video serves the last two.
+      ...VOCABULARY_LECTURES,
     ],
   },
 ];

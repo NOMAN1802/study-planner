@@ -31,6 +31,11 @@ export const LECTURES_PER_DAY = 2;
 export const HOLIDAY_LECTURES = 3;
 /** New vocabulary words per word day (every day except Friday). */
 export const WORDS_PER_DAY = 10;
+/**
+ * Word days each vocabulary lecture is the reference for: 9 lectures over the
+ * ~71 word days of a 92-day learning phase (Fridays and final days have none).
+ */
+export const VOCAB_DAYS_PER_LECTURE = 8;
 const WORD_DAYS_PER_WEEK = 6;
 /** Revision days give each subject a block of this many cycles before rotating. */
 export const REVISION_BLOCK = 4;
@@ -210,8 +215,14 @@ function fillWithNextSubject(
   return taken;
 }
 
-function nextDailyTopic(subject: PlanSubject | undefined) {
-  return subject?.topics.find((t) => !t.done);
+/**
+ * The vocabulary lecture behind a word day: each lecture covers
+ * VOCAB_DAYS_PER_LECTURE word days in order (the last one keeps any extra).
+ */
+function dailyTopicFor(subject: PlanSubject | undefined, wordDay: number) {
+  if (!subject || subject.topics.length === 0) return undefined;
+  const i = Math.min(subject.topics.length - 1, Math.floor(wordDay / VOCAB_DAYS_PER_LECTURE));
+  return subject.topics[i];
 }
 
 /** The revision-plan block covering revision day `n` (1-based), if any. */
@@ -278,7 +289,9 @@ export function buildSchedule(input: ScheduleInput): Schedule {
 
     // Daily subject (vocabulary) first, every day of the plan: 10 new words
     // Saturday–Thursday, and a revision of the week's words on Friday.
-    if (daily && !(isToday && input.dailyDoneToday)) {
+    // A subject's final day has no vocabulary either (its revision + final only).
+    const subjectFinalDay = phase === "learning" && queue.length > 0 && queue[0].kind !== "topic";
+    if (daily && !subjectFinalDay && !(isToday && input.dailyDoneToday)) {
       if (weekday === FRIDAY) {
         take({
           kind: "daily",
@@ -287,7 +300,7 @@ export function buildSchedule(input: ScheduleInput): Schedule {
           subjectId: daily.id,
         });
       } else {
-        const topic = nextDailyTopic(daily);
+        const topic = dailyTopicFor(daily, wordDays);
         const first = wordDays * WORDS_PER_DAY + 1;
         take({
           kind: "daily",

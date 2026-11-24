@@ -44,7 +44,7 @@ test.describe("work-station", () => {
     // Vocabulary: 10 new words Saturday–Thursday, the week's revision on Friday.
     if (new Date(`${await browserToday(page)}T12:00:00Z`).getUTCDay() === 5)
       await expect(items.first()).toContainText("Vocabulary revision: this week's 60 words");
-    else await expect(items.first()).toContainText("Words 1–10 · Vocabulary Marathon-1");
+    else await expect(items.first()).toContainText("Words 1–10 · Vocabulary 01: Part 1");
     await expect(items.nth(1)).toContainText("Lit 01: Literary Terms");
     // Its lecture book pages open through the app (a signed link to private storage).
     await expect(items.nth(1).getByTestId("ws-book")).toHaveAttribute(

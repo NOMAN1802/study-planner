@@ -38,7 +38,8 @@ describe("merged syllabus", () => {
     expect(lectures).toHaveLength(164);
     expect(lectures.every((t) => t.parts.length === 1)).toBe(true);
     const urls = BCS_SYLLABUS.flatMap((s) => s.topics.flatMap((t) => t.parts.map((p) => p.url)));
-    expect(urls).toHaveLength(172); // 164 lecture videos + 8 vocabulary
+    // 164 lecture videos + 9 vocabulary lectures on 8 videos (Parts 9–10 is one video).
+    expect(urls).toHaveLength(173);
     expect(new Set(urls).size).toBe(172);
   });
 
@@ -53,9 +54,17 @@ describe("merged syllabus", () => {
       titles.indexOf("Grammar 6: Preposition-1"),
     );
     const vocab = BCS_SYLLABUS.find((s) => s.isDaily)!;
+    // 9 reference lectures, one per part (the Parts 9–10 video serves two).
     expect(vocab.topics.map((t) => t.title)).toEqual([
-      "Vocabulary Marathon-1",
-      "Vocabulary Marathon-2",
+      "Vocabulary 01: Part 1",
+      "Vocabulary 02: Part 2",
+      "Vocabulary 03: Part 4",
+      "Vocabulary 04: Part 5",
+      "Vocabulary 05: Part 6",
+      "Vocabulary 06: Part 7",
+      "Vocabulary 07: Part 8",
+      "Vocabulary 08: Part 9",
+      "Vocabulary 09: Part 10",
     ]);
   });
 });

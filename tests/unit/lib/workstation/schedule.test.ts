@@ -74,8 +74,8 @@ describe("buildSchedule", () => {
     const s = buildSchedule(input());
     // Day 2 (Sunday): ENG's last 2 lectures, then revision; the final waits for Monday.
     expect(kinds(s, "2026-11-22")).toEqual(["daily:1", "topic:2", "topic:2", "revision:3"]);
-    // Day 3 (Monday): ENG final day; nothing else, the rest of the day is free.
-    expect(kinds(s, "2026-11-23")).toEqual(["daily:1", "subject-revision:2", "subject-final:1"]);
+    // Day 3 (Monday): ENG final day; no vocabulary either, the rest of the day is free.
+    expect(kinds(s, "2026-11-23")).toEqual(["subject-revision:2", "subject-final:1"]);
     // Day 4: the next subject starts.
     expect(s.days[3].items[1]).toMatchObject({ kind: "topic", topicId: "ban-1" });
     const eng = s.subjects.find((p) => p.subjectId === "eng");
@@ -205,6 +205,39 @@ describe("buildSchedule", () => {
     expect(daily("2026-11-27")?.topicId).toBeUndefined();
     expect(daily("2026-11-27")?.label).toBe("Vocabulary revision: this week's 60 words");
     expect(daily("2026-11-28")?.label).toContain("Words 61–70");
+  });
+
+  it("moves to the next vocabulary lecture every 8 word days", () => {
+    const s = buildSchedule(
+      input({ subjects: [subject("vocab", 9, { isDaily: true }), subject("eng", 60)] }),
+    );
+    const topics = s.days
+      .flatMap((d) => d.items)
+      .filter((i) => i.kind === "daily" && i.topicId)
+      .map((i) => i.topicId);
+    // Word days 1–8 → lecture 1, 9–16 → lecture 2, …; Fridays (revision) have none.
+    expect(topics.slice(0, 8)).toEqual(Array(8).fill("vocab-1"));
+    expect(topics[8]).toBe("vocab-2");
+    expect(topics[16]).toBe("vocab-3");
+    expect(topics[64]).toBe("vocab-9");
+    expect(topics.at(-1)).toBe("vocab-9"); // the last lecture keeps any extra days
+    // Already 12 word days done: today's words come from lecture 2.
+    const later = buildSchedule(
+      input({
+        subjects: [subject("vocab", 9, { isDaily: true }), subject("eng", 60)],
+        vocabDaysDone: 12,
+      }),
+    );
+    expect(later.days[0].items[0]).toMatchObject({ kind: "daily", topicId: "vocab-2" });
+  });
+
+  it("has no vocabulary on a subject's final day", () => {
+    const s = buildSchedule(
+      input({ subjects: [subject("vocab", 9, { isDaily: true }), subject("eng", 2)] }),
+    );
+    // Sat 21: ENG's 2 lectures; Sun 22: ENG final, with no words that day.
+    expect(kinds(s, "2026-11-22")).toEqual(["subject-revision:2", "subject-final:1"]);
+    expect(s.days[2].items.find((i) => i.kind === "daily")?.label).toContain("Words 11–20");
   });
 
   it("continues the word count from vocabulary days already done", () => {
