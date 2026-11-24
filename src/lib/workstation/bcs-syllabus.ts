@@ -36,10 +36,12 @@ export const REVISION_PLAN: readonly { subjects: readonly string[]; days: number
 ];
 export const REVISION_PLAN_DAYS = REVISION_PLAN.reduce((n, b) => n + b.days, 0);
 /**
- * 164 lectures (2 a day, 3 on Fridays and holidays) plus 9 subject final days,
- * from a 20 Nov 2026 start with holidays 16 Dec, 25 Dec and 24 Jan.
+ * 164 lectures (2 a day, Fridays too, 3 on holidays) plus 9 subject final days,
+ * from a 24 Nov 2026 start with holidays 16 Dec, 25 Dec, 24 Jan and 21 Feb:
+ * lectures end 21 Feb, leaving 2 spare days before the 15-day revision
+ * (exam-ready 10 Mar 2027).
  */
-export const DEFAULT_LEARNING_DAYS = 87;
+export const DEFAULT_LEARNING_DAYS = 92;
 
 export const BCS_SYLLABUS: readonly SyllabusSubject[] = [
   {

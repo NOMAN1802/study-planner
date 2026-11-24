@@ -5,11 +5,12 @@
  *
  * Days 1…learningDays: subjects one at a time (in order), one vocabulary cycle
  * a day (10 new words Saturday–Thursday, revising the week's words on Friday),
- * at most LECTURES_PER_DAY lectures a day (HOLIDAY_LECTURES on Friday and
- * holidays, which follow the Friday routine: 2 and 3 lectures)
- * with the rest of the study session spent revising what was covered, weekly
- * revision + exam on Fridays, and a subject final day after each subject's
- * last topic (its revision + final exam, no lectures, the rest of the day off).
+ * LECTURES_PER_DAY lectures a day, Fridays included (HOLIDAY_LECTURES on
+ * holidays, which follow the Friday routine), with the rest of the study
+ * session spent revising what was covered, weekly revision + exam on Fridays,
+ * and a subject final day after each subject's last topic (its revision + final
+ * exam, no lectures, the rest of the day off). Lecture slots left on a
+ * subject's last lecture day go to the next subject's first lectures.
  * The next revisionDays: whole days per subject following the revision plan
  * when one is given, otherwise (and after it) rotating revision with a mock
  * test every second day. Learning work that does not fit spills into the
@@ -24,12 +25,9 @@ export const WEEKLY_EXAM_CYCLES = 1;
 export const FINAL_REVISION_CYCLES = 2;
 export const FINAL_EXAM_CYCLES = 1;
 export const MOCK_CYCLES = 3;
-/** Lectures a day (office days), however long each lecture is. */
+/** Lectures a day, Fridays included, however long each lecture is. */
 export const LECTURES_PER_DAY = 2;
-/**
- * Lectures on Friday and holidays, leaving room for the weekly revision and
- * exam (Friday) and some revision.
- */
+/** Lectures on a holiday (16 Dec, 25 Dec, 24 Jan, 21 Feb in the BCS plan). */
 export const HOLIDAY_LECTURES = 3;
 /** New vocabulary words per word day (every day except Friday). */
 export const WORDS_PER_DAY = 10;
@@ -183,6 +181,35 @@ function learningQueue(subjects: readonly PlanSubject[]): Work[] {
   return queue;
 }
 
+/**
+ * On a subject's last lecture day, spend the lecture slots still free on the
+ * next subject's first lectures, leaving the finished subject's revision and
+ * final at the front of the queue for tomorrow. Returns lectures taken.
+ */
+function fillWithNextSubject(
+  queue: Work[],
+  finishing: string | undefined,
+  slots: number,
+  take: (item: PlanItem) => number,
+): number {
+  // Only the finishing subject's revision + final may sit before the next lectures.
+  let j = 0;
+  while (j < queue.length && queue[j].kind !== "topic" && queue[j].subjectId === finishing) j++;
+  const next = queue[j]?.subjectId;
+  let taken = 0;
+  while (taken < slots && j < queue.length) {
+    const item = queue[j];
+    if (item.kind !== "topic" || item.subjectId !== next) break;
+    const used = take(item);
+    if (used <= 0) break;
+    taken += 1;
+    item.cycles -= used;
+    if (item.cycles > 0) break;
+    queue.splice(j, 1);
+  }
+  return taken;
+}
+
 function nextDailyTopic(subject: PlanSubject | undefined) {
   return subject?.topics.find((t) => !t.done);
 }
@@ -288,11 +315,12 @@ export function buildSchedule(input: ScheduleInput): Schedule {
     // Learning work: always first in line, even after the learning phase (overflow).
     // Lectures are capped per day; a subject's revision + final get a day of their own.
     // The cap counts lectures, not cycles: a lecture with little left still counts as one.
-    const lectureCap = weekday === FRIDAY || holiday ? HOLIDAY_LECTURES : LECTURES_PER_DAY;
+    // Fridays get the usual 2; only holidays (a Friday holiday too) get 3.
+    const lectureCap = holidays.has(day) ? HOLIDAY_LECTURES : LECTURES_PER_DAY;
     const doneLectures = isToday ? (input.lecturesDoneToday ?? 0) : 0;
     let lectureLeft = Math.max(0, lectureCap - doneLectures);
     let lecturedOn: string | undefined;
-    let finalDay = false;
+    let finalDay: string | undefined;
     while (free > 0 && queue.length > 0) {
       const head = queue[0];
       let used: number;
@@ -302,9 +330,17 @@ export function buildSchedule(input: ScheduleInput): Schedule {
         lectureLeft -= 1;
         lecturedOn = head.subjectId;
       } else {
-        if (lecturedOn !== undefined) break;
+        if (lecturedOn !== undefined) {
+          // The subject's last lecture day: its revision + final wait for tomorrow,
+          // and any lecture slots left today start the next subject.
+          lectureLeft -= fillWithNextSubject(queue, head.subjectId, lectureLeft, take);
+          break;
+        }
+        // One subject's revision + final per day, even when the next subject's
+        // own final is already next in line.
+        if (finalDay !== undefined && head.subjectId !== finalDay) break;
         used = take(head);
-        finalDay = true;
+        finalDay = head.subjectId;
       }
       head.cycles -= used;
       if (head.cycles <= 0) queue.shift();

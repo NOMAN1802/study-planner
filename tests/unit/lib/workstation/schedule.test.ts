@@ -86,14 +86,13 @@ describe("buildSchedule", () => {
   it("reserves weekly revision and exam on Fridays", () => {
     const big = input({ subjects: [subject("eng", 60)] });
     const s = buildSchedule(big);
-    // 2026-11-27 is the first Friday: 16 cycles = 3 lectures + weekly revision 3 + exam 1 + 6 revision.
+    // 2026-11-27 is the first Friday: 16 cycles = 2 lectures + weekly revision 3 + exam 1 + 8 revision.
     expect(kinds(s, "2026-11-27")).toEqual([
-      "topic:2",
       "topic:2",
       "topic:2",
       "weekly-revision:3",
       "weekly-exam:1",
-      "revision:6",
+      "revision:8",
     ]);
   });
 
@@ -132,7 +131,8 @@ describe("buildSchedule", () => {
   });
 
   it("switches to rotating revision with a mock test every second day after the learning phase", () => {
-    // ENG lecture, ENG final, BAN lecture, BAN final, then 4 revision days.
+    // Day 1: ENG lecture + BAN lecture (the spare slot); day 2 ENG final; day 3 BAN final;
+    // day 4 is a spare learning day; then 4 revision days.
     const s = buildSchedule(
       input({ learningDays: 4, revisionDays: 4, subjects: [subject("eng", 1), subject("ban", 1)] }),
     );
@@ -142,8 +142,11 @@ describe("buildSchedule", () => {
     ]);
     expect(s.learningEnd).toBe("2026-11-24");
     expect(s.planEnd).toBe("2026-11-28");
-    expect(s.projectedLearningEnd).toBe("2026-11-24");
-    expect(s.bufferDays).toBe(0);
+    expect(s.projectedLearningEnd).toBe("2026-11-23");
+    expect(s.bufferDays).toBe(1);
+    expect(kinds(s, "2026-11-21").filter((k) => k.startsWith("topic"))).toHaveLength(2);
+    expect(s.days[1].items.filter((i) => i.kind === "subject-final")).toHaveLength(1);
+    expect(s.days[2].items.filter((i) => i.kind === "subject-final")).toHaveLength(1);
     const day5 = s.days[4].items.map((i) => i.kind);
     const day6 = s.days[5].items.map((i) => i.kind);
     expect(day5).not.toContain("mock");
@@ -168,11 +171,11 @@ describe("buildSchedule", () => {
   });
 
   it("falling behind a day pushes projections out", () => {
-    // 19 topics = 38 lecture cycles: Sat–Thu 4 + Fri 6 = 30, Sat 4, Sun 4, Monday the final.
+    // 19 topics at 2 a day, Fridays too: 21–30 Nov cover 19, Tuesday 1 Dec the final.
     const onTime = buildSchedule(input({ subjects: [subject("eng", 19)] }));
     const late = buildSchedule(input({ subjects: [subject("eng", 19)], today: "2026-11-22" }));
-    expect(onTime.projectedLearningEnd).toBe("2026-11-30");
-    expect(late.projectedLearningEnd).toBe("2026-12-01");
+    expect(onTime.projectedLearningEnd).toBe("2026-12-01");
+    expect(late.projectedLearningEnd).toBe("2026-12-02");
     expect(late.bufferDays).toBe(onTime.bufferDays - 1); // the missed Saturday
   });
 
@@ -234,6 +237,50 @@ describe("buildSchedule", () => {
     expect(new Set(scheduled.map((i) => i.topicId)).size).toBe(164);
     expect(s.days.filter((d) => d.phase !== "overflow")).toHaveLength(100);
   });
+
+  it("finishes the BCS lectures by 21 Feb on the 24 Nov plan (exam-ready 10 Mar)", () => {
+    const subjects: PlanSubject[] = BCS_SYLLABUS.map((sub, i) => ({
+      id: `s${i}`,
+      name: sub.name,
+      color: sub.color,
+      isDaily: Boolean(sub.isDaily),
+      finalDone: false,
+      topics: sub.topics.map((t, j) => ({
+        id: `s${i}-${j}`,
+        title: t.title,
+        estCycles: 2,
+        done: false,
+        spentCycles: 0,
+      })),
+    }));
+    const s = buildSchedule(
+      input({
+        subjects,
+        startDay: "2026-11-24",
+        today: "2026-11-24",
+        learningDays: 92,
+        revisionDays: 15,
+        holidays: ["2026-12-16", "2026-12-25", "2027-01-24", "2027-02-21"],
+      }),
+    );
+    const finals = s.days
+      .filter((d) => d.items.some((i) => i.kind === "subject-final"))
+      .map((d) => d.day);
+    expect(finals).toEqual([
+      "2026-12-09",
+      "2026-12-26",
+      "2027-01-13",
+      "2027-01-22",
+      "2027-01-31",
+      "2027-02-08",
+      "2027-02-13",
+      "2027-02-18",
+      "2027-02-21",
+    ]);
+    expect(s.projectedLearningEnd).toBe("2027-02-21");
+    expect(s.planEnd).toBe("2027-03-10");
+    expect(s.bufferDays).toBe(2);
+  });
 });
 
 describe("cycleLabels", () => {
@@ -258,12 +305,27 @@ describe("daily lecture limit", () => {
   const lectures = (s: ReturnType<typeof buildSchedule>, day: string) =>
     s.days.find((d) => d.day === day)!.items.filter((i) => i.kind === "topic").length;
 
-  it("caps lectures at 2 on office days and 3 on Friday", () => {
+  it("caps lectures at 2 a day, Fridays included, and 3 on a holiday", () => {
     const s = buildSchedule(busy());
     expect(lectures(s, "2026-11-21")).toBe(LECTURES_PER_DAY); // Saturday
     expect(lectures(s, "2026-11-26")).toBe(LECTURES_PER_DAY); // Thursday
-    expect(lectures(s, "2026-11-27")).toBe(HOLIDAY_LECTURES); // Friday
+    expect(lectures(s, "2026-11-27")).toBe(LECTURES_PER_DAY); // Friday
     expect(lectureCycles(s, "2026-11-21")).toBe(4);
+    const friHoliday = buildSchedule({ ...busy(), holidays: ["2026-11-27"] });
+    expect(lectures(friHoliday, "2026-11-27")).toBe(HOLIDAY_LECTURES); // a Friday holiday
+  });
+
+  it("starts the next subject in a spare slot, but keeps its final on a day of its own", () => {
+    // ENG has 3 lectures: Sat 2, Sun 1 + BAN's first; Mon ENG final; Tue BAN's last 2.
+    const s = buildSchedule(input({ subjects: [subject("eng", 3), subject("ban", 3)] }));
+    const topics = (day: string) =>
+      s.days
+        .find((d) => d.day === day)!
+        .items.filter((i) => i.kind === "topic")
+        .map((i) => i.topicId);
+    expect(topics("2026-11-22")).toEqual(["eng-3", "ban-1"]);
+    expect(kinds(s, "2026-11-23")).toEqual(["subject-revision:2", "subject-final:1"]);
+    expect(topics("2026-11-24")).toEqual(["ban-2", "ban-3"]);
   });
 
   it("counts lectures, not cycles: short lectures do not let a third one in on an office day", () => {
