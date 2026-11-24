@@ -204,7 +204,7 @@ export function TodayTab({ data, exam }: { data: WorkstationData; exam: ExamChoi
                         <span className="font-mono tabular-nums">
                           {plural(item.cycles, "hour")}
                         </span>
-                        {topic && item.kind === "topic" ? (
+                        {topic && (item.kind === "topic" || item.kind === "daily") ? (
                           <LectureLinks parts={topic.parts} topicId={topic.id} book={topic.book} />
                         ) : null}
                       </p>
