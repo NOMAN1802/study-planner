@@ -286,6 +286,80 @@ const INTERNATIONAL_SLICES: Record<string, BookSlice> = {
   "16: International Organization-3": antorjatik("16", "174-182", "বৈশ্বিক সংগঠন ও জোট (তৃতীয় অংশ)"),
 };
 
+/** PDF page = printed page + 3 throughout (contents on PDF 3). */
+const BANGLADESH: LectureBook = {
+  file: "লেকচার বুক - বাংলাদেশ বিষয়াবলি.pdf",
+  folder: "bangladesh",
+  name: "বাংলাদেশ বিষয়াবলি",
+  pages: 186,
+};
+
+const bangladesh = (n: string, pages: string, chapters: string) =>
+  slice(BANGLADESH, pages, chapters, `bangladesh-${n}`);
+
+/**
+ * Bangladesh Affairs lecture book. অধ্যায় ১ (জাতীয় বিষয়াবলি) is the history,
+ * split by era at its section headings; সংবিধান is split in thirds; বিবিধ
+ * goes with ইতিহাসের পাতা থেকে, as in the question bank. Splits share their
+ * boundary page, since sections start mid-page.
+ */
+const BANGLADESH_SLICES: Record<string, BookSlice> = {
+  "০১: বাঙলার প্রাচীন ইতিহাস": bangladesh(
+    "01",
+    "4-15",
+    "বিগত বছরের প্রশ্ন, জাতির উদ্ভব, প্রাচীন জনপদ, মৌর্য, গুপ্ত, পাল ও সেন যুগ",
+  ),
+  "০২: গুরুত্বপূর্ণ স্থাপত্য, পর্যটক ও মুসলমানদের আগমন": bangladesh(
+    "02",
+    "15-21",
+    "প্রাচীন বাংলার শিক্ষা ও প্রত্নতাত্ত্বিক নিদর্শন, মুসলমানদের আগমন, সুলতানি আমল",
+  ),
+  "০৩: মোগল আমল": bangladesh("03", "21-26", "মোগল সাম্রাজ্য, বারো ভূঁইয়া, সুবেদারি ও নবাবি শাসন"),
+  "০৪: ইংরেজ শাসন-০১": bangladesh(
+    "04",
+    "26-33",
+    "ইউরোপীয়দের আগমন, পলাশী, কোম্পানি ও ব্রিটিশ শাসন, বঙ্গভঙ্গ, মুসলিম লীগ",
+  ),
+  "০৫: ইংরেজ শাসন-০২": bangladesh(
+    "05",
+    "33-40",
+    "কৃষক ও স্বদেশী আন্দোলন, খিলাফত-অসহযোগ, ভারত শাসন আইন, লাহোর প্রস্তাব, দেশভাগ, সমাজ সংস্কার",
+  ),
+  "০৭: ১৯৪৭ থেকে ভাষা আন্দোলন": bangladesh("07", "38-46", "দেশভাগ, ভাষা আন্দোলন, শহিদ মিনার"),
+  "০৮: যুক্তফ্রন্ট থেকে সত্তরের নির্বাচন": bangladesh(
+    "08",
+    "46-54",
+    "যুক্তফ্রন্ট নির্বাচন, সামরিক শাসন, ছয় দফা, আগরতলা মামলা, গণ-অভ্যুত্থান, সত্তরের নির্বাচন",
+  ),
+  "০৯: মুক্তিযুদ্ধ-০১": bangladesh(
+    "09",
+    "54-61",
+    "অসহযোগ আন্দোলন, ৭ মার্চ, স্বাধীনতার ঘোষণা, মুজিবনগর সরকার, সেক্টর ও বাহিনী",
+  ),
+  "১০: মুক্তিযুদ্ধ-০২": bangladesh(
+    "10",
+    "61-73",
+    "বিজয়, বুদ্ধিজীবী হত্যা, অপারেশন, বীরশ্রেষ্ঠ, বিদেশি বন্ধু, মুক্তিযুদ্ধের সাহিত্য ও ভাস্কর্য",
+  ),
+  "১১: ইতিহাসের পাতা থেকে (১৯৭২ থেকে ২০২৪)": bangladesh(
+    "11",
+    "73-83,174-186",
+    "স্বাধীনতা-পরবর্তী শাসনামল, জুলাই আন্দোলন, নির্বাচিত কালপঞ্জি, বিবিধ",
+  ),
+  "১৫: সংবিধান-০১": bangladesh("15", "135-141", "বাংলাদেশের সংবিধান (প্রথম অংশ)"),
+  "১৬: সংবিধান-০২": bangladesh("16", "141-148", "বাংলাদেশের সংবিধান (দ্বিতীয় অংশ)"),
+  "১৭: সংবিধান-০৩": bangladesh("17", "148-154", "বাংলাদেশের সংবিধান (তৃতীয় অংশ)"),
+  "১৮: বাংলাদেশের সরকার ও রাজনৈতিক ব্যবস্থা": bangladesh(
+    "18",
+    "154-174",
+    "বাংলাদেশের সরকার ব্যবস্থা, রাজনৈতিক ব্যবস্থা",
+  ),
+  "০৬: বাংলাদেশের অর্থনীতি": bangladesh("06", "104-119", "বাংলাদেশের অর্থনীতি"),
+  "১২: বাংলাদেশের শিল্প ও বাণিজ্য": bangladesh("12", "119-135", "বাংলাদেশের শিল্প ও বাণিজ্য"),
+  "১৪: বাংলাদেশের জনসংখ্যা": bangladesh("14", "94-104", "বাংলাদেশের জনসংখ্যা"),
+  "১৩: বাংলাদেশের কৃষিজ সম্পদ": bangladesh("13", "83-94", "বাংলাদেশের কৃষিজ সম্পদ"),
+};
+
 /** By lecture title, as in BCS_SYLLABUS. */
 export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   "Lit 01: Literary Terms": slice(ENGLISH, "171-179", "Figure of Speech and Literary Terms"),
@@ -365,6 +439,7 @@ export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   ...BANGLA_SLICES,
   ...MATH_SLICES,
   ...INTERNATIONAL_SLICES,
+  ...BANGLADESH_SLICES,
 };
 
 /** The lecture's file name in the bucket: its title, lower-cased, as a slug. */

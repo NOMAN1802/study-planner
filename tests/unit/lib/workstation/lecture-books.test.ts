@@ -35,6 +35,12 @@ describe("lecture books", () => {
     expect(lectureBookPath("০৬: এশিয়া-০১")).toBe("international/antorjatik-06.pdf");
   });
 
+  it("covers every Bangladesh Affairs lecture", () => {
+    const ba = BCS_SYLLABUS.find((s) => s.name === "Bangladesh Affairs")!;
+    expect(ba.topics.filter((t) => !LECTURE_BOOK_SLICES[t.title]).map((t) => t.title)).toEqual([]);
+    expect(lectureBookPath("০৩: মোগল আমল")).toBe("bangladesh/bangladesh-03.pdf");
+  });
+
   it("only names lectures that exist", () => {
     const titles = new Set(BCS_SYLLABUS.flatMap((s) => s.topics.map((t) => t.title)));
     expect(Object.keys(LECTURE_BOOK_SLICES).filter((t) => !titles.has(t))).toEqual([]);
