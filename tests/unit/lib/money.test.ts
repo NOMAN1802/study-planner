@@ -15,6 +15,7 @@ import {
   previousRange,
   series,
   topExpenses,
+  totalBalance,
   totals,
   type Entry,
 } from "@/lib/money";
@@ -86,6 +87,33 @@ describe("balances", () => {
     expect(b.get("cash")).toBe(100000 - 20000 + 100000 + 50000 - 20000 - 30000 + 10000 - 999);
     // bank: 5000 − 1000 − 400 + 150
     expect(b.get("bank")).toBe(500000 - 100000 - 40000 + 15000);
+  });
+
+  it("totals every account, opening balances included", () => {
+    // Opening 1000 cash + 0 bank, then every entry above (the 9.99 one too).
+    expect(totalBalance(accounts, entries, debts)).toBe(
+      100000 + 500000 - 20000 + 50000 - 20000 - 30000 + 10000 - 40000 + 15000 - 999,
+    );
+  });
+
+  it("counts an opening balance as money held, not as this month's income", () => {
+    // The dashboard case: ৳3,150 opening, ৳380 spent, nothing earned.
+    const wallet = [{ id: "cash", openingMinor: 315000 }];
+    const spent = [entry({ kind: "EXPENSE", amountMinor: 38000 })];
+    expect(totalBalance(wallet, spent, new Map())).toBe(277000);
+    expect(totals(spent, new Map(), "2026-11-01", "2026-11-30").net).toBe(-38000);
+    expect(totalBalance(wallet, [], new Map())).toBe(315000);
+  });
+
+  it("moving money between accounts leaves the total unchanged", () => {
+    const two = [
+      { id: "cash", openingMinor: 10000 },
+      { id: "bank", openingMinor: 50000 },
+    ];
+    const move = [
+      entry({ kind: "TRANSFER", amountMinor: 20000, accountId: "bank", toAccountId: "cash" }),
+    ];
+    expect(totalBalance(two, move, new Map())).toBe(60000);
   });
 
   it("can stop at a day", () => {

@@ -161,6 +161,19 @@ export function accountBalances(
   return out;
 }
 
+/**
+ * All the money you hold: every account's opening balance plus all entries.
+ * The Finance page total and the dashboard Balance tile.
+ */
+export function totalBalance(
+  accounts: readonly { id: string; openingMinor: number }[],
+  entries: readonly Entry[],
+  debts: DebtDirections,
+): number {
+  const balances = accountBalances(accounts, entries, debts);
+  return accounts.reduce((n, a) => n + (balances.get(a.id) ?? 0), 0);
+}
+
 /** Money in a savings goal: saved minus taken out. */
 export function goalBalance(goalId: string, entries: readonly Entry[]): number {
   let n = 0;

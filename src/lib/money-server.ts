@@ -13,6 +13,7 @@ import {
   previousRange,
   series,
   topExpenses,
+  totalBalance,
   totals,
   type AccountKind,
   type CategoryKind,
@@ -216,7 +217,7 @@ export async function getMoneyOverview(user: CurrentUser) {
     today,
     ...lookups(all),
     balances: Object.fromEntries(balances),
-    total: all.accounts.reduce((n, a) => n + (balances.get(a.id) ?? 0), 0),
+    total: totalBalance(all.accounts, all.entries, all.directions),
     month: totals(all.entries, all.directions, `${month}-01`, monthEnd(month)),
     debtTotals: debtTotals(all.debts, all.entries, today),
     goalList: goalRows(all, today).filter((g) => !g.archived),
@@ -346,10 +347,9 @@ export async function getMoneySummary(user: CurrentUser) {
   const today = moneyToday(user);
   const month = today.slice(0, 7);
   const all = await loadAll(user.id);
-  const balances = accountBalances(all.accounts, all.entries, all.directions);
   return {
     /** Money held now: every account's opening balance plus all entries, as on the Finance page. */
-    balance: all.accounts.reduce((n, a) => n + (balances.get(a.id) ?? 0), 0),
+    balance: totalBalance(all.accounts, all.entries, all.directions),
     month: totals(all.entries, all.directions, `${month}-01`, monthEnd(month)),
     debts: debtTotals(all.debts, all.entries, today),
     budgetAlerts: budgetUse(

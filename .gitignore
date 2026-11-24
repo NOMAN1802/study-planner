@@ -56,6 +56,10 @@ next-env.d.ts
 /Doc/question-bank/
 /Doc/study-resource/*.zip
 
+# Local scratch files and screenshots, never committed.
+/temp/
+/Doc/habbit.png
+
 # Lecture books are paid material: keep the source books and slices local.
 /Doc/study-resource/লেকচার বুক*
 /Doc/lecture-books/
