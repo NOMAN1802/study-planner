@@ -420,6 +420,94 @@ const SCIENCE_SLICES: Record<string, BookSlice> = {
   "০৯: খাদ্য ও পুষ্টি": biggan("09", "129-137", "খাদ্য ও পুষ্টি"),
 };
 
+/** PDF page = printed page + 3 throughout (contents on PDF 3). */
+const ICT: LectureBook = {
+  file: "লেকচার বুক - তথ্য ও যোগাযোগ প্রযুক্তি.pdf",
+  folder: "ict",
+  name: "কম্পিউটার ও তথ্যপ্রযুক্তি",
+  pages: 109,
+};
+
+const ict = (n: string, pages: string, chapters: string) => slice(ICT, pages, chapters, `ict-${n}`);
+
+/**
+ * Computer & ICT lecture book, 22 chapters. Office suite goes with software
+ * (02); IT, cloud, mobile, internet, social media and tech giants all go with
+ * Internet (06), as in the question bank. Neighbours share a boundary page.
+ */
+const ICT_SLICES: Record<string, BookSlice> = {
+  "01: Computer Architecture, Hardware & Software": ict(
+    "01",
+    "4-19",
+    "কম্পিউটার পরিচিতি, কম্পিউটারের অঙ্গসংগঠন, কম্পিউটার পেরিফেরালস",
+  ),
+  "02: Memory, Software, OS": ict("02", "19-30,40-47", "মেমোরি, সফটওয়্যার, মাইক্রোসফট অফিস স্যুট"),
+  "03: Computer Network": ict("03", "74-81", "কম্পিউটার নেটওয়ার্ক"),
+  "04: Logic Gate": ict("04", "36-40", "লজিক গেট"),
+  "05: Numbering System": ict("05", "30-36", "সংখ্যা পদ্ধতি"),
+  "06: Internet": ict(
+    "06",
+    "64-74,81-93,104-109",
+    "তথ্য প্রযুক্তি, দৈনন্দিন জীবনে তথ্য-প্রযুক্তি, ক্লাউড কম্পিউটিং, মোবাইল প্রযুক্তি, স্মার্টফোন, ইন্টারনেট, সোশ্যাল মিডিয়া, Tech Giants",
+  ),
+  "07: Computer Programming": ict("07", "47-53", "কম্পিউটার প্রোগ্রামিং"),
+  "08: ডেটাবেজ ও ডেটা কমিউনিকেশন": ict(
+    "08",
+    "53-64",
+    "ডেটাবেজ ও ডেটা কমিউনিকেশন, Database Management System, Data communication",
+  ),
+  "09: Malware, Cyber Security": ict("09", "93-104", "ম্যালওয়্যার, সাইবার সিকিউরিটি"),
+};
+
+/** Geography and Morality share one book. PDF page = printed page + 3 (contents on PDF 3). */
+const GEO_MORAL: LectureBook = {
+  file: "লেকচার বুক - ভূগোল ও নৈতিকতা.pdf",
+  folder: "geo-moral",
+  name: "ভূগোল, পরিবেশ ও দুর্যোগ ব্যবস্থাপনা এবং নৈতিকতা, মূল্যবোধ ও সুশাসন",
+  pages: 108,
+};
+
+const geo = (n: string, pages: string, chapters: string) =>
+  slice(GEO_MORAL, pages, chapters, `bhugol-${n}`);
+const moral = (n: string, pages: string, chapters: string) =>
+  slice(GEO_MORAL, pages, chapters, `noitikota-${n}`);
+
+/**
+ * Geography: অধ্যায় ৩ (বায়ুমণ্ডল, মহাকাশ ও বারিমণ্ডল) serves both ০৪ and ০৫;
+ * the নদ-নদী chapter goes with ০৪ and বৈশ্বিক ভূগোল with ০৫, as in the
+ * question bank. Morality has three chapters for four lectures, so ০৪
+ * (past BCS questions and extras in the bank) gets the whole section.
+ */
+const GEO_MORAL_SLICES: Record<string, BookSlice> = {
+  "০১: মানচিত্র, কাল্পনিক রেখা ও মহাকাশ": geo(
+    "01",
+    "4-9",
+    "ভূগোলের ধারণা, মানচিত্র, মহাকাশ ও কাল্পনিক রেখা",
+  ),
+  "০২: বাংলাদেশের অবস্থান, সম্পদ": geo(
+    "02",
+    "38-46",
+    "বাংলাদেশের অবস্থান, সীমানা, সম্পদ, ছিটমহল, বঙ্গোপসাগর",
+  ),
+  "০৩: ভূ-অভ্যন্তরীণ গঠন ও উপাদান": geo("03", "9-19", "ভূ-অভ্যন্তরীণ গঠন"),
+  "০৪: বায়ুমণ্ডল ও বাংলাদেশের নদনদী": geo(
+    "04",
+    "19-30,46-61",
+    "বায়ুমণ্ডল, মহাকাশ ও বারিমণ্ডল; বাংলাদেশের ভূ-প্রকৃতি, সম্পদ ও নদ-নদী",
+  ),
+  "০৫: বারিমণ্ডল ও ভৌগোলিক অবস্থান": geo(
+    "05",
+    "19-30,38-46",
+    "বায়ুমণ্ডল, মহাকাশ ও বারিমণ্ডল; ভৌগোলিক ব্র্যান্ডিং ও বৈশ্বিক ভূগোল",
+  ),
+  "০৬: আবহাওয়া ও জলবায়ু": geo("06", "30-38", "আবহাওয়া ও জলবায়ু, বাংলাদেশ ও বৈশ্বিক পরিবেশ পরিবর্তন"),
+  "০৭: প্রাকৃতিক দুর্যোগ ও ব্যবস্থাপনা": geo("07", "61-78", "দুর্যোগ ও দুর্যোগ ব্যবস্থাপনা"),
+  "০১: নৈতিকতা, সুশাসন ও মূল্যবোধ-১": moral("01", "79-87", "নৈতিকতা"),
+  "০২: নৈতিকতা, সুশাসন ও মূল্যবোধ-২": moral("02", "87-92", "মূল্যবোধ"),
+  "০৩: নৈতিকতা, সুশাসন ও মূল্যবোধ-৩": moral("03", "92-108", "সুশাসন"),
+  "০৪: নৈতিকতা, সুশাসন ও মূল্যবোধ-৪": moral("04", "79-108", "নৈতিকতা, মূল্যবোধ ও সুশাসন (পুরো অংশ)"),
+};
+
 /** By lecture title, as in BCS_SYLLABUS. */
 export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   "Lit 01: Literary Terms": slice(ENGLISH, "171-179", "Figure of Speech and Literary Terms"),
@@ -501,6 +589,8 @@ export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   ...INTERNATIONAL_SLICES,
   ...BANGLADESH_SLICES,
   ...SCIENCE_SLICES,
+  ...ICT_SLICES,
+  ...GEO_MORAL_SLICES,
 };
 
 /** The lecture's file name in the bucket: its title, lower-cased, as a slug. */

@@ -47,6 +47,23 @@ describe("lecture books", () => {
     expect(lectureBookPath("০৬: তাপ ও শব্দ")).toBe("science/biggan-06.pdf");
   });
 
+  it("covers every Computer & ICT lecture", () => {
+    const ict = BCS_SYLLABUS.find((s) => s.name === "Computer & ICT")!;
+    expect(ict.topics.filter((t) => !LECTURE_BOOK_SLICES[t.title]).map((t) => t.title)).toEqual([]);
+    expect(lectureBookPath("04: Logic Gate")).toBe("ict/ict-04.pdf");
+  });
+
+  it("covers every Geography and Morality lecture", () => {
+    for (const name of ["Geography", "Morality, Values & Good Governance"]) {
+      const subject = BCS_SYLLABUS.find((s) => s.name === name)!;
+      expect(
+        subject.topics.filter((t) => !LECTURE_BOOK_SLICES[t.title]).map((t) => t.title),
+      ).toEqual([]);
+    }
+    expect(lectureBookPath("০৬: আবহাওয়া ও জলবায়ু")).toBe("geo-moral/bhugol-06.pdf");
+    expect(lectureBookPath("০২: নৈতিকতা, সুশাসন ও মূল্যবোধ-২")).toBe("geo-moral/noitikota-02.pdf");
+  });
+
   it("only names lectures that exist", () => {
     const titles = new Set(BCS_SYLLABUS.flatMap((s) => s.topics.map((t) => t.title)));
     expect(Object.keys(LECTURE_BOOK_SLICES).filter((t) => !titles.has(t))).toEqual([]);
