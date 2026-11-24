@@ -360,6 +360,66 @@ const BANGLADESH_SLICES: Record<string, BookSlice> = {
   "১৩: বাংলাদেশের কৃষিজ সম্পদ": bangladesh("13", "83-94", "বাংলাদেশের কৃষিজ সম্পদ"),
 };
 
+/** PDF page = printed page + 3 throughout (contents on PDF 3). */
+const SCIENCE: LectureBook = {
+  file: "লেকচার বুক - সাধারণ বিজ্ঞান.pdf",
+  folder: "science",
+  name: "সাধারণ বিজ্ঞান",
+  pages: 142,
+};
+
+const biggan = (n: string, pages: string, chapters: string) =>
+  slice(SCIENCE, pages, chapters, `biggan-${n}`);
+
+/**
+ * General Science lecture book, 32 chapters grouped as in the question bank:
+ * the কোষ chapter is shared by ১০ and ১১, and চিকিৎসাবিজ্ঞান goes with
+ * মানবদেহ (১৩). Chapters start mid-page, so neighbours share a page.
+ */
+const SCIENCE_SLICES: Record<string, BookSlice> = {
+  "০১: পদার্থের অবস্থা ও গঠন": biggan("01", "4-10", "পরমাণু, ভৌত অবস্থা, ভৌত পরিবর্তন ও ভৌত প্রক্রিয়া"),
+  "০২: পর্যায় সারণি ও জারণ-বিজারণ": biggan(
+    "02",
+    "10-21",
+    "পর্যায় সারণি; প্রতীক, সংকেত, যোজনী ও বন্ধন; তেজস্ক্রিয়তা ও নিউক্লিয়ার বিক্রিয়া",
+  ),
+  "০৩: জারণ-বিজারণ, তড়িৎ কোষ, এসিড-ক্ষারক-লবণ": biggan(
+    "03",
+    "23-29",
+    "তড়িৎ রসায়ন; এসিড, ক্ষার, লবণ ও পানি",
+  ),
+  "০৪: ধাতু, অধাতু ও জৈব রসায়ন ও প্রাত্যহিক জীবনে রসায়ন": biggan(
+    "04",
+    "21-23,29-35",
+    "ধাতু ও অধাতু, জৈব যৌগ, প্রাত্যহিক জীবনে রসায়ন",
+  ),
+  "০৫: ভৌত বিজ্ঞানের বিকাশ ও বলবিদ্যা, মহাকর্ষ অভিকর্ষ, কাজ ক্ষমতা শক্তি": biggan(
+    "05",
+    "35-45",
+    "ভৌত বিজ্ঞানের বিকাশ, বলবিদ্যা, মহাকর্ষ ও অভিকর্ষ, কাজ, ক্ষমতা ও শক্তি",
+  ),
+  "০৬: তাপ ও শব্দ": biggan("06", "45-54", "শব্দ ও তরঙ্গ, তাপ"),
+  "০৭: তড়িৎ ও আলো": biggan("07", "54-70", "আলো, তড়িৎ"),
+  "০৮: চুম্বক, ইলেকট্রনিক্স, আধুনিক এবং বাস্তবজীবনে পদার্থবিজ্ঞান": biggan(
+    "08",
+    "70-84",
+    "চৌম্বক, ইলেকট্রনিক্স, দৈনন্দিন জীবনে পদার্থবিজ্ঞান, আধুনিক বিজ্ঞান",
+  ),
+  "১০: জীববিজ্ঞানের ক্রমবিকাশ ও কোষ, কোষ বিভাজন, কলা, জিনতত্ত্ব": biggan(
+    "10",
+    "84-91",
+    "জীববিজ্ঞানের বিকাশ; কোষ, কোষ বিভাজন ও কলা",
+  ),
+  "১১: কোষ বিভাজন, কলা, জিনতত্ত্ব": biggan("11", "87-96", "কোষ, কোষ বিভাজন ও কলা; টিস্যু; জিনতত্ত্ব"),
+  "১২: অণুজীববিজ্ঞান, উদ্ভিদবিজ্ঞান ও প্রাণিবৈচিত্র্য": biggan(
+    "12",
+    "96-114",
+    "অণুজীববিজ্ঞান, উদ্ভিদবৈচিত্র্য, প্রাণিবৈচিত্র্য",
+  ),
+  "১৩: মানবদেহ-১ ও ২": biggan("13", "114-129,137-142", "মানবদেহ, চিকিৎসাবিজ্ঞান"),
+  "০৯: খাদ্য ও পুষ্টি": biggan("09", "129-137", "খাদ্য ও পুষ্টি"),
+};
+
 /** By lecture title, as in BCS_SYLLABUS. */
 export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   "Lit 01: Literary Terms": slice(ENGLISH, "171-179", "Figure of Speech and Literary Terms"),
@@ -440,6 +500,7 @@ export const LECTURE_BOOK_SLICES: Readonly<Record<string, BookSlice>> = {
   ...MATH_SLICES,
   ...INTERNATIONAL_SLICES,
   ...BANGLADESH_SLICES,
+  ...SCIENCE_SLICES,
 };
 
 /** The lecture's file name in the bucket: its title, lower-cased, as a slug. */

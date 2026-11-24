@@ -41,6 +41,12 @@ describe("lecture books", () => {
     expect(lectureBookPath("০৩: মোগল আমল")).toBe("bangladesh/bangladesh-03.pdf");
   });
 
+  it("covers every General Science lecture", () => {
+    const gs = BCS_SYLLABUS.find((s) => s.name === "General Science")!;
+    expect(gs.topics.filter((t) => !LECTURE_BOOK_SLICES[t.title]).map((t) => t.title)).toEqual([]);
+    expect(lectureBookPath("০৬: তাপ ও শব্দ")).toBe("science/biggan-06.pdf");
+  });
+
   it("only names lectures that exist", () => {
     const titles = new Set(BCS_SYLLABUS.flatMap((s) => s.topics.map((t) => t.title)));
     expect(Object.keys(LECTURE_BOOK_SLICES).filter((t) => !titles.has(t))).toEqual([]);
